@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מתוק בכיכר | קיוסק חלבי</title>
+
+  <!-- פונט יפה -->
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #ff7b3a;
+      --primary-dark: #e76424;
+      --bg: #060712;
+      --bg-soft: #101322;
+      --card: #181b2c;
+      --text: #f5f5f7;
+      --muted: #a3a7c2;
+      --accent: #4ade80;
+      --radius-lg: 22px;
+      --radius-xl: 32px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Heebo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2438 0, #050612 45%, #02030a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1100px;
+      padding: 16px 14px 40px;
+    }
+
+    /* ===== NAVBAR ===== */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 16px;
+      background: radial-gradient(circle at 30% 20%, #ffe7b8 0, #ff7b3a 35%, #ff3c72 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .nav-contact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pill-tag {
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1.1fr);
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    @media (max-width: 840px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .hero-main {
+      background: linear-gradient(135deg, rgba(255, 123, 58, 0.06), rgba(255, 255, 255, 0.02));
+      border-radius: var(--radius-xl);
+      padding: 20px 18px 18px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(4, 250, 146, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .hero-chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 7px rgba(74, 222, 128, 0.18);
+    }
+
+    .hero-title {
+      font-size: 28px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .hero-highlight {
+      background: linear-gradient(90deg, #ffc857, #ff7b3a, #ff3c72);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero-text {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-main,
+    .btn-ghost {
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, #ff7b3a, #ff3c72);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(255, 123, 58, 0.5);
+    }
+
+    .btn-main:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 38px rgba(255, 123, 58, 0.6);
+    }
+
+    .btn-ghost {
+      background: rgba(24, 27, 44, 0.9);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(34, 39, 66, 0.98);
+      transform: translateY(-1px);
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .hero-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-visual {
+      background: radial-gradient(circle at top left, #ffb866 0, #ff7b3a 35%, #181b2c 100%);
+      border-radius: var(--radius-xl);
+      padding: 18px 14px 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-visual-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .hero-visual-sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 12px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .hero-card {
+      background: rgba(0, 0, 0, 0.26);
+      border-radius: 18px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      color: #f9fafb;
+    }
+
+    .hero-card-tag {
+      font-size: 10px;
+      opacity: 0.85;
+    }
+
+    .hero-card-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .hero-card-price {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #ffeaa7;
+      font-weight: 600;
+    }
+
+    .hero-pill {
+      position: absolute;
+      inset-inline-end: 12px;
+      inset-block-end: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #e5e7eb;
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    /* ===== MENU ===== */
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 880px) {
+      .menu-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .menu-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .menu-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 12px 11px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu-tag {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .menu-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .menu-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .menu-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      gap: 6px;
+    }
+
+    .menu-price {
+      font-weight: 700;
+      font-size: 15px;
+      color: #ffb866;
+    }
+
+    .menu-cta {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: none;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      cursor: pointer;
+    }
+
+    .menu-highlight {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0, transparent 65%);
+      opacity: 0.45;
+      inset-inline-start: -40px;
+      inset-block-start: -40px;
+    }
+
+    /* ===== FOOTER / CONTACT ===== */
+    .footer {
+      margin-top: 24px;
+      padding: 16px 14px;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-text-main {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .footer-text-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-small {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    a {
+      color: inherit;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <!-- NAVBAR -->
+    <header class="nav">
+      <div class="logo-wrap">
+        <div class="logo-circle">מ</div>
+        <div>
+          <div class="brand-title">מתוק בכיכר</div>
+          <div class="brand-sub">קיוסק חלבי • טוסטים • פסטות • וופל בלגי</div>
+        </div>
+      </div>
+      <div class="nav-contact">
+        <span class="pill-tag">פתוח היום • הזמנות מהירות</span>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-main">
+        <div class="hero-chip">
+          <span class="hero-chip-dot"></span>
+          הזמנה מהירה מהנייד
+        </div>
+        <h1 class="hero-title">
+          כל הטוב של <span class="hero-highlight">מתוק בכיכר</span><br />
+          במקום אחד נוח ויפה.
+        </h1>
+        <p class="hero-text">
+          טוסטים, פסטות מוקרמות, סלטים טריים וקינוחים מתוקים – מזמינים מראש, מגיעים, לוקחים והולכים.
+        </p>
+
+        <div class="hero-actions">
+          <!-- החלף כאן למספר הוואטסאפ שלך -->
+          <a class="btn-main" href="https://wa.me/972500000000" target="_blank" rel="noopener">
+            הזמנה בווטסאפ
+          </a>
+          <a class="btn-ghost" href="#menu">
+            צפייה בתפריט
+          </a>
+        </div>
+
+        <div class="hero-badges">
+          <span class="hero-badge">כשר חלבי</span>
+          <span class="hero-badge">הכנה במקום</span>
+          <span class="hero-badge">אפשרות לאיסוף מהיר</span>
+        </div>
+      </div>
+
+      <aside class="hero-visual">
+        <div class="hero-visual-title">מומלצים חמים</div>
+        <div class="hero-visual-sub">המנות שהלקוחות הכי אוהבים אצלנו.</div>
+
+        <div class="hero-grid">
+          <div class="hero-card">
+            <div class="hero-card-tag">טוסט</div>
+            <div class="hero-card-title">טוסט גבינות מיוחד</div>
+            <div class="hero-card-price">₪24</div>
+            <div>לחם טרי, תערובת גבינות, רוטב הבית.</div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-card-tag">פסטה</div>
+            <div class="hero-card-title">פסטה מוקרמת פטריות</div>
+            <div class="hero-card-price">₪36</div>
+            <div>רוטב שמנת פטריות, פרמזן מגורד מעל.</div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-card-tag">קינוח</div>
+            <div class="hero-card-title">וופל בלגי קלאסי</div>
+            <div class="hero-card-price">₪32</div>
+            <div>שוקולד, קצפת, סירופ מייפל ופירות עונה.</div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-card-tag">סלט</div>
+            <div class="hero-card-title">סלט ירקות גדול</div>
+            <div class="hero-card-price">₪28</div>
+            <div>ירקות טריים, גבינת בולגרית, רוטב ויניגרט.</div>
+          </div>
+        </div>
+
+        <div class="hero-pill">
+          <span class="hero-pill-dot"></span>
+          זמן הכנה ממוצע: 10–15 דקות
+        </div>
+      </aside>
+    </section>
+
+    <!-- MENU -->
+    <section id="menu">
+      <h2 class="section-title">התפריט שלנו</h2>
+      <p class="section-sub">
+        חלק קטן מהתפריט – אפשר תמיד להרחיב ולהוסיף מנות בהמשך.
+      </p>
+
+      <div class="menu-grid">
+        <!-- טוסטים -->
+        <article class="menu-card">
+          <div class="menu-highlight"></div>
+          <div class="menu-tag">טוסט</div>
+          <div class="menu-name">טוסט קלאסי</div>
+          <div class="menu-desc">גבינה צהובה, רוטב הבית, מוגש חם וקריספי.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪22</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <article class="menu-card">
+          <div class="menu-tag">טוסט</div>
+          <div class="menu-name">טוסט פטריות &amp; בולגרית</div>
+          <div class="menu-desc">גבינות משולבות, פטריות טריות וזיתי קלמטה.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪26</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <!-- פסטות -->
+        <article class="menu-card">
+          <div class="menu-tag">פסטה</div>
+          <div class="menu-name">פסטה שמנת פטריות</div>
+          <div class="menu-desc">רוטב שמנת עשיר, פטריות, שום, פרמזן מעל.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪36</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <article class="menu-card">
+          <div class="menu-tag">פסטה</div>
+          <div class="menu-name">פסטה רוזה</div>
+          <div class="menu-desc">שילוב של שמנת ורוטב עגבניות, בזיליקום טרי.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪36</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <!-- סלטים -->
+        <article class="menu-card">
+          <div class="menu-tag">סלט</div>
+          <div class="menu-name">סלט ירקות גדול</div>
+          <div class="menu-desc">חסה, עגבניה, מלפפון, גזר, בצל סגול, תוספות לבחירה.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪28</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <article class="menu-card">
+          <div class="menu-tag">סלט</div>
+          <div class="menu-name">סלט חלומי על הגריל</div>
+          <div class="menu-desc">קוביות חלומי חם, ירקות טריים, טחינה/ויניגרט.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪34</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <!-- קינוחים -->
+        <article class="menu-card">
+          <div class="menu-tag">קינוח</div>
+          <div class="menu-name">וופל בלגי שוקולד</div>
+          <div class="menu-desc">רוטב שוקולד חם, קצפת וגלידת וניל.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪32</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+
+        <article class="menu-card">
+          <div class="menu-tag">קינוח</div>
+          <div class="menu-name">מלאווח פיצה</div>
+          <div class="menu-desc">רוטב עגבניות, גבינה צהובה ותוספות לבחירה.</div>
+          <div class="menu-bottom">
+            <span class="menu-price">₪24</span>
+            <button class="menu-cta">להוספה להזמנה</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>
+        <div class="footer-text-main">רוצים להזמין מראש?</div>
+        <div class="footer-text-sub">
+          שולחים לנו הודעה, מכינים לכם הכול טרי – ואתם רק מגיעים לאיסוף.
+        </div>
+      </div>
+      <div class="footer-actions">
+        <a class="btn-main" href="https://wa.me/972500000000" target="_blank" rel="noopener">
+          הזמנה בווטסאפ
+        </a>
+        <a class="btn-ghost" href="tel:0500000000">
+          התקשרו אלינו
+        </a>
+      </div>
+    </footer>
+
+    <div class="footer-small">
+      מתוק בכיכר &middot; אתר הדגמה – אפשר לשנות מחירים, שעות פתיחה ותוכן מתי שתרצה.
+    </div>
+  </div>
+</body>
+</html>
