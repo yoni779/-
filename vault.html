@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הכספת של יוני 🔒</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #1a1a1a;
+            --card: #2d2d2d;
+            --text: #ffffff;
+            --danger: #ff4757;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        h1 { margin-bottom: 1.5rem; color: var(--primary); }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: none;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        input {
+            background: #3d3d3d;
+            color: white;
+            border: 1px solid #555;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        button {
+            cursor: pointer;
+            background-color: var(--primary);
+            color: #000;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+        
+        .btn-delete {
+            background-color: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            width: auto;
+            padding: 5px 10px;
+            margin: 0;
+        }
+        
+        .btn-delete:hover { background-color: var(--danger); color: white; }
+
+        /* רשימת הסודות */
+        #vaultContent { display: none; }
+        
+        .secret-item {
+            background: #363636;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--primary);
+        }
+
+        .blur-text {
+            filter: blur(5px);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .blur-text:hover, .blur-text.revealed {
+            filter: blur(0);
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="loginScreen">
+        <h1>🔒 כספת סודית</h1>
+        <p>הזמנת שם משתמש? בבקשה:</p>
+        <input type="text" id="usernameInput" placeholder="שם משתמש (לדוגמה: יוני)">
+        <input type="password" id="pinInput" placeholder="קוד סודי (רמז: 1234)">
+        <button onclick="login()">פתח כספת</button>
+        <p id="errorMsg" style="color:var(--danger); display:none;">פרטים שגויים!</p>
+    </div>
+
+    <div class="container" id="vaultContent">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="welcomeUser">שלום, יוני</h2>
+            <button onclick="logout()" style="width:auto; background:#555; color:white; font-size:0.8rem;">יציאה</button>
+        </div>
+        
+        <div style="border-top:1px solid #444; margin: 10px 0;"></div>
+
+        <input type="text" id="secretInput" placeholder="הכנס מידע סודי לשמירה...">
+        <button onclick="addSecret()">שמור בכספת 💾</button>
+
+        <div id="secretsList" style="text-align: right; margin-top: 20px;">
+            </div>
+        
+        <p class="hint">טיפ: המידע נשמר בדפדפן שלך ולא יימחק ברענון!</p>
+    </div>
+
+    <script>
+        // הגדרות קבועות לכניסה (אפשר לשנות)
+        const CORRECT_PIN = "1234"; 
+
+        // בדיקת התחברות
+        function login() {
+            const user = document.getElementById('usernameInput').value;
+            const pin = document.getElementById('pinInput').value;
+
+            if (user.length > 0 && pin === CORRECT_PIN) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('vaultContent').style.display = 'block';
+                document.getElementById('welcomeUser').innerText = 'ברוך הבא, ' + user;
+                loadSecrets(); // טעינת המידע השמור
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('vaultContent').style.display = 'none';
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('pinInput').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // שמירת סוד חדש
+        function addSecret() {
+            const input = document.getElementById('secretInput');
+            const secret = input.value;
+            
+            if (secret === '') return;
+
+            // שליפת מערך הסודות הקיים או יצירת חדש
+            let secrets = JSON.parse(localStorage.getItem('mySecrets')) || [];
+            secrets.push(secret);
+            
+            // שמירה בזיכרון הדפדפן
+            localStorage.setItem('mySecrets', JSON.stringify(secrets));
+            
+            input.value = '';
+            loadSecrets();
+        }
+
+        // הצגת הסודות מהזיכרון
+        function loadSecrets() {
+            const list = document.getElementById('secretsList');
+            list.innerHTML = '';
+            
+            let secrets = JSON.parse(localStorage.getItem('mySecrets')) || [];
+
+            secrets.forEach((secret, index) => {
+                const item = document.createElement('div');
+                item.className = 'secret-item';
+                item.innerHTML = `
+                    <span class="blur-text" onclick="this.classList.toggle('revealed')" title="לחץ כדי לחשוף">${secret}</span>
+                    <button class="btn-delete" onclick="deleteSecret(${index})">X</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // מחיקת סוד
+        function deleteSecret(index) {
+            let secrets = JSON.parse(localStorage.getItem('mySecrets')) || [];
+            secrets.splice(index, 1); // הסרה מהמערך
+            localStorage.setItem('mySecrets', JSON.stringify(secrets)); // עדכון הזיכרון
+            loadSecrets(); // רענון התצוגה
+        }
+    </script>
+</body>
+</html>
