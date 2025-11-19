@@ -3,371 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Tycoon 2.0 💀</title>
+    <title>Unknown Protocol 👁️</title>
     <style>
         :root {
-            --neon: #00ff41;
-            --gold: #ffd700;
-            --bg: #050505;
-            --panel: #111;
-            --text: #eee;
-            --accent: #003b00;
+            --main-color: #0f0; /* ירוק האקרים */
+            --bg-color: #000;
+            --dim-color: #003300;
+            --alert-color: #ff3333;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
+            background-color: var(--bg-color);
+            color: var(--main-color);
+            font-family: 'Courier New', Courier, monospace; /* פונט של מכונת כתיבה */
             margin: 0;
-            padding-bottom: 80px;
+            padding: 20px;
+            text-align: center;
             user-select: none;
         }
 
-        /* כותרת ודרגה */
-        .header {
-            background: linear-gradient(180deg, #002200 0%, #000 100%);
-            padding: 15px;
-            border-bottom: 2px solid var(--neon);
-            position: sticky;
+        /* אפקט סריקה של מסך ישן */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
             top: 0;
-            z-index: 100;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
-        .rank-badge {
-            background: var(--neon);
-            color: black;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-top: 5px;
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            border-bottom: 1px solid var(--main-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
         }
 
-        /* מד התקדמות */
-        .progress-container {
-            width: 80%;
-            height: 10px;
-            background: #333;
-            margin: 10px auto;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background: var(--gold);
-            width: 0%;
-            transition: width 0.5s;
-        }
-
-        /* תצוגת הכסף */
-        .stats {
-            margin: 20px 0;
-        }
-        #balance {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--neon);
-            text-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
-        }
-        .gps-label { color: #888; font-size: 0.9rem; }
-
-        /* כפתור ההאקינג הראשי */
-        .main-btn-container {
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hack-btn {
-            width: 140px;
-            height: 140px;
-            background: radial-gradient(circle, #0a0a0a 0%, #000 100%);
-            border: 2px dashed var(--neon);
-            border-radius: 50%;
-            color: var(--neon);
+        /* תצוגת נתונים */
+        .data-display {
             font-size: 1.5rem;
-            font-weight: bold;
+            margin: 20px 0;
+            border: 1px solid var(--dim-color);
+            padding: 15px;
+            background: #050505;
+        }
+
+        #balance { font-weight: bold; font-size: 2.5rem; }
+
+        /* הכפתור הראשי */
+        .matrix-btn {
+            background: black;
+            color: var(--main-color);
+            border: 2px solid var(--main-color);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 1.2rem;
             cursor: pointer;
-            box-shadow: 0 0 20px var(--accent);
-            transition: 0.1s;
+            box-shadow: 0 0 15px var(--dim-color);
+            transition: 0.2s;
+            margin: 20px auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
+            z-index: 10;
         }
 
-        .hack-btn:active { transform: scale(0.92); background: var(--accent); }
-        
-        /* חנות */
-        .store-title {
-            margin-top: 30px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-            color: var(--gold);
+        .matrix-btn:active {
+            background: var(--main-color);
+            color: black;
+            box-shadow: 0 0 30px var(--main-color);
         }
 
-        .shop-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            padding: 10px;
-            max-width: 600px;
+        /* חנות מסתורית */
+        .market-container {
+            max-width: 500px;
             margin: 0 auto;
+            text-align: right;
         }
 
-        .item {
-            background: var(--panel);
-            border: 1px solid #333;
+        .shop-item {
+            border: 1px solid var(--dim-color);
+            margin: 10px 0;
             padding: 15px;
-            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: 0.3s;
+            background: #020202;
+            transition: 0.5s;
         }
 
-        .item:hover { border-color: var(--neon); }
-        .item.locked { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+        .shop-item.mystery {
+            border-style: dashed;
+            opacity: 0.6;
+            color: #555;
+        }
 
-        .item-info { text-align: right; }
-        .item-name { font-weight: bold; font-size: 1.1rem; }
-        .item-desc { font-size: 0.8rem; color: #aaa; }
-        
         .buy-btn {
-            background: #222;
-            color: white;
-            border: 1px solid #555;
-            padding: 10px 15px;
-            border-radius: 8px;
+            background: transparent;
+            border: 1px solid var(--main-color);
+            color: var(--main-color);
+            padding: 5px 15px;
             cursor: pointer;
-            font-weight: bold;
-            min-width: 90px;
+            font-family: inherit;
         }
 
-        .buy-btn.affordable {
-            background: var(--neon);
-            color: black;
-            border-color: var(--neon);
-            box-shadow: 0 0 10px rgba(0,255,65,0.3);
-        }
+        .buy-btn:hover { background: var(--dim-color); }
+        .buy-btn:disabled { border-color: #333; color: #333; cursor: not-allowed; }
 
-        /* הודעות צפות */
-        .float-text {
-            position: absolute;
-            color: white;
-            font-weight: bold;
-            pointer-events: none;
-            animation: floatUp 1s forwards;
+        /* לוג הודעות */
+        .console-log {
+            height: 100px;
+            overflow-y: auto;
+            border-top: 1px solid #333;
+            margin-top: 30px;
+            text-align: left;
+            font-size: 0.8rem;
+            color: #008800;
+            padding: 10px;
+            font-family: monospace;
         }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
-        }
+        
+        .log-entry { margin: 2px 0; }
+        .log-new { color: var(--main-color); font-weight: bold; }
 
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div id="rankName">RANK: SCRIPT KIDDIE</div>
-        <div class="rank-badge" id="rankBadge">LEVEL 1</div>
-        <div class="progress-container">
-            <div class="progress-bar" id="rankProgress"></div>
-        </div>
+    <h1>System Status: <span id="rankDisplay">UNKNOWN</span></h1>
+
+    <div class="data-display">
+        <div>CRYPTO_WALLET: <span id="balance">0</span></div>
+        <div style="font-size: 0.9rem; color:#008800; margin-top:5px;">AUTO_MINING: <span id="gps">0</span> / SEC</div>
     </div>
 
-    <div class="stats">
-        <div>💎 <span id="balance">0</span></div>
-        <div class="gps-label">מייצר <span id="gps">0</span> לשנייה</div>
+    <div class="matrix-btn" onclick="hack()">
+        INITIATE<br>BREACH
     </div>
 
-    <div class="main-btn-container">
-        <button class="hack-btn" id="mainBtn" onclick="clickHack(event)">
-            <div>HACK</div>
-            <div style="font-size:0.8rem; opacity:0.7;">TAP ME</div>
-        </button>
-    </div>
-
-    <h3 class="store-title">🛒 DARK WEB MARKET</h3>
-    
-    <div class="shop-grid" id="shopList">
+    <div class="market-container" id="market">
         </div>
 
-    <button onclick="resetGame()" style="margin-top:30px; background:none; border:1px solid red; color:red; padding:10px;">איפוס כללי ☠️</button>
+    <div class="console-log" id="console">
+        <div class="log-entry">> System initialized...</div>
+        <div class="log-entry">> Waiting for input...</div>
+    </div>
+
+    <button onclick="resetData()" style="margin-top:20px; border:none; background:none; color:#333; font-size:0.7rem;">[ FORMAT SYSTEM ]</button>
 
     <script>
-        // הגדרת המשחק
+        // --- נתונים סודיים ---
         const RANKS = [
-            { name: "Script Kiddie", req: 0 },
-            { name: "Grey Hat", req: 1000 },
-            { name: "Black Hat", req: 5000 },
-            { name: "Cyber Ghost", req: 20000 },
-            { name: "Anonymous Leader", req: 100000 },
-            { name: "Internet GOD", req: 1000000 }
+            { name: "NOBODY", req: 0 },
+            { name: "SCRIPT_KIDDIE", req: 500 },
+            { name: "GHOST_USER", req: 2500 },
+            { name: "SYSTEM_ADMIN", req: 10000 },
+            { name: "NET_RUNNER", req: 50000 },
+            { name: "CYBER_GOD", req: 1000000 }
         ];
 
+        // שים לב: השמות כאן הם מה שייחשף בהמשך
         const ITEMS = [
-            { id: 0, name: "VPN פרוץ", desc: "מייצר 1 לשנייה", baseCost: 20, prod: 1 },
-            { id: 1, name: "בוט ספאם", desc: "מייצר 5 לשנייה", baseCost: 150, prod: 5 },
-            { id: 2, name: "כרטיס מסך RTX", desc: "מייצר 15 לשנייה", baseCost: 500, prod: 15 },
-            { id: 3, name: "חוות שרתים", desc: "מייצר 50 לשנייה", baseCost: 2000, prod: 50 },
-            { id: 4, name: "וירוס כופר", desc: "מייצר 150 לשנייה", baseCost: 7500, prod: 150 },
-            { id: 5, name: "מחשב קוונטי", desc: "מייצר 500 לשנייה", baseCost: 30000, prod: 500 }
+            { name: "PROXY_SERVER", cost: 15, prod: 1, unlocked: true }, // הראשון תמיד פתוח
+            { name: "SQL_INJECTOR", cost: 100, prod: 5, unlocked: false },
+            { name: "BOT_NET", cost: 500, prod: 20, unlocked: false },
+            { name: "AI_ALGORITHM", cost: 2000, prod: 75, unlocked: false },
+            { name: "QUANTUM_CORE", cost: 10000, prod: 250, unlocked: false },
+            { name: "SATELLITE_UPLINK", cost: 50000, prod: 1000, unlocked: false }
         ];
 
         let game = {
             money: 0,
-            totalMoney: 0, // למעקב אחרי הדרגה
-            inventory: [0, 0, 0, 0, 0, 0] // כמויות מכל פריט
+            totalEarned: 0,
+            inventory: [0, 0, 0, 0, 0, 0]
         };
 
         // טעינה
-        if(localStorage.getItem('cyberSaveV2')) {
-            game = JSON.parse(localStorage.getItem('cyberSaveV2'));
+        if(localStorage.getItem('mysterySave')) {
+            game = JSON.parse(localStorage.getItem('mysterySave'));
+            // שחזור חשיפת פריטים בהתבסס על מה שכבר קנינו
+            checkUnlocks();
         }
 
-        // לולאה ראשית
-        setInterval(() => {
-            let gps = calculateGPS();
-            if(gps > 0) {
-                addMoney(gps);
+        // הפעלה
+        setInterval(gameLoop, 1000);
+        setInterval(updateUI, 100);
+
+        function gameLoop() {
+            let prod = calcProd();
+            if(prod > 0) {
+                addMoney(prod);
             }
             saveGame();
-        }, 1000);
-
-        setInterval(updateUI, 100); // עדכון מסך מהיר
-
-        // לוגיקה
-        function calculateGPS() {
-            let gps = 0;
-            game.inventory.forEach((count, index) => {
-                gps += count * ITEMS[index].prod;
-            });
-            return gps;
         }
 
-        function addMoney(amount) {
-            game.money += amount;
-            game.totalMoney += amount;
+        function calcProd() {
+            let p = 0;
+            game.inventory.forEach((count, i) => p += count * ITEMS[i].prod);
+            return p;
         }
 
-        function clickHack(e) {
-            // לחיצה ידנית נותנת יותר ככל שהדרגה גבוהה יותר
-            let clickPower = 1 + Math.floor(calculateGPS() / 20);
-            addMoney(clickPower);
-            
-            // אפקט צף
-            showFloatText(e.clientX, e.clientY, "+" + clickPower);
+        function addMoney(n) {
+            game.money += n;
+            game.totalEarned += n;
+            checkUnlocks();
         }
 
-        function buyItem(index) {
-            let cost = getCost(index);
-            if(game.money >= cost) {
-                game.money -= cost;
-                game.inventory[index]++;
-                updateUI();
-            }
+        function hack() {
+            let power = 1 + Math.floor(calcProd() / 10);
+            addMoney(power);
         }
 
-        function getCost(index) {
-            let item = ITEMS[index];
-            // המחיר עולה ב-15% כל קנייה
-            return Math.floor(item.baseCost * Math.pow(1.15, game.inventory[index]));
-        }
-
-        // ממשק משתמש
-        function updateUI() {
-            document.getElementById('balance').innerText = Math.floor(game.money).toLocaleString();
-            document.getElementById('gps').innerText = calculateGPS().toLocaleString();
-
-            updateRank();
-            renderShop();
-        }
-
-        function updateRank() {
-            let currentRank = 0;
-            let nextReq = RANKS[1].req;
-            
-            // מציאת הדרגה הנוכחית
-            for(let i=0; i<RANKS.length; i++) {
-                if(game.totalMoney >= RANKS[i].req) {
-                    currentRank = i;
+        // --- מנגנון המסתורין ---
+        function checkUnlocks() {
+            // לוגיקה: פריט נפתח אם קנית את הפריט שלפניו לפחות פעם אחת
+            // או אם הגעת לסכום כסף גבוה מאוד
+            for(let i = 1; i < ITEMS.length; i++) {
+                if(!ITEMS[i].unlocked) {
+                    // אם יש לי לפחות אחד מהפריט הקודם
+                    if (game.inventory[i-1] > 0) {
+                        ITEMS[i].unlocked = true;
+                        log(`> NEW HARDWARE DETECTED: ${ITEMS[i].name}`);
+                    }
                 }
             }
+        }
 
-            // עדכון טקסט
-            document.getElementById('rankName').innerText = "RANK: " + RANKS[currentRank].name;
-            document.getElementById('rankBadge').innerText = "LEVEL " + (currentRank + 1);
+        function getCost(i) {
+            return Math.floor(ITEMS[i].cost * Math.pow(1.2, game.inventory[i]));
+        }
 
-            // חישוב מד התקדמות
-            if (currentRank < RANKS.length - 1) {
-                let prevReq = RANKS[currentRank].req;
-                let target = RANKS[currentRank + 1].req;
-                let percent = ((game.totalMoney - prevReq) / (target - prevReq)) * 100;
-                if(percent > 100) percent = 100;
-                document.getElementById('rankProgress').style.width = percent + "%";
-            } else {
-                document.getElementById('rankProgress').style.width = "100%"; // מקסימום
+        function buy(i) {
+            let cost = getCost(i);
+            if(game.money >= cost) {
+                game.money -= cost;
+                game.inventory[i]++;
+                log(`> ACQUIRED: ${ITEMS[i].name} [x${game.inventory[i]}]`);
+                checkUnlocks(); // בדיקה אם זה פתח משהו חדש
             }
         }
 
-        function renderShop() {
-            const list = document.getElementById('shopList');
-            // ניקוי והרכבה מחדש רק אם צריך (כדי לא להכביד) - כאן נעשה פשוט
-            list.innerHTML = '';
+        // --- עדכון תצוגה ---
+        function updateUI() {
+            document.getElementById('balance').innerText = Math.floor(game.money).toLocaleString();
+            document.getElementById('gps').innerText = calcProd().toLocaleString();
 
-            ITEMS.forEach((item, index) => {
-                let cost = getCost(index);
-                let count = game.inventory[index];
-                let canAfford = game.money >= cost;
+            // עדכון דרגה - מראה את הבאה כסימני שאלה
+            let currentRankName = "UNKNOWN";
+            for(let r of RANKS) {
+                if(game.totalEarned >= r.req) currentRankName = r.name;
+            }
+            document.getElementById('rankDisplay').innerText = currentRankName;
 
-                let div = document.createElement('div');
-                div.className = 'item';
-                div.innerHTML = `
-                    <div class="item-info">
-                        <div class="item-name">${item.name} <span style="color:var(--gold)">x${count}</span></div>
-                        <div class="item-desc">${item.desc} | עולה: ${cost.toLocaleString()}</div>
-                    </div>
-                    <button class="buy-btn ${canAfford ? 'affordable' : ''}" 
-                            onclick="buyItem(${index})" 
-                            ${canAfford ? '' : 'disabled'}>
-                        קנה
-                    </button>
-                `;
-                list.appendChild(div);
+            renderMarket();
+        }
+
+        function renderMarket() {
+            const container = document.getElementById('market');
+            container.innerHTML = "";
+
+            ITEMS.forEach((item, i) => {
+                // מציגים רק אם זה פתוח, או אם זה הפריט ה"בא בתור" (כדי ליצור סקרנות)
+                // אם הפריט הקודם פתוח, נציג את הנוכחי גם אם הוא נעול (כמוצפן)
+                let showMystery = (i === 0) || (ITEMS[i-1].unlocked);
+                
+                if (item.unlocked) {
+                    // פריט גלוי
+                    let cost = getCost(i);
+                    let canBuy = game.money >= cost;
+                    
+                    container.innerHTML += `
+                    <div class="shop-item">
+                        <div>
+                            <div style="font-weight:bold">${item.name}</div>
+                            <div style="font-size:0.8rem; color:#008800">+${item.prod}/sec</div>
+                        </div>
+                        <button class="buy-btn" onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>
+                            $${cost.toLocaleString()}
+                        </button>
+                    </div>`;
+                } 
+                else if (showMystery) {
+                    // פריט מסתורי (הבא בתור)
+                    container.innerHTML += `
+                    <div class="shop-item mystery">
+                        <div>
+                            <div>[ ENCRYPTED DEVICE ]</div>
+                            <div style="font-size:0.8rem">Unlock previous tech to reveal</div>
+                        </div>
+                        <div style="font-size:1.5rem">🔒</div>
+                    </div>`;
+                }
             });
         }
 
-        // אפקטים ועזרים
-        function showFloatText(x, y, text) {
-            let el = document.createElement('div');
-            el.className = 'float-text';
-            el.innerText = text;
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
+        function log(msg) {
+            const consoleEl = document.getElementById('console');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry log-new';
+            entry.innerText = msg;
+            consoleEl.insertBefore(entry, consoleEl.firstChild);
+            
+            // מחיקת ישנים
+            if(consoleEl.children.length > 10) consoleEl.removeChild(consoleEl.lastChild);
         }
 
         function saveGame() {
-            localStorage.setItem('cyberSaveV2', JSON.stringify(game));
+            localStorage.setItem('mysterySave', JSON.stringify(game));
         }
 
-        function resetGame() {
-            if(confirm("בטוח שאתה רוצה למחוק הכל?")) {
-                localStorage.removeItem('cyberSaveV2');
+        function resetData() {
+            if(confirm("SYSTEM PURGE? (Delete all data)")) {
+                localStorage.removeItem('mysterySave');
                 location.reload();
             }
         }
-        
-        // אתחול ראשוני של החנות
-        renderShop();
+
     </script>
 </body>
 </html>
