@@ -3,326 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unknown Protocol 👁️</title>
+    <title>המעבדה הסודית ⚗️</title>
     <style>
         :root {
-            --main-color: #0f0; /* ירוק האקרים */
-            --bg-color: #000;
-            --dim-color: #003300;
-            --alert-color: #ff3333;
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --highlight: #e94560;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--main-color);
-            font-family: 'Courier New', Courier, monospace; /* פונט של מכונת כתיבה */
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
             margin: 0;
             padding: 20px;
-            text-align: center;
             user-select: none;
-        }
-
-        /* אפקט סריקה של מסך ישן */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+            overflow-x: hidden;
         }
 
         h1 {
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            border-bottom: 1px solid var(--main-color);
-            padding-bottom: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
-        /* תצוגת נתונים */
-        .data-display {
-            font-size: 1.5rem;
-            margin: 20px 0;
-            border: 1px solid var(--dim-color);
-            padding: 15px;
-            background: #050505;
-        }
-
-        #balance { font-weight: bold; font-size: 2.5rem; }
-
-        /* הכפתור הראשי */
-        .matrix-btn {
-            background: black;
-            color: var(--main-color);
-            border: 2px solid var(--main-color);
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--dim-color);
-            transition: 0.2s;
-            margin: 20px auto;
+        /* אזור הערבוב */
+        .mixing-area {
+            height: 150px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .matrix-btn:active {
-            background: var(--main-color);
-            color: black;
-            box-shadow: 0 0 30px var(--main-color);
-        }
-
-        /* חנות מסתורית */
-        .market-container {
-            max-width: 500px;
-            margin: 0 auto;
-            text-align: right;
-        }
-
-        .shop-item {
-            border: 1px solid var(--dim-color);
-            margin: 10px 0;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            background: #020202;
-            transition: 0.5s;
+            margin-bottom: 30px;
+            position: relative;
         }
 
-        .shop-item.mystery {
-            border-style: dashed;
-            opacity: 0.6;
-            color: #555;
+        .slot {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #555;
+            border-radius: 50%;
+            margin: 0 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            background: rgba(0,0,0,0.3);
+            transition: 0.3s;
         }
 
-        .buy-btn {
-            background: transparent;
-            border: 1px solid var(--main-color);
-            color: var(--main-color);
-            padding: 5px 15px;
-            cursor: pointer;
-            font-family: inherit;
+        .slot.active {
+            border-color: white;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
-        .buy-btn:hover { background: var(--dim-color); }
-        .buy-btn:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+        .plus-sign { font-size: 2rem; color: #888; }
 
-        /* לוג הודעות */
-        .console-log {
-            height: 100px;
-            overflow-y: auto;
-            border-top: 1px solid #333;
-            margin-top: 30px;
-            text-align: left;
-            font-size: 0.8rem;
-            color: #008800;
+        /* רשימת היסודות */
+        .inventory {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
             padding: 10px;
-            font-family: monospace;
         }
-        
-        .log-entry { margin: 2px 0; }
-        .log-new { color: var(--main-color); font-weight: bold; }
 
+        .element {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid transparent;
+        }
+
+        .element:hover { transform: translateY(-5px); background: #1f2b4d; }
+        .element:active { transform: scale(0.95); }
+        
+        .element.selected {
+            border-color: var(--highlight);
+            box-shadow: 0 0 15px var(--highlight);
+        }
+
+        .icon { font-size: 2rem; margin-bottom: 5px; }
+        .name { font-size: 0.8rem; color: #ccc; }
+
+        /* אנימציית גילוי */
+        #discoveryModal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .new-item-glow {
+            font-size: 5rem;
+            filter: drop-shadow(0 0 30px gold);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+        .reset-btn {
+            margin-top: 50px;
+            background: none;
+            border: 1px solid #444;
+            color: #666;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>System Status: <span id="rankDisplay">UNKNOWN</span></h1>
+    <h1>🧪 המעבדה</h1>
+    <p style="color:#888; font-size:0.9rem;">מצאת <span id="count">4</span> מתוך 14 יסודות</p>
 
-    <div class="data-display">
-        <div>CRYPTO_WALLET: <span id="balance">0</span></div>
-        <div style="font-size: 0.9rem; color:#008800; margin-top:5px;">AUTO_MINING: <span id="gps">0</span> / SEC</div>
+    <div class="mixing-area">
+        <div class="slot" id="slot1" onclick="clearSlot(1)"></div>
+        <div class="plus-sign">+</div>
+        <div class="slot" id="slot2" onclick="clearSlot(2)"></div>
     </div>
 
-    <div class="matrix-btn" onclick="hack()">
-        INITIATE<br>BREACH
-    </div>
-
-    <div class="market-container" id="market">
+    <div class="inventory" id="inventoryGrid">
         </div>
 
-    <div class="console-log" id="console">
-        <div class="log-entry">> System initialized...</div>
-        <div class="log-entry">> Waiting for input...</div>
+    <div id="discoveryModal" onclick="closeModal()">
+        <h2 style="color: gold; margin-bottom: 20px;">✨ תגלית חדשה! ✨</h2>
+        <div id="newIcon" class="new-item-glow"></div>
+        <h3 id="newName" style="margin-top: 20px; font-size: 1.5rem;"></h3>
+        <p style="color: #aaa; margin-top: 30px;">(לחץ כדי להמשיך)</p>
     </div>
 
-    <button onclick="resetData()" style="margin-top:20px; border:none; background:none; color:#333; font-size:0.7rem;">[ FORMAT SYSTEM ]</button>
+    <button class="reset-btn" onclick="resetGame()">איפוס משחק</button>
 
     <script>
-        // --- נתונים סודיים ---
-        const RANKS = [
-            { name: "NOBODY", req: 0 },
-            { name: "SCRIPT_KIDDIE", req: 500 },
-            { name: "GHOST_USER", req: 2500 },
-            { name: "SYSTEM_ADMIN", req: 10000 },
-            { name: "NET_RUNNER", req: 50000 },
-            { name: "CYBER_GOD", req: 1000000 }
-        ];
+        // --- הגדרות המשחק ---
+        
+        // היסודות הקיימים בהתחלה
+        const STARTING_ELEMENTS = ['fire', 'water', 'earth', 'air'];
 
-        // שים לב: השמות כאן הם מה שייחשף בהמשך
-        const ITEMS = [
-            { name: "PROXY_SERVER", cost: 15, prod: 1, unlocked: true }, // הראשון תמיד פתוח
-            { name: "SQL_INJECTOR", cost: 100, prod: 5, unlocked: false },
-            { name: "BOT_NET", cost: 500, prod: 20, unlocked: false },
-            { name: "AI_ALGORITHM", cost: 2000, prod: 75, unlocked: false },
-            { name: "QUANTUM_CORE", cost: 10000, prod: 250, unlocked: false },
-            { name: "SATELLITE_UPLINK", cost: 50000, prod: 1000, unlocked: false }
-        ];
+        // בסיס הנתונים של כל היסודות
+        const DB = {
+            'fire': { icon: '🔥', name: 'אש', color: '#ff4d4d' },
+            'water': { icon: '💧', name: 'מים', color: '#4d94ff' },
+            'earth': { icon: '🌱', name: 'אדמה', color: '#8cd98c' },
+            'air': { icon: '💨', name: 'אוויר', color: '#e6e6e6' },
+            
+            // רמה 2
+            'steam': { icon: '☁️', name: 'קיטור', color: '#ddd' }, // אש + מים
+            'lava': { icon: '🌋', name: 'לבה', color: '#ff8c1a' }, // אש + אדמה
+            'dust': { icon: '🌫️', name: 'אבק', color: '#bfbfbf' }, // אוויר + אדמה
+            'rain': { icon: '🌧️', name: 'גשם', color: '#6666ff' }, // אוויר + מים
+            'energy': { icon: '⚡', name: 'אנרגיה', color: '#ffff66' }, // אש + אוויר
+            'mud': { icon: '💩', name: 'בוץ', color: '#663300' }, // מים + אדמה
 
-        let game = {
-            money: 0,
-            totalEarned: 0,
-            inventory: [0, 0, 0, 0, 0, 0]
+            // רמה 3 (דוגמאות)
+            'stone': { icon: '🪨', name: 'אבן', color: '#888' }, // לבה + מים
+            'plant': { icon: '🌻', name: 'צמח', color: '#00cc00' }, // גשם + אדמה
+            'storm': { icon: '⛈️', name: 'סופה', color: '#333' }, // אנרגיה + גשם
+            'life': { icon: '🧬', name: 'חיים', color: '#ff00ff' } // בוץ + אנרגיה (הכי קשה)
         };
 
+        // מתכונים (סדר לא משנה)
+        const RECIPES = [
+            { in: ['fire', 'water'], out: 'steam' },
+            { in: ['fire', 'earth'], out: 'lava' },
+            { in: ['air', 'earth'], out: 'dust' },
+            { in: ['air', 'water'], out: 'rain' },
+            { in: ['fire', 'air'], out: 'energy' },
+            { in: ['water', 'earth'], out: 'mud' },
+            
+            { in: ['lava', 'water'], out: 'stone' },
+            { in: ['rain', 'earth'], out: 'plant' },
+            { in: ['energy', 'rain'], out: 'storm' },
+            { in: ['mud', 'energy'], out: 'life' }
+        ];
+
+        // --- לוגיקה ---
+
+        let myElements = [...STARTING_ELEMENTS];
+        let selected = [null, null]; // שני הסלוטים
+
         // טעינה
-        if(localStorage.getItem('mysterySave')) {
-            game = JSON.parse(localStorage.getItem('mysterySave'));
-            // שחזור חשיפת פריטים בהתבסס על מה שכבר קנינו
-            checkUnlocks();
+        if(localStorage.getItem('alchemySave')) {
+            myElements = JSON.parse(localStorage.getItem('alchemySave'));
         }
 
-        // הפעלה
-        setInterval(gameLoop, 1000);
-        setInterval(updateUI, 100);
+        renderInventory();
 
-        function gameLoop() {
-            let prod = calcProd();
-            if(prod > 0) {
-                addMoney(prod);
-            }
-            saveGame();
-        }
+        function renderInventory() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            document.getElementById('count').innerText = myElements.length;
 
-        function calcProd() {
-            let p = 0;
-            game.inventory.forEach((count, i) => p += count * ITEMS[i].prod);
-            return p;
-        }
-
-        function addMoney(n) {
-            game.money += n;
-            game.totalEarned += n;
-            checkUnlocks();
-        }
-
-        function hack() {
-            let power = 1 + Math.floor(calcProd() / 10);
-            addMoney(power);
-        }
-
-        // --- מנגנון המסתורין ---
-        function checkUnlocks() {
-            // לוגיקה: פריט נפתח אם קנית את הפריט שלפניו לפחות פעם אחת
-            // או אם הגעת לסכום כסף גבוה מאוד
-            for(let i = 1; i < ITEMS.length; i++) {
-                if(!ITEMS[i].unlocked) {
-                    // אם יש לי לפחות אחד מהפריט הקודם
-                    if (game.inventory[i-1] > 0) {
-                        ITEMS[i].unlocked = true;
-                        log(`> NEW HARDWARE DETECTED: ${ITEMS[i].name}`);
-                    }
-                }
-            }
-        }
-
-        function getCost(i) {
-            return Math.floor(ITEMS[i].cost * Math.pow(1.2, game.inventory[i]));
-        }
-
-        function buy(i) {
-            let cost = getCost(i);
-            if(game.money >= cost) {
-                game.money -= cost;
-                game.inventory[i]++;
-                log(`> ACQUIRED: ${ITEMS[i].name} [x${game.inventory[i]}]`);
-                checkUnlocks(); // בדיקה אם זה פתח משהו חדש
-            }
-        }
-
-        // --- עדכון תצוגה ---
-        function updateUI() {
-            document.getElementById('balance').innerText = Math.floor(game.money).toLocaleString();
-            document.getElementById('gps').innerText = calcProd().toLocaleString();
-
-            // עדכון דרגה - מראה את הבאה כסימני שאלה
-            let currentRankName = "UNKNOWN";
-            for(let r of RANKS) {
-                if(game.totalEarned >= r.req) currentRankName = r.name;
-            }
-            document.getElementById('rankDisplay').innerText = currentRankName;
-
-            renderMarket();
-        }
-
-        function renderMarket() {
-            const container = document.getElementById('market');
-            container.innerHTML = "";
-
-            ITEMS.forEach((item, i) => {
-                // מציגים רק אם זה פתוח, או אם זה הפריט ה"בא בתור" (כדי ליצור סקרנות)
-                // אם הפריט הקודם פתוח, נציג את הנוכחי גם אם הוא נעול (כמוצפן)
-                let showMystery = (i === 0) || (ITEMS[i-1].unlocked);
-                
-                if (item.unlocked) {
-                    // פריט גלוי
-                    let cost = getCost(i);
-                    let canBuy = game.money >= cost;
-                    
-                    container.innerHTML += `
-                    <div class="shop-item">
-                        <div>
-                            <div style="font-weight:bold">${item.name}</div>
-                            <div style="font-size:0.8rem; color:#008800">+${item.prod}/sec</div>
-                        </div>
-                        <button class="buy-btn" onclick="buy(${i})" ${canBuy ? '' : 'disabled'}>
-                            $${cost.toLocaleString()}
-                        </button>
-                    </div>`;
-                } 
-                else if (showMystery) {
-                    // פריט מסתורי (הבא בתור)
-                    container.innerHTML += `
-                    <div class="shop-item mystery">
-                        <div>
-                            <div>[ ENCRYPTED DEVICE ]</div>
-                            <div style="font-size:0.8rem">Unlock previous tech to reveal</div>
-                        </div>
-                        <div style="font-size:1.5rem">🔒</div>
-                    </div>`;
-                }
+            myElements.forEach(key => {
+                const el = DB[key];
+                const div = document.createElement('div');
+                div.className = 'element';
+                div.innerHTML = `<div class="icon">${el.icon}</div><div class="name">${el.name}</div>`;
+                div.onclick = () => addToMix(key);
+                grid.appendChild(div);
             });
         }
 
-        function log(msg) {
-            const consoleEl = document.getElementById('console');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry log-new';
-            entry.innerText = msg;
-            consoleEl.insertBefore(entry, consoleEl.firstChild);
+        function addToMix(key) {
+            // אם סלוט 1 ריק
+            if (!selected[0]) {
+                selected[0] = key;
+                document.getElementById('slot1').innerHTML = DB[key].icon;
+                document.getElementById('slot1').style.borderColor = DB[key].color;
+            } 
+            // אם סלוט 2 ריק
+            else if (!selected[1]) {
+                selected[1] = key;
+                document.getElementById('slot2').innerHTML = DB[key].icon;
+                document.getElementById('slot2').style.borderColor = DB[key].color;
+                
+                // בדיקת שילוב (דיליי קטן לאפקט)
+                setTimeout(checkMix, 300);
+            }
+        }
+
+        function clearSlot(num) {
+            selected[num-1] = null;
+            const el = document.getElementById('slot'+num);
+            el.innerHTML = '';
+            el.style.borderColor = '#555';
+        }
+
+        function checkMix() {
+            const [a, b] = selected;
             
-            // מחיקת ישנים
-            if(consoleEl.children.length > 10) consoleEl.removeChild(consoleEl.lastChild);
+            // חיפוש מתכון
+            const recipe = RECIPES.find(r => 
+                (r.in[0] === a && r.in[1] === b) || 
+                (r.in[0] === b && r.in[1] === a)
+            );
+
+            if (recipe) {
+                // יש התאמה!
+                if (!myElements.includes(recipe.out)) {
+                    // יסוד חדש לגמרי!
+                    myElements.push(recipe.out);
+                    saveGame();
+                    showNewDiscovery(recipe.out);
+                } else {
+                    // כבר יש לנו את זה
+                    shakeSlots(); // אפקט "כבר יש לך את זה"
+                }
+            } else {
+                // שילוב נכשל
+                shakeSlots();
+            }
+
+            // איפוס הסלוטים אחרי רגע
+            setTimeout(() => {
+                clearSlot(1);
+                clearSlot(2);
+            }, 1000);
+        }
+
+        function showNewDiscovery(key) {
+            const el = DB[key];
+            document.getElementById('newIcon').innerHTML = el.icon;
+            document.getElementById('newName').innerText = el.name;
+            document.getElementById('discoveryModal').style.display = 'flex';
+            renderInventory();
+        }
+
+        function closeModal() {
+            document.getElementById('discoveryModal').style.display = 'none';
+        }
+
+        function shakeSlots() {
+            const area = document.querySelector('.mixing-area');
+            area.style.transform = "translateX(10px)";
+            setTimeout(() => area.style.transform = "translateX(-10px)", 50);
+            setTimeout(() => area.style.transform = "translateX(5px)", 100);
+            setTimeout(() => area.style.transform = "translateX(0)", 150);
         }
 
         function saveGame() {
-            localStorage.setItem('mysterySave', JSON.stringify(game));
+            localStorage.setItem('alchemySave', JSON.stringify(myElements));
         }
 
-        function resetData() {
-            if(confirm("SYSTEM PURGE? (Delete all data)")) {
-                localStorage.removeItem('mysterySave');
+        function resetGame() {
+            if(confirm('בטוח? זה ימחק את כל התגליות.')) {
+                localStorage.removeItem('alchemySave');
                 location.reload();
             }
         }
