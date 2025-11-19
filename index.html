@@ -26,24 +26,37 @@
         [x-cloak] { display: none !important; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
         .input-field { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; width: 100%; color: white; outline: none; }
-        /* כפתור חירום */
-        #emergency-btn { position: fixed; top: 10px; left: 10px; z-index: 99999; opacity: 0.3; font-size: 10px; }
+        
+        /* כפתור חירום בולט */
+        #emergency-btn { 
+            position: fixed; top: 20px; left: 20px; z-index: 99999; 
+            background: rgba(255, 200, 0, 0.2); color: #fbbf24; 
+            border: 1px solid #fbbf24; padding: 5px 10px; border-radius: 8px; 
+            font-size: 12px; font-weight: bold;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
-    <button id="emergency-btn" onclick="localStorage.clear(); location.reload();">⚠️ איפוס</button>
+    <button id="emergency-btn" onclick="localStorage.clear(); location.reload();">⚠️ איפוס תקיעה</button>
 
-    <div id="static-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f172a]">
+    <div id="static-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f172a] transition-opacity duration-500">
         <div class="text-5xl mb-4 animate-bounce">💎</div>
-        <p class="text-gray-400 text-sm">מארגן יומן...</p>
+        <p class="text-gray-400 text-sm">מפעיל מנועים...</p>
     </div>
+
+    <script>
+        setTimeout(function() {
+            const loader = document.getElementById('static-loader');
+            if(loader) loader.style.display = 'none';
+        }, 3000);
+    </script>
 
     <div x-data="app()" x-init="initApp()" x-cloak class="h-full flex flex-col">
 
         <div x-show="!user.isLoggedIn" class="fixed inset-0 z-50 bg-[#0f172a] flex flex-col items-center justify-center p-8">
             <h1 class="text-4xl font-black text-white mb-2">YoniOS</h1>
-            <p class="text-gray-400 mb-8">מערכת יומית חכמה</p>
+            <p class="text-gray-400 mb-8">הגרסה היציבה</p>
             <div class="w-full max-w-xs space-y-4">
                 <input type="text" x-model="form.name" class="input-field" placeholder="שם">
                 <input type="email" x-model="form.email" class="input-field" placeholder="אימייל">
@@ -53,7 +66,7 @@
 
         <div x-show="user.isLoggedIn" class="flex-1 flex flex-col h-full relative">
             
-            <header class="px-5 pt-12 pb-4 flex justify-between items-center bg-[#0f172a]/90 backdrop-blur border-b border-white/5 z-30">
+            <header class="px-5 pt-14 pb-4 flex justify-between items-center bg-[#0f172a]/90 backdrop-blur border-b border-white/5 z-30">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center font-bold text-lg">
                         <span x-text="user.name.charAt(0)"></span>
@@ -87,8 +100,7 @@
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-3 px-1">
                             <div>
-                                <h3 class="font-bold text-gray-200 uppercase text-sm">🔄 יומי (מתאפס כל לילה)</h3>
-                                <p class="text-[10px] text-gray-500">לחץ כדי לסמן שבוצע היום</p>
+                                <h3 class="font-bold text-gray-200 uppercase text-sm">🔄 יומי (מתאפס בלילה)</h3>
                             </div>
                             <button @click="openModal('habit')" class="bg-blue-600/20 text-blue-400 text-xs px-3 py-1 rounded-lg font-bold">+ הוסף</button>
                         </div>
@@ -119,7 +131,7 @@
 
                     <div>
                         <div class="flex justify-between items-end mb-3 px-1">
-                            <h3 class="font-bold text-gray-400 uppercase text-xs">משימות חד פעמיות</h3>
+                            <h3 class="font-bold text-gray-400 uppercase text-xs">משימות שוטפות</h3>
                             <button x-show="tasks.some(t => t.completed)" @click="clearCompleted()" class="text-[10px] text-red-400 bg-red-900/20 px-2 py-1 rounded">נקה שבוצעו</button>
                         </div>
 
@@ -220,7 +232,7 @@
                 form: { name: '', email: '' },
                 coins: 0,
                 tasks: [],
-                habits: [], // <--- ההרגלים היומיים נשמרים כאן
+                habits: [],
                 shopItems: [],
                 todayStr: new Date().toLocaleDateString('he-IL'),
                 modal: { isOpen: false, type: '', title: '', data: { name: '', value: '', color: 'bg-blue-500' } },
@@ -228,17 +240,14 @@
                 isLoaded: false,
 
                 initApp() {
-                    setTimeout(() => document.getElementById('static-loader').style.display = 'none', 500);
-                    
-                    // עדכון תאריך אוטומטי
-                    setInterval(() => {
-                        this.todayStr = new Date().toLocaleDateString('he-IL');
-                    }, 60000);
-
-                    const saved = localStorage.getItem('yoni_daily_v1');
+                    // הופך את הטעינה למהירה יותר
+                    const saved = localStorage.getItem('yoni_final_v1');
                     if (saved) {
                         this.form = JSON.parse(saved);
                         this.login(true);
+                    } else {
+                        // הסרת מסך טעינה אם אין משתמש שמור
+                         document.getElementById('static-loader').style.display = 'none';
                     }
                     
                     this.$watch('tasks', () => this.save());
@@ -249,12 +258,15 @@
 
                 login(auto = false) {
                     if (!this.form.email) return;
-                    if(!auto) localStorage.setItem('yoni_daily_v1', JSON.stringify(this.form));
+                    if(!auto) localStorage.setItem('yoni_final_v1', JSON.stringify(this.form));
 
                     const safeEmail = this.form.email.toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbRef = db.ref('users/' + safeEmail);
 
                     this.dbRef.on('value', (snap) => {
+                        // ברגע שהמידע הגיע, מעיפים את הלואדר
+                        document.getElementById('static-loader').style.display = 'none';
+
                         const val = snap.val();
                         if (!this.isLoaded) {
                             this.user.isLoggedIn = true;
@@ -286,23 +298,6 @@
                     });
                 },
 
-                // --- לוגיקה יומית ---
-
-                toggleHabit(i) {
-                    // אם זה כבר בוצע היום -> מבטל סימון (מוריד כסף)
-                    if(this.habits[i].lastDone === this.todayStr) {
-                        this.habits[i].lastDone = ''; // מאפס
-                        this.coins = Math.max(0, this.coins - 10); // מוריד ניקוד
-                    } 
-                    // אם זה לא בוצע היום -> מסמן (מוסיף כסף)
-                    else {
-                        this.habits[i].lastDone = this.todayStr; // שומר את התאריך של היום
-                        this.coins += 10;
-                        try { confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } catch(e){}
-                    }
-                    this.save();
-                },
-
                 sortTasks() { this.tasks.sort((a, b) => a.completed - b.completed); },
 
                 clearCompleted() {
@@ -314,7 +309,7 @@
 
                 openModal(type) {
                     this.modal.type = type;
-                    this.modal.title = type === 'task' ? 'משימה חד פעמית' : (type === 'habit' ? 'הרגל יומי קבוע' : 'פריט לחנות');
+                    this.modal.title = type === 'task' ? 'משימה חדשה' : (type === 'habit' ? 'הרגל יומי' : 'פריט לחנות');
                     this.modal.data = { name: '', value: '', color: 'bg-blue-500' };
                     this.modal.isOpen = true;
                 },
@@ -329,7 +324,6 @@
                     } else if(this.modal.type === 'shop') {
                         this.shopItems.push({ name: d.name, cost: parseInt(d.value)||100 });
                     } else {
-                        // הוספת הרגל יומי חדש
                         this.habits.push({ name: d.name, lastDone: '' });
                     }
                     this.save();
@@ -340,4 +334,16 @@
                     this.tasks[i].completed = !this.tasks[i].completed;
                     if(this.tasks[i].completed) {
                         this.coins += parseInt(this.tasks[i].reward);
-                        try { confetti({ particleCount: 60, spread: 70, origin: { y
+                        try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); } catch(e){}
+                    } else {
+                        this.coins -= parseInt(this.tasks[i].reward);
+                    }
+                    setTimeout(() => { this.sortTasks(); this.save(); }, 300);
+                    this.save();
+                },
+
+                toggleHabit(i) {
+                    if(this.habits[i].lastDone === this.todayStr) {
+                        // ביטול סימון
+                        this.habits[i].lastDone = '';
+             
