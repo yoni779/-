@@ -822,32 +822,48 @@
     });
 
     function sendCartToWhatsApp() {
-      let lines = [];
-      let totalPrice = 0;
+    // טופס קלט
+    const name = prompt("מה השם להזמנה?");
+    if (!name || name.trim() === "") {
+        alert("צריך לכתוב שם");
+        return;
+    }
 
-      Object.keys(cart).forEach(id => {
+    const phone = prompt("מה מספר הטלפון שלך?");
+    if (!phone || phone.trim() === "") {
+        alert("צריך מספר טלפון");
+        return;
+    }
+
+    const notes = prompt("הערות להזמנה (לא חובה):") || "";
+
+    let lines = [];
+    let totalPrice = 0;
+
+    Object.keys(cart).forEach(id => {
         const qty = cart[id];
         const p = productsById[id];
         if (!p || qty <= 0) return;
         const lineTotal = qty * p.price;
         totalPrice += lineTotal;
-        lines.push(`${p.name} × ${qty} – ${lineTotal} ₪`);
-      });
+        lines.push(`${p.name} × ${qty} = ${lineTotal}₪`);
+    });
 
-      if (!lines.length) {
-        alert("לא בחרת מנות לעגלה עדיין 🙂");
+    if (!lines.length) {
+        alert("לא בחרת מנות לעגלה עדיין");
         return;
-      }
-
-      const header = "היי, אני רוצה להזמין ממתוק בכיכר:\n";
-      const body = lines.join("\n");
-      const footer = `\n\nסה\"כ: ${totalPrice} ₪\n\nשם הלקוח:\nשעת איסוף / משלוח:`;      
-
-      const text = encodeURIComponent(header + body + footer);
-      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
-      window.location.href = url;
     }
 
+    const header = `הזמנה חדשה ממתוק בכיכר`;
+    const info = `שם: ${name}\nטלפון: ${phone}\nהערות: ${notes}`;
+    const body = lines.join("\n");
+    const footer = `\nסה״כ לתשלום: ${totalPrice}₪`;
+
+    const text = encodeURIComponent(`${header}\n\n${info}\n\n${body}\n\n${footer}`);
+
+    const url = `https://wa.me/972507948877?text=${text}`;
+    window.location.href = url;
+    }
     document.getElementById("cart-whatsapp-btn").addEventListener("click", sendCartToWhatsApp);
 
     renderMenu();
