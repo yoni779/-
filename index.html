@@ -4,14 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>YoniOS Daily</title>
+    <title>YoniOS Debug</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        window.onerror = function(msg, url, line) {
+            const log = document.getElementById('debug-log');
+            if(log) {
+                log.style.display = 'block';
+                log.innerHTML += `<div>❌ שגיאה: ${msg} (שורה ${line})</div>`;
+            }
+        };
+    </script>
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
 
@@ -27,36 +37,32 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
         .input-field { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; width: 100%; color: white; outline: none; }
         
-        /* כפתור חירום בולט */
-        #emergency-btn { 
-            position: fixed; top: 20px; left: 20px; z-index: 99999; 
-            background: rgba(255, 200, 0, 0.2); color: #fbbf24; 
-            border: 1px solid #fbbf24; padding: 5px 10px; border-radius: 8px; 
-            font-size: 12px; font-weight: bold;
+        /* יומן שגיאות */
+        #debug-log {
+            position: fixed; top: 0; left: 0; width: 100%; background: rgba(0,0,0,0.9); 
+            color: #ff5555; padding: 10px; font-size: 10px; z-index: 999999; display: none;
+            max-height: 200px; overflow-y: auto; text-align: left; direction: ltr;
         }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
-    <button id="emergency-btn" onclick="localStorage.clear(); location.reload();">⚠️ איפוס תקיעה</button>
+    <div id="debug-log"></div>
 
-    <div id="static-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f172a] transition-opacity duration-500">
+    <button onclick="localStorage.clear(); location.reload();" style="position: fixed; top: 10px; right: 10px; z-index: 500; background: #fbbf24; color: black; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold;">
+        ♻️ איפוס מלא
+    </button>
+
+    <div id="loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f172a]">
         <div class="text-5xl mb-4 animate-bounce">💎</div>
-        <p class="text-gray-400 text-sm">מפעיל מנועים...</p>
+        <p class="text-gray-400 text-sm">טוען מנוע...</p>
     </div>
-
-    <script>
-        setTimeout(function() {
-            const loader = document.getElementById('static-loader');
-            if(loader) loader.style.display = 'none';
-        }, 3000);
-    </script>
 
     <div x-data="app()" x-init="initApp()" x-cloak class="h-full flex flex-col">
 
         <div x-show="!user.isLoggedIn" class="fixed inset-0 z-50 bg-[#0f172a] flex flex-col items-center justify-center p-8">
             <h1 class="text-4xl font-black text-white mb-2">YoniOS</h1>
-            <p class="text-gray-400 mb-8">הגרסה היציבה</p>
+            <p class="text-gray-400 mb-8">מערכת יומית</p>
             <div class="w-full max-w-xs space-y-4">
                 <input type="text" x-model="form.name" class="input-field" placeholder="שם">
                 <input type="email" x-model="form.email" class="input-field" placeholder="אימייל">
@@ -96,11 +102,10 @@
                 </div>
 
                 <div x-show="tab === 'tasks'">
-                    
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-3 px-1">
                             <div>
-                                <h3 class="font-bold text-gray-200 uppercase text-sm">🔄 יומי (מתאפס בלילה)</h3>
+                                <h3 class="font-bold text-gray-200 uppercase text-sm">🔄 יומי</h3>
                             </div>
                             <button @click="openModal('habit')" class="bg-blue-600/20 text-blue-400 text-xs px-3 py-1 rounded-lg font-bold">+ הוסף</button>
                         </div>
@@ -110,29 +115,23 @@
                                 <div @click="toggleHabit(i)" 
                                      class="glass aspect-square flex flex-col items-center justify-center relative transition-all active:scale-95 cursor-pointer"
                                      :class="habit.lastDone === todayStr ? 'bg-green-500/20 border-green-500/50' : 'hover:bg-white/5'">
-                                    
                                     <button @click.stop="deleteItem('habits', i)" class="absolute top-1 right-1 text-white/10 hover:text-red-400 p-1"><i class="fa-solid fa-times text-[10px]"></i></button>
-                                    
-                                    <div class="text-2xl mb-2 transition-transform duration-300" 
-                                         :class="habit.lastDone === todayStr ? 'scale-110 text-green-400' : 'text-gray-500'">
+                                    <div class="text-2xl mb-2" :class="habit.lastDone === todayStr ? 'text-green-400' : 'text-gray-500'">
                                         <i class="fa-solid" :class="habit.lastDone === todayStr ? 'fa-circle-check' : 'fa-circle'"></i>
                                     </div>
-                                    
                                     <span class="text-[11px] font-bold text-center leading-tight px-1 text-gray-300" x-text="habit.name"></span>
                                 </div>
                             </template>
-                            
                             <div x-show="habits.length === 0" @click="openModal('habit')" class="glass aspect-square flex flex-col items-center justify-center border-dashed border-gray-600 text-gray-500 opacity-50">
                                 <i class="fa-solid fa-plus text-xl"></i>
-                                <span class="text-[10px] mt-1">הוסף יומי</span>
                             </div>
                         </div>
                     </div>
 
                     <div>
                         <div class="flex justify-between items-end mb-3 px-1">
-                            <h3 class="font-bold text-gray-400 uppercase text-xs">משימות שוטפות</h3>
-                            <button x-show="tasks.some(t => t.completed)" @click="clearCompleted()" class="text-[10px] text-red-400 bg-red-900/20 px-2 py-1 rounded">נקה שבוצעו</button>
+                            <h3 class="font-bold text-gray-400 uppercase text-xs">שוטף</h3>
+                            <button x-show="tasks.some(t => t.completed)" @click="clearCompleted()" class="text-[10px] text-red-400 bg-red-900/20 px-2 py-1 rounded">נקה</button>
                         </div>
 
                         <div class="space-y-3">
@@ -149,7 +148,6 @@
                                     <button @click="deleteItem('tasks', i)" class="text-gray-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </template>
-                            <div x-show="tasks.length === 0" class="text-center py-8 text-gray-600 text-xs">אין משימות פתוחות</div>
                         </div>
                     </div>
                 </div>
@@ -194,14 +192,12 @@
                     <h3 class="text-lg font-bold mb-4" x-text="modal.title"></h3>
                     <div class="space-y-3">
                         <input x-model="modal.data.name" type="text" class="input-field" placeholder="כותרת">
-                        
                         <div x-show="modal.type === 'task'" class="flex gap-2">
                             <button @click="modal.data.color = 'bg-red-500'" class="h-8 flex-1 rounded bg-red-500 opacity-50 hover:opacity-100"></button>
                             <button @click="modal.data.color = 'bg-blue-500'" class="h-8 flex-1 rounded bg-blue-500 opacity-50 hover:opacity-100"></button>
                             <button @click="modal.data.color = 'bg-green-500'" class="h-8 flex-1 rounded bg-green-500 opacity-50 hover:opacity-100"></button>
                             <button @click="modal.data.color = 'bg-yellow-500'" class="h-8 flex-1 rounded bg-yellow-500 opacity-50 hover:opacity-100"></button>
                         </div>
-
                         <input x-show="modal.type !== 'habit'" x-model="modal.data.value" type="number" class="input-field" placeholder="ערך">
                         <button @click="saveModal()" class="w-full bg-blue-600 py-3 rounded-xl font-bold mt-2">שמור</button>
                     </div>
@@ -212,6 +208,7 @@
     </div>
 
     <script>
+        // הגדרת פיירבייס בשיטת Compat (הכי בטוחה)
         const firebaseConfig = {
             apiKey: "AIzaSyAMBx4Udu3w9iR6GpEcl561TNWGRc1UVQ0",
             authDomain: "yoni-os.firebaseapp.com",
@@ -221,7 +218,17 @@
             messagingSenderId: "238428366388",
             appId: "1:238428366388:web:70e54810382d3d88134c61"
         };
-        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+
+        // אתחול מוגן
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        } catch (e) {
+            console.error("Firebase Init Error:", e);
+            document.getElementById('debug-log').innerHTML += `<div>Error: ${e.message}</div>`;
+        }
+        
         const db = firebase.database();
 
         function app() {
@@ -240,14 +247,16 @@
                 isLoaded: false,
 
                 initApp() {
-                    // הופך את הטעינה למהירה יותר
-                    const saved = localStorage.getItem('yoni_final_v1');
+                    setTimeout(() => {
+                         // הסרת מסך טעינה
+                         const loader = document.getElementById('loader');
+                         if(loader) loader.style.display = 'none';
+                    }, 1000);
+
+                    const saved = localStorage.getItem('yoni_debug_v1');
                     if (saved) {
                         this.form = JSON.parse(saved);
                         this.login(true);
-                    } else {
-                        // הסרת מסך טעינה אם אין משתמש שמור
-                         document.getElementById('static-loader').style.display = 'none';
                     }
                     
                     this.$watch('tasks', () => this.save());
@@ -258,15 +267,12 @@
 
                 login(auto = false) {
                     if (!this.form.email) return;
-                    if(!auto) localStorage.setItem('yoni_final_v1', JSON.stringify(this.form));
+                    if(!auto) localStorage.setItem('yoni_debug_v1', JSON.stringify(this.form));
 
                     const safeEmail = this.form.email.toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbRef = db.ref('users/' + safeEmail);
 
                     this.dbRef.on('value', (snap) => {
-                        // ברגע שהמידע הגיע, מעיפים את הלואדר
-                        document.getElementById('static-loader').style.display = 'none';
-
                         const val = snap.val();
                         if (!this.isLoaded) {
                             this.user.isLoggedIn = true;
@@ -296,6 +302,19 @@
                     }, (err) => {
                         if(!err) setTimeout(() => this.saveState = 'נשמר ✅', 500);
                     });
+                },
+
+                // לוגיקה
+                toggleHabit(i) {
+                    if(this.habits[i].lastDone === this.todayStr) {
+                         this.habits[i].lastDone = '';
+                         this.coins = Math.max(0, this.coins - 10);
+                    } else {
+                        this.habits[i].lastDone = this.todayStr;
+                        this.coins += 10;
+                        try { confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } catch(e){}
+                    }
+                    this.save();
                 },
 
                 sortTasks() { this.tasks.sort((a, b) => a.completed - b.completed); },
@@ -334,16 +353,4 @@
                     this.tasks[i].completed = !this.tasks[i].completed;
                     if(this.tasks[i].completed) {
                         this.coins += parseInt(this.tasks[i].reward);
-                        try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } }); } catch(e){}
-                    } else {
-                        this.coins -= parseInt(this.tasks[i].reward);
-                    }
-                    setTimeout(() => { this.sortTasks(); this.save(); }, 300);
-                    this.save();
-                },
-
-                toggleHabit(i) {
-                    if(this.habits[i].lastDone === this.todayStr) {
-                        // ביטול סימון
-                        this.habits[i].lastDone = '';
-             
+                        try { confetti({ part
