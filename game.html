@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoni's Cyber Tycoon 💸</title>
+    <style>
+        :root {
+            --neon: #00ff41;
+            --bg: #0d0d0d;
+            --panel: #1a1a1a;
+            --text: #ffffff;
+            --danger: #ff3860;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            margin: 0;
+            user-select: none; /* מונע סימון טקסט בלחיצות מהירות */
+            padding-bottom: 50px;
+        }
+
+        h1 {
+            text-shadow: 0 0 10px var(--neon);
+            margin-top: 20px;
+        }
+
+        /* איזור הכסף */
+        .score-board {
+            background: var(--panel);
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+            border: 2px solid var(--neon);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+
+        #cryptoAmount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--neon);
+            display: block;
+        }
+
+        .label { font-size: 0.9rem; color: #888; }
+
+        /* הכפתור הראשי */
+        .hack-btn {
+            background: radial-gradient(circle, #004d1a 0%, #000 100%);
+            border: 4px solid var(--neon);
+            color: var(--neon);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .hack-btn:active {
+            transform: scale(0.95);
+            background: var(--neon);
+            color: black;
+        }
+
+        /* חנות */
+        .store {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .upgrade-item {
+            background: #222;
+            border: 1px solid #444;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-item:not(.disabled):hover {
+            border-color: var(--neon);
+            transform: translateX(-5px);
+        }
+
+        .buy-btn {
+            background: var(--neon);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .buy-btn:disabled {
+            background: #555;
+            color: #888;
+        }
+
+        /* מסוף הודעות */
+        #consoleLog {
+            font-size: 0.8rem;
+            color: #00cc33;
+            height: 30px;
+            margin-top: 10px;
+        }
+
+        .reset-btn {
+            margin-top: 30px;
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>💻 HACKER TYCOON</h1>
+
+    <div class="score-board">
+        <span class="label">יתרה ב-Wallet:</span>
+        <span id="cryptoAmount">0</span>
+        <span class="label" style="display:block; margin-top:5px;">קצב כרייה: <span id="gps">0</span> לשנייה</span>
+    </div>
+
+    <div id="consoleLog">ממתין לפקודה...</div>
+
+    <div class="hack-btn" onclick="manualHack()">
+        <div>HACK</div>
+        <div style="font-size:0.7rem">Click Here</div>
+    </div>
+
+    <div class="store">
+        <h3>🛒 Dark Web Store</h3>
+        
+        <div class="upgrade-item" id="item1">
+            <div style="text-align: right;">
+                <div style="font-weight:bold;">🤖 בוט אוטומטי</div>
+                <div style="font-size:0.8rem; color:#aaa;">מייצר 1 לשנייה</div>
+            </div>
+            <button class="buy-btn" id="btn1" onclick="buyUpgrade(1)">קנה (15)</button>
+        </div>
+
+        <div class="upgrade-item" id="item2">
+            <div style="text-align: right;">
+                <div style="font-weight:bold;">💾 שרת פרוץ</div>
+                <div style="font-size:0.8rem; color:#aaa;">מייצר 5 לשנייה</div>
+            </div>
+            <button class="buy-btn" id="btn2" onclick="buyUpgrade(2)">קנה (100)</button>
+        </div>
+
+        <div class="upgrade-item" id="item3">
+            <div style="text-align: right;">
+                <div style="font-weight:bold;">🚀 מחשב קוונטי</div>
+                <div style="font-size:0.8rem; color:#aaa;">מייצר 20 לשנייה</div>
+            </div>
+            <button class="buy-btn" id="btn3" onclick="buyUpgrade(3)">קנה (500)</button>
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetGame()">⚠️ איפוס משחק</button>
+
+    <script>
+        // משתני המשחק
+        let gameData = {
+            score: 0,
+            gps: 0, // Gold Per Second
+            upgrades: {
+                1: { count: 0, cost: 15, production: 1 },
+                2: { count: 0, cost: 100, production: 5 },
+                3: { count: 0, cost: 500, production: 20 }
+            }
+        };
+
+        // טעינה ראשונית
+        loadGame();
+        setInterval(autoMine, 1000); // הפעלת הטיימר של הכרייה האוטומטית
+        setInterval(saveGame, 5000); // שמירה אוטומטית כל 5 שניות
+        updateDisplay();
+
+        // פונקציית לחיצה ידנית
+        function manualHack() {
+            gameData.score += 1;
+            pulseAnim();
+            updateDisplay();
+        }
+
+        // אנימציה קטנה ללחיצה
+        function pulseAnim() {
+            const btn = document.querySelector('.hack-btn');
+            btn.style.transform = "scale(0.95)";
+            setTimeout(() => btn.style.transform = "scale(1)", 50);
+        }
+
+        // קניית שדרוג
+        function buyUpgrade(id) {
+            let item = gameData.upgrades[id];
+            if (gameData.score >= item.cost) {
+                gameData.score -= item.cost;
+                item.count++;
+                item.cost = Math.floor(item.cost * 1.5); // המחיר עולה בכל קנייה
+                
+                // עדכון קצב הייצור הכללי
+                recalcGPS();
+                updateDisplay();
+                logMsg("נרכש שדרוג בהצלחה!");
+            }
+        }
+
+        // חישוב מחדש של הכנסה לשנייה
+        function recalcGPS() {
+            gameData.gps = 
+                (gameData.upgrades[1].count * gameData.upgrades[1].production) +
+                (gameData.upgrades[2].count * gameData.upgrades[2].production) +
+                (gameData.upgrades[3].count * gameData.upgrades[3].production);
+        }
+
+        // הפונקציה שרצה כל שנייה ברקע
+        function autoMine() {
+            if (gameData.gps > 0) {
+                gameData.score += gameData.gps;
+                updateDisplay();
+            }
+        }
+
+        // עדכון המסך וכפתורים
+        function updateDisplay() {
+            document.getElementById('cryptoAmount').innerText = gameData.score.toLocaleString();
+            document.getElementById('gps').innerText = gameData.gps;
+
+            // עדכון כפתורי הקניה (האם יש מספיק כסף?)
+            updateBtn(1);
+            updateBtn(2);
+            updateBtn(3);
+        }
+
+        function updateBtn(id) {
+            const btn = document.getElementById('btn' + id);
+            const item = gameData.upgrades[id];
+            btn.innerText = `קנה (${item.cost})`; // הצגת מחיר מעודכן
+            
+            // בדיקה אם יש מספיק כסף
+            if (gameData.score >= item.cost) {
+                btn.disabled = false;
+                document.getElementById('item' + id).classList.remove('disabled');
+            } else {
+                btn.disabled = true;
+                document.getElementById('item' + id).classList.add('disabled');
+            }
+        }
+
+        function logMsg(text) {
+            document.getElementById('consoleLog').innerText = "> " + text;
+            setTimeout(() => document.getElementById('consoleLog').innerText = "ממתין לפקודה...", 2000);
+        }
+
+        // שמירה וטעינה (LocalStorage)
+        function saveGame() {
+            localStorage.setItem('hackerTycoonSave', JSON.stringify(gameData));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('hackerTycoonSave');
+            if (saved) {
+                gameData = JSON.parse(saved);
+                recalcGPS();
+            }
+        }
+
+        function resetGame() {
+            if(confirm("אתה בטוח? זה ימחוק את כל ההתקדמות!")) {
+                localStorage.removeItem('hackerTycoonSave');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
