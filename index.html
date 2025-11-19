@@ -10,232 +10,122 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <style>
         body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         [x-cloak] { display: none !important; }
-        
-        /* אנימציות */
-        .modal-enter { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .scale-in { animation: scaleIn 0.2s ease-out; }
-        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .input-field {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            background-color: #f1f5f9;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            outline: none;
-        }
-        .input-field:focus {
-            background-color: white;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-        
-        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
 </head>
-<body class="text-slate-800 h-screen overflow-hidden flex flex-col" x-data="app()">
+<body class="text-slate-800 h-screen overflow-hidden flex flex-col bg-gray-50">
 
-    <div x-show="isLoading" class="fixed inset-0 z-[60] bg-white flex flex-col items-center justify-center" x-transition>
+    <div id="fallback-loading" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
-        <p class="text-slate-400 text-sm font-bold">טוען נתונים...</p>
+        <p class="text-gray-500 font-bold">טוען את המערכת...</p>
     </div>
 
-    <div x-show="!user.isLoggedIn && !isLoading" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8 text-center modal-enter">
-        <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-200 mb-6 rotate-3">
-            <i class="fa-solid fa-cloud-bolt"></i>
-        </div>
-        <h1 class="text-3xl font-black text-slate-900 mb-2">YoniOS Cloud</h1>
-        <p class="text-slate-500 mb-8">הנתונים שלך, מכל מקום.</p>
+    <div x-data="app()" x-cloak class="h-full flex flex-col">
         
-        <div class="w-full max-w-xs space-y-4">
-            <div class="text-right">
-                <label class="text-xs font-bold text-slate-400 mr-1">שם משתמש</label>
-                <input type="text" x-model="loginForm.name" class="input-field" placeholder="השם שלך">
+        <div x-show="!user.isLoggedIn" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8 text-center">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-200 mb-6 rotate-3">
+                <i class="fa-solid fa-cloud"></i>
             </div>
-            <div class="text-right">
-                <label class="text-xs font-bold text-slate-400 mr-1">אימייל (סיסמה)</label>
-                <input type="email" x-model="loginForm.email" class="input-field" placeholder="your@email.com">
+            <h1 class="text-3xl font-black text-slate-900 mb-2">YoniOS</h1>
+            <div class="w-full max-w-xs space-y-4 mt-8">
+                <input type="text" x-model="loginForm.name" class="w-full p-3 bg-gray-100 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 outline-none transition-all" placeholder="שם">
+                <input type="email" x-model="loginForm.email" class="w-full p-3 bg-gray-100 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 outline-none transition-all" placeholder="אימייל">
+                <button @click="login()" :disabled="!loginForm.name || !loginForm.email" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform disabled:opacity-50">כניסה</button>
             </div>
-            <button @click="login()" :disabled="!loginForm.name || !loginForm.email" 
-                class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-4">
-                התחבר 🚀
-            </button>
         </div>
-    </div>
 
-    <div x-show="user.isLoggedIn" class="flex-1 flex flex-col h-full relative" x-cloak>
-        
-        <header class="px-6 pt-8 pb-4 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-30">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    <span x-text="user.name ? user.name.charAt(0) : 'A'"></span>
-                </div>
+        <div x-show="user.isLoggedIn" class="flex-1 flex flex-col h-full relative">
+            <header class="px-6 pt-8 pb-4 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-30">
                 <div>
-                    <h1 class="text-lg font-black leading-none" x-text="settings.appName"></h1>
-                    <div class="flex items-center gap-1">
-                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        <p class="text-xs text-slate-500">מחובר</p>
-                    </div>
+                    <h1 class="text-lg font-black" x-text="settings.appName"></h1>
+                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div><span class="text-xs text-gray-500">מחובר</span></div>
                 </div>
-            </div>
-            <div class="bg-white border border-slate-100 shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2">
-                <span class="text-blue-600 font-black" x-text="coins"></span>
-                <span class="text-sm">💎</span>
-            </div>
-        </header>
+                <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black border border-blue-100">
+                    <span x-text="coins"></span> 💎
+                </div>
+            </header>
 
-        <main class="flex-1 overflow-y-auto no-scrollbar px-5 pb-28">
-            
-            <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl shadow-slate-200 mb-8 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div class="relative z-10 flex justify-between items-end">
-                    <div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">הדרגה שלי</p>
-                        <h2 class="text-3xl font-black">Level <span x-text="Math.floor(coins/100) + 1"></span></h2>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs text-slate-400 mb-1">עוד <span x-text="100 - (coins % 100)"></span> לדרגה הבאה</p>
-                        <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-blue-500 transition-all duration-1000" :style="`width: ${coins % 100}%`"></div>
+            <main class="flex-1 overflow-y-auto px-5 pb-28">
+                <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
+                    <div class="relative z-10 flex justify-between items-end">
+                        <div>
+                            <p class="text-slate-400 text-xs font-bold uppercase">דרגה</p>
+                            <h2 class="text-3xl font-black" x-text="Math.floor(coins/100) + 1"></h2>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-400 mb-1">התקדמות</p>
+                            <div class="w-24 h-2 bg-slate-700 rounded-full"><div class="h-full bg-blue-500" :style="`width: ${coins % 100}%`"></div></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div x-show="currentTab === 'tasks'" class="scale-in">
-                <div class="flex justify-between items-end mb-4">
-                    <h2 class="text-xl font-bold text-slate-800">משימות</h2>
-                </div>
-                <div class="space-y-3">
-                    <template x-for="(task, index) in tasks" :key="index">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 relative group">
-                            <button @click="toggleTask(task, index)" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                                 :class="task.completed ? 'bg-green-500 border-green-500' : 'border-slate-300'">
-                                <i x-show="task.completed" class="fa-solid fa-check text-white text-[10px]"></i>
-                            </button>
-                            <div class="flex-1">
-                                <p class="font-bold text-slate-700" :class="{'line-through text-slate-400': task.completed}" x-text="task.title"></p>
-                                <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">+<span x-text="task.reward"></span> XP</span>
-                            </div>
-                            <button @click="openOptions('tasks', index)" class="text-slate-300 hover:text-slate-600 p-2">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-                 <button @click="openModal('tasks')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-300 flex items-center justify-center text-2xl active:scale-90 transition-transform z-40">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-            </div>
-
-            <div x-show="currentTab === 'shop'" class="scale-in" x-cloak>
-                <h2 class="text-xl font-bold text-slate-800 mb-4">חנות הפינוקים</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <template x-for="(item, index) in shopItems" :key="index">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-48 relative">
-                             <button @click="openOptions('shopItems', index)" class="absolute top-2 left-2 text-slate-300 hover:text-slate-600 p-1">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <div class="flex-1 flex flex-col items-center justify-center text-center">
-                                <div class="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 text-xl mb-2">
-                                    <i class="fa-solid fa-gift"></i>
+                <div x-show="currentTab === 'tasks'">
+                    <h2 class="font-bold text-xl mb-4">משימות</h2>
+                    <div class="space-y-3">
+                        <template x-for="(task, index) in tasks" :key="index">
+                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                                <button @click="toggleTask(index)" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors" :class="task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'">
+                                    <i x-show="task.completed" class="fa-solid fa-check text-white text-[10px]"></i>
+                                </button>
+                                <div class="flex-1">
+                                    <p class="font-bold" :class="{'line-through text-gray-400': task.completed}" x-text="task.title"></p>
+                                    <span class="text-xs text-gray-400">+<span x-text="task.reward"></span> יהלומים</span>
                                 </div>
-                                <h3 class="font-bold text-sm leading-tight mb-1" x-text="item.name"></h3>
-                                <p class="text-xs text-slate-400 font-bold"><span x-text="item.cost"></span> 💎</p>
+                                <button @click="deleteItem('tasks', index)" class="text-gray-300 p-2"><i class="fa-solid fa-trash"></i></button>
                             </div>
-                            <button @click="buyItem(item)" :disabled="coins < item.cost"
-                                class="w-full py-2 rounded-xl text-xs font-bold mt-2 transition-colors"
-                                :class="coins >= item.cost ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'">
-                                רכוש
-                            </button>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
+                    <button @click="addItem('tasks')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-40"><i class="fa-solid fa-plus"></i></button>
                 </div>
-                 <button @click="openModal('shopItems')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-300 flex items-center justify-center text-2xl active:scale-90 transition-transform z-40">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-            </div>
-        </main>
 
-        <nav class="bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center fixed bottom-0 w-full z-30 pb-6">
-            <button @click="currentTab = 'tasks'" :class="currentTab === 'tasks' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
-                <i class="fa-solid fa-list-check text-xl"></i><span class="text-[10px] font-bold">משימות</span>
-            </button>
-            <button @click="currentTab = 'shop'" :class="currentTab === 'shop' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
-                <i class="fa-solid fa-store text-xl"></i><span class="text-[10px] font-bold">חנות</span>
-            </button>
-            <button @click="currentTab = 'profile'" :class="currentTab === 'profile' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
-                <i class="fa-solid fa-user text-xl"></i><span class="text-[10px] font-bold">פרופיל</span>
-            </button>
-        </nav>
+                <div x-show="currentTab === 'shop'" x-cloak>
+                    <h2 class="font-bold text-xl mb-4">חנות</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <template x-for="(item, index) in shopItems" :key="index">
+                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-40 justify-between relative">
+                                <button @click="deleteItem('shopItems', index)" class="absolute top-2 left-2 text-gray-300"><i class="fa-solid fa-trash"></i></button>
+                                <div class="text-center">
+                                    <i class="fa-solid fa-gift text-2xl text-orange-400 mb-2"></i>
+                                    <h3 class="font-bold text-sm" x-text="item.name"></h3>
+                                    <p class="text-xs font-bold text-gray-400"><span x-text="item.cost"></span> 💎</p>
+                                </div>
+                                <button @click="buyItem(item)" :disabled="coins < item.cost" class="w-full py-2 rounded-lg text-xs font-bold" :class="coins >= item.cost ? 'bg-slate-900 text-white' : 'bg-gray-100 text-gray-400'">רכוש</button>
+                            </div>
+                        </template>
+                    </div>
+                    <button @click="addItem('shopItems')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-40"><i class="fa-solid fa-plus"></i></button>
+                </div>
 
-        <div x-show="modal.isOpen" class="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/50 backdrop-blur-sm" x-cloak>
-            <div @click.away="closeModal()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 modal-enter">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold" x-text="modal.isEdit ? 'עריכת פריט' : 'הוספת חדש'"></h3>
-                    <button @click="closeModal()" class="bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+                 <div x-show="currentTab === 'profile'" x-cloak class="px-4">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm text-center mt-4">
+                        <div class="w-16 h-16 bg-slate-900 rounded-full mx-auto text-white flex items-center justify-center text-2xl mb-3 font-bold" x-text="user.name.charAt(0)"></div>
+                        <h3 class="font-bold text-lg" x-text="user.name"></h3>
+                        <p class="text-sm text-gray-500" x-text="user.email"></p>
+                    </div>
+                    <button @click="logout()" class="w-full bg-red-50 text-red-500 py-4 rounded-xl font-bold mt-4">התנתק</button>
                 </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400">כותרת</label>
-                        <input type="text" x-model="modal.data.title" class="input-field" placeholder="מה לכתוב כאן?">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400" x-text="modal.type === 'tasks' ? 'שווי ניקוד (XP)' : 'מחיר ביהלומים'"></label>
-                        <input type="number" x-model="modal.data.value" class="input-field" placeholder="0">
-                    </div>
-                    <div class="flex gap-3 mt-6">
-                        <button @click="saveItem()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-200">שמור שינויים</button>
-                        <button x-show="modal.isEdit" @click="deleteCurrentItem()" class="flex-1 bg-red-50 text-red-500 py-3 rounded-xl font-bold">מחק</button>
-                    </div>
-                </div>
-            </div>
+            </main>
+
+            <nav class="bg-white border-t px-6 py-3 flex justify-around items-center fixed bottom-0 w-full z-30 pb-6">
+                <button @click="currentTab = 'tasks'" :class="currentTab === 'tasks' ? 'text-blue-600' : 'text-gray-400'"><i class="fa-solid fa-list-check text-xl"></i></button>
+                <button @click="currentTab = 'shop'" :class="currentTab === 'shop' ? 'text-blue-600' : 'text-gray-400'"><i class="fa-solid fa-store text-xl"></i></button>
+                <button @click="currentTab = 'profile'" :class="currentTab === 'profile' ? 'text-blue-600' : 'text-gray-400'"><i class="fa-solid fa-user text-xl"></i></button>
+            </nav>
         </div>
 
-        <div x-show="actions.isOpen" class="fixed inset-0 z-50 flex items-end justify-center bg-black/20" x-cloak>
-            <div @click.away="actions.isOpen = false" class="bg-white w-full max-w-md rounded-t-3xl p-6 modal-enter space-y-2">
-                <button @click="editFromActions()" class="w-full bg-slate-50 py-4 rounded-xl font-bold text-slate-700 flex items-center justify-center gap-2"><i class="fa-solid fa-pen"></i> ערוך</button>
-                <button @click="deleteFromActions()" class="w-full bg-red-50 py-4 rounded-xl font-bold text-red-500 flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> מחק</button>
-                <button @click="actions.isOpen = false" class="w-full py-3 font-bold text-slate-400">ביטול</button>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'profile'" class="scale-in px-6" x-cloak>
-            <h2 class="text-2xl font-bold mb-6 mt-4">הגדרות משתמש</h2>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center mb-6">
-                <div class="w-20 h-20 rounded-full bg-slate-900 text-white text-3xl flex items-center justify-center mx-auto mb-3">
-                    <span x-text="user.name.charAt(0)"></span>
-                </div>
-                <h3 class="text-xl font-bold" x-text="user.name"></h3>
-                <p class="text-slate-400 text-sm" x-text="user.email"></p>
-            </div>
-            <div class="space-y-3">
-                <div class="bg-white p-4 rounded-xl border border-slate-100 flex justify-between items-center">
-                    <span>שם האפליקציה</span>
-                    <input x-model="settings.appName" @change="saveToCloud()" class="text-left bg-transparent font-bold text-blue-600 outline-none w-32">
-                </div>
-                <button @click="logout()" class="w-full bg-red-50 text-red-500 py-4 rounded-xl font-bold mt-8">התנתק</button>
-            </div>
-        </div>
     </div>
 
-    <script>
-        // 1. הגדרת החיבור ל-Firebase
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // הגדרות
         const firebaseConfig = {
             apiKey: "AIzaSyAMBx4Udu3w9iR6GpEcl561TNWGRc1UVQ0",
             authDomain: "yoni-os.firebaseapp.com",
@@ -245,106 +135,108 @@
             appId: "1:238428366388:web:70e54810382d3d88134c61"
         };
 
-        // 2. התחלת החיבור
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // אתחול פיירבייס
+        const fbApp = initializeApp(firebaseConfig);
+        const db = getDatabase(fbApp);
 
-        // 3. אפליקציית Alpine
-        function app() {
-            return {
-                isLoading: false,
+        // לוגיקה ראשית
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('app', () => ({
                 currentTab: 'tasks',
                 coins: 0,
                 user: { isLoggedIn: false, name: '', email: '' },
-                settings: { appName: 'YoniOS Cloud' },
+                settings: { appName: 'YoniOS' },
                 tasks: [],
                 shopItems: [],
                 loginForm: { name: '', email: '' },
-                modal: { isOpen: false, isEdit: false, type: '', index: -1, data: { title: '', value: '' } },
-                actions: { isOpen: false, type: '', index: -1 },
                 dbPath: null,
 
                 init() {
-                    const savedUser = localStorage.getItem('yoni_cloud_user');
+                    // הסרת מסך הטעינה הראשוני כשהכל מוכן
+                    document.getElementById('fallback-loading').style.display = 'none';
+                    
+                    const savedUser = localStorage.getItem('yoni_user');
                     if (savedUser) {
-                        const userData = JSON.parse(savedUser);
-                        this.loginForm = userData;
+                        this.loginForm = JSON.parse(savedUser);
                         this.login();
                     }
                 },
 
                 login() {
-                    this.isLoading = true;
-                    // נרמול האימייל שיהיה תקין למסד נתונים
                     const safeEmail = this.loginForm.email.replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbPath = 'users/' + safeEmail;
                     
-                    const userRef = db.ref(this.dbPath);
-                    
-                    userRef.on('value', (snapshot) => {
+                    onValue(ref(db, this.dbPath), (snapshot) => {
                         const data = snapshot.val();
-                        this.isLoading = false;
                         this.user.isLoggedIn = true;
                         this.user.name = this.loginForm.name;
                         this.user.email = this.loginForm.email;
-                        
-                        localStorage.setItem('yoni_cloud_user', JSON.stringify({name: this.user.name, email: this.user.email}));
+                        localStorage.setItem('yoni_user', JSON.stringify(this.user));
 
                         if (data) {
                             this.coins = data.coins || 0;
                             this.tasks = data.tasks || [];
                             this.shopItems = data.shopItems || [];
-                            this.settings = data.settings || { appName: 'YoniOS Cloud' };
                         } else {
-                            this.saveToCloud();
+                            this.save();
                         }
                     });
                 },
 
-                saveToCloud() {
-                    if (!this.dbPath) return;
-                    const data = {
+                save() {
+                    if(!this.dbPath) return;
+                    set(ref(db, this.dbPath), {
                         coins: this.coins,
                         tasks: this.tasks,
                         shopItems: this.shopItems,
                         settings: this.settings
-                    };
-                    db.ref(this.dbPath).set(data);
+                    });
+                },
+
+                toggleTask(index) {
+                    this.tasks[index].completed = !this.tasks[index].completed;
+                    if(this.tasks[index].completed) {
+                        this.coins += parseInt(this.tasks[index].reward);
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                    } else {
+                        this.coins -= parseInt(this.tasks[index].reward);
+                    }
+                    this.save();
+                },
+
+                buyItem(item) {
+                    if(this.coins >= item.cost && confirm('לקנות?')) {
+                        this.coins -= item.cost;
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        this.save();
+                    }
+                },
+
+                addItem(type) {
+                    const title = prompt('שם:');
+                    const val = prompt(type === 'tasks' ? 'ניקוד:' : 'מחיר:');
+                    if(title && val) {
+                        if(type === 'tasks') this.tasks.push({ title, reward: parseInt(val), completed: false });
+                        else this.shopItems.push({ name: title, cost: parseInt(val) });
+                        this.save();
+                    }
+                },
+
+                deleteItem(type, index) {
+                    if(confirm('למחוק?')) {
+                        this[type].splice(index, 1);
+                        this.save();
+                    }
                 },
 
                 logout() {
                     if(confirm('להתנתק?')) {
-                        localStorage.removeItem('yoni_cloud_user');
+                        localStorage.removeItem('yoni_user');
                         location.reload();
                     }
-                },
-
-                toggleTask(task, index) {
-                    this.tasks[index].completed = !this.tasks[index].completed;
-                    if (this.tasks[index].completed) {
-                        this.coins += parseInt(task.reward);
-                        this.celebrate();
-                    } else {
-                        this.coins -= parseInt(task.reward);
-                    }
-                    this.saveToCloud();
-                },
-
-                buyItem(item) {
-                    if (this.coins >= item.cost) {
-                        if(confirm('לרכוש את ' + item.name + '?')) {
-                            this.coins -= item.cost;
-                            this.celebrate();
-                            this.saveToCloud();
-                        }
-                    }
-                },
-
-                openModal(type, index = -1) {
-                    this.modal.type = type;
-                    this.modal.index = index;
-                    this.modal.isEdit = index > -1;
-                    this.modal.isOpen = true;
-                    if (this.modal.isEdit) {
-                        const item = this[type][index];
-                        
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
