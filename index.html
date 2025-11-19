@@ -1,28 +1,22 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>מתוק בכיכר | קיוסק חלבי</title>
-
-  <!-- פונט -->
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #ffb347;
-      --primary-dark: #e68b1f;
       --bg: #050816;
-      --bg-soft: #101322;
-      --card: #181b2c;
-      --text: #f5f5f7;
-      --muted: #a3a7c2;
-      --accent: #4ade80;
-      --danger: #f97373;
-      --border: #2a2f45;
-      --radius-lg: 18px;
-      --radius-pill: 999px;
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+      --card: #111827;
+      --card-soft: #1f2933;
+      --accent: #ffb84d;
+      --accent-soft: #f97316;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --danger: #ef4444;
+      --success: #22c55e;
     }
 
     * {
@@ -31,712 +25,708 @@
 
     body {
       margin: 0;
-      font-family: "Heebo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #191f3b 0, #050816 55%);
+      font-family: "Heebo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
       color: var(--text);
       min-height: 100vh;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
     .page {
-      max-width: 960px;
+      max-width: 450px;
       margin: 0 auto;
-      padding: 16px 16px 72px;
+      padding: 16px 12px 90px;
     }
 
-    /* HEADER */
-    .header {
+    .top-bar {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 18px;
+      justify-content: space-between;
+      margin-bottom: 16px;
     }
 
-    .logo-wrapper {
-      width: 72px;
-      height: 72px;
+    .brand-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       overflow: hidden;
-      border: 2px solid rgba(255, 255, 255, 0.16);
-      background: #111321;
+      border: 2px solid rgba(255,255,255,0.12);
+      background: #020617;
       flex-shrink: 0;
     }
 
-    .logo-wrapper img {
+    .brand-logo img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
     .brand-text-title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
+      font-size: 20px;
+      font-weight: 600;
     }
 
     .brand-text-sub {
-      font-size: 14px;
+      font-size: 12px;
       color: var(--muted);
     }
 
-    .header-badge {
+    .tagline {
+      font-size: 11px;
+      color: var(--muted);
       margin-top: 4px;
+    }
+
+    .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
-      border-radius: var(--radius-pill);
-      background: rgba(74, 222, 128, 0.12);
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(34,197,94,0.14);
       color: #bbf7d0;
-      font-size: 12px;
-    }
-
-    .header-badge .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.25);
-    }
-
-    /* HERO */
-    .hero {
+      font-size: 11px;
       margin-top: 4px;
+    }
+
+    .hero-card {
+      margin-top: 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #111827, #020617);
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 12px 12px 10px;
       display: grid;
-      gap: 16px;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 10px;
     }
 
-    .hero-text-card,
-    .hero-image-card {
-      background: radial-gradient(circle at top left, rgba(255, 179, 71, 0.12), rgba(12, 12, 30, 0.96));
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      padding: 16px 16px 14px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .hero-title {
-      font-size: 20px;
-      font-weight: 700;
+    .hero-text-title {
+      font-weight: 600;
+      font-size: 16px;
       margin-bottom: 6px;
     }
 
-    .hero-subtitle {
-      font-size: 14px;
+    .hero-text-sub {
+      font-size: 13px;
       color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .hero-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
       margin-bottom: 10px;
     }
 
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 3px 9px;
-      border-radius: var(--radius-pill);
-      background: rgba(24, 27, 44, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+    .pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.3);
       color: #e5e7eb;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
     }
 
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: flex-start;
+    .pill.accent {
+      background: rgba(249,115,22,0.2);
+      border-color: rgba(249,115,22,0.7);
+      color: #fed7aa;
     }
 
     .btn-primary {
-      border: none;
-      padding: 9px 16px;
-      border-radius: var(--radius-pill);
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #1f2933;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-soft), #facc15);
+      color: #020617;
+      font-weight: 600;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(249,115,22,0.4);
     }
 
     .btn-primary span.emoji {
-      font-size: 16px;
+      font-size: 15px;
     }
 
-    .hero-note {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .hero-image-card {
-      position: relative;
-      overflow: hidden;
-      padding: 12px;
-    }
-
-    .hero-image-card img {
-      width: 100%;
+    .hero-image-wrapper {
       border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.35);
+      background: #020617;
+    }
+
+    .hero-image-wrapper img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
+      display: block;
     }
 
-    .hero-floating {
-      position: absolute;
-      bottom: 10px;
-      right: 12px;
-      padding: 6px 10px;
-      border-radius: var(--radius-pill);
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7eb;
-      font-size: 11px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      backdrop-filter: blur(10px);
-    }
-
-    /* SECTION TITLES */
     .section-title-row {
       display: flex;
-      align-items: baseline;
       justify-content: space-between;
-      gap: 8px;
-      margin: 26px 0 10px;
+      align-items: center;
+      margin-top: 22px;
+      margin-bottom: 8px;
     }
 
     .section-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
     }
 
-    .section-sub {
+    .section-caption {
       font-size: 12px;
       color: var(--muted);
     }
 
-    /* MENU GRID */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 12px;
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 8px;
     }
 
-    @media (min-width: 640px) {
-      .hero {
-        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-        align-items: stretch;
-      }
-      .menu-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .category-section {
+      margin-bottom: 4px;
+    }
+
+    .category-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e7eb;
+      margin-bottom: 6px;
+      padding-inline: 2px;
     }
 
     .product-card {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 10px;
-      border: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: 90px minmax(0, 1fr);
-      gap: 10px;
-      align-items: center;
-    }
-
-    .product-image {
-      width: 90px;
-      height: 90px;
+      background: linear-gradient(135deg, #020617, #020617 25%, #020617);
       border-radius: 14px;
-      object-fit: cover;
-      background: #020617;
+      border: 1px solid rgba(31,41,55,0.95);
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .product-main {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .product-name-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 6px;
+    .product-text {
+      flex: 1;
+      min-width: 0;
     }
 
     .product-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
+      margin-bottom: 2px;
     }
 
     .product-price {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--accent);
       font-weight: 600;
-      white-space: nowrap;
+      margin-bottom: 4px;
     }
 
-    .product-category {
+    .product-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .product-meta {
+      display: flex;
+      gap: 8px;
       font-size: 11px;
       color: var(--muted);
     }
 
+    .product-image-wrapper {
+      width: 82px;
+      height: 82px;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #020617;
+      border: 1px solid rgba(31,41,55,0.9);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     .qty-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 8px;
+      margin-top: 6px;
     }
 
     .qty-controls {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background: #020617;
-      border-radius: var(--radius-pill);
-      padding: 3px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15,23,42,0.85);
+      border-radius: 999px;
+      padding: 3px 5px;
+      border: 1px solid rgba(31,41,55,0.9);
     }
 
     .qty-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
       border: none;
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      background: #0f172a;
-      color: var(--text);
-      font-size: 18px;
-      line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 16px;
       cursor: pointer;
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    .qty-btn.plus {
+      background: linear-gradient(135deg, var(--accent-soft), #facc15);
+      color: #020617;
     }
 
     .qty-value {
-      min-width: 20px;
+      font-size: 13px;
+      min-width: 16px;
       text-align: center;
-      font-size: 14px;
     }
 
     .in-cart-label {
       font-size: 11px;
-      color: var(--muted);
+      color: var(--success);
+      margin-top: 2px;
     }
 
-    /* CART */
-    .cart {
-      margin-top: 32px;
-      background: linear-gradient(145deg, #020617, #050816);
-      border-radius: var(--radius-lg);
-      padding: 14px 14px 16px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      box-shadow: var(--shadow-soft);
-      position: sticky;
-      bottom: 12px;
-    }
-
-    .cart-title-row {
+    .cart-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #020617, #111827);
+      border-top: 1px solid rgba(31,41,55,0.9);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .cart-title-row h2 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .cart-items {
-      max-height: 140px;
-      overflow-y: auto;
-      margin-bottom: 6px;
-      padding-right: 2px;
-    }
-
-    .cart-item {
-      display: flex;
       justify-content: space-between;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    .cart-label {
       font-size: 13px;
-      padding: 3px 0;
-      border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
     }
 
-    .cart-item:last-child {
-      border-bottom: none;
-    }
-
-    .cart-items-empty {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .cart-total-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
+    .cart-label span {
       font-weight: 600;
-      margin-bottom: 8px;
+      color: var(--accent);
     }
 
-    .cart-extra {
-      display: grid;
-      gap: 6px;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-
-    .cart-extra label {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .cart-extra input,
-    .cart-extra textarea {
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      padding: 5px 8px;
-      background: #020617;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 12px;
-      resize: vertical;
-      min-height: 32px;
-    }
-
-    .cart-extra textarea {
-      min-height: 40px;
-    }
-
-    .btn-whatsapp {
-      width: 100%;
-      border-radius: var(--radius-pill);
+    .btn-cart-whatsapp {
+      border-radius: 999px;
       border: none;
-      padding: 9px 14px;
-      font-size: 14px;
+      padding: 7px 12px;
+      background: #22c55e;
+      font-size: 13px;
       font-weight: 600;
-      cursor: pointer;
+      color: #022c16;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: #25d366;
-      color: #022c22;
+      gap: 4px;
+      cursor: pointer;
     }
 
-    .btn-whatsapp[disabled] {
-      opacity: 0.45;
-      cursor: not-allowed;
+    .btn-cart-whatsapp span.emoji {
+      font-size: 15px;
     }
 
-    .small-hint {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-      text-align: center;
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 400px) {
+      .hero-card {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <!-- HEADER -->
-    <header class="header">
-      <div class="logo-wrapper">
-        <!-- אם הלוגו לא מופיע, בדוק שהנתיב נכון לשם הקובץ בתיקייה -->
-        <img src="images/images/IMG-20250120-WA0078(1).jpg" alt="לוגו מתוק בכיכר" />
-      </div>
-      <div>
-        <div class="brand-text-title">מתוק בכיכר</div>
-        <div class="brand-text-sub">קיוסק חלבי | קפה • טוסטים • פסטות • וופל בלגי</div>
-        <div class="header-badge">
-          <span class="dot"></span>
-          <span>מקבלים הזמנות בווצאפ</span>
+    <header class="top-bar">
+      <div class="brand-main">
+        <div class="brand-logo">
+          <!-- לוגו העסק – עדכן שם קובץ אם צריך -->
+          <img src="images/IMG-20250120-WA0078(1).jpg" alt="מתוק בכיכר">
+        </div>
+        <div>
+          <div class="brand-text-title">מתוק בכיכר</div>
+          <div class="brand-text-sub">קיוסק חלבי • טוסטים, פסטות, וופל בלגי ועוד</div>
+          <div class="tagline">ממוקמים בכיכר – מקבלים הזמנות בווצאפ</div>
+          <div class="hero-badge">
+            🟢 פתוח למשלוחים
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- HERO -->
     <section class="hero">
-      <div class="hero-text-card">
-        <h1 class="hero-title">כשבא לך משהו חלבי טוב – אנחנו כאן 🍕🧇</h1>
-        <p class="hero-subtitle">
-          באגטים חמים, פסטה מוקרמת, מלאווח פיצה וופל בלגי מפנק. תבחר מנות, נוסיף לעגלה
-          ובקליק אחד ההזמנה נשלחת אלינו לווצאפ.
-        </p>
-
-        <div class="tag-row">
-          <span class="tag">🔥 מאפים חמים במקום</span>
-          <span class="tag">🧀 גבינות איכותיות</span>
-          <span class="tag">🧇 קינוחים במקום</span>
-        </div>
-
-        <div class="cta-row">
-          <button class="btn-primary" onclick="scrollToMenu()">
-            <span class="emoji">📋</span>
-            תפריט מלא – לבחור מנות
-          </button>
-          <div class="hero-note">
-            אפשר גם לכתוב לנו ישירות בוואטסאפ אם יש שאלות.
+      <div class="hero-card">
+        <div>
+          <div class="hero-text-title">כשבא לך משהו חלבי טוב – אנחנו פה 🤍</div>
+          <div class="hero-text-sub">
+            באגט טוסט חם, פסטה מוקרמת, מלאווח פיצה וופל בלגי משוגע לסיום מתוק.
+            בחרו מנות, עדכנו כמויות ובקליק אחד ההזמנה עפה אלינו לווצאפ.
           </div>
+          <div class="hero-pill-row">
+            <span class="pill">הכנה במקום</span>
+            <span class="pill">חומרי גלם איכותיים</span>
+            <span class="pill accent">הזמנה מהירה בווצאפ</span>
+          </div>
+          <a class="btn-primary" href="https://wa.me/972552596022" target="_blank" rel="noopener">
+            <span class="emoji">💬</span>
+            הזמנה מהירה בוואטסאפ
+          </a>
         </div>
-      </div>
-
-      <div class="hero-image-card">
-        <!-- אם לא נראה טוב, שחק עם התמונה הרצויה כאן -->
-        <img
-          src="images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg"
-          alt="פסטה מוקרמת ומתוקה"
-        />
-        <div class="hero-floating">
-          <span>פסטה מוקרמת • מוגשת חמה</span>
+        <div class="hero-image-wrapper">
+          <!-- תמונת אווירה – פסטה -->
+          <img src="images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg" alt="פסטה מוקרמת חמה">
         </div>
       </div>
     </section>
 
-    <!-- MENU -->
-    <section id="menu-section">
-      <div class="section-title-row">
-        <h2 class="section-title">התפריט שלנו</h2>
-        <div class="section-sub">בחר מנות, קבע כמויות – ואז שליחת הזמנה בווצאפ</div>
-      </div>
+    <div class="section-title-row">
+      <h2 class="section-title">התפריט שלנו</h2>
+      <div class="section-caption">בחרו מנות, עדכנו כמויות – ואנחנו כבר נכין 📦</div>
+    </div>
 
-      <h3 class="section-sub" style="font-size: 13px; margin-bottom: 8px;">
-        טוסטים ובאגטים
-      </h3>
-      <div class="menu-grid">
-        <!-- באגט טוסט -->
-        <div class="product-card" data-name="באגט טוסט" data-price="32">
-          <img
-            src="images/images/1024x683.jpg-U010"
-            alt="באגט טוסט"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">באגט טוסט</div>
-              <div class="product-price">32 ₪</div>
-            </div>
-            <div class="product-category">באגט קראנצ'י עם גבינה ונגיעת רוטב</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
+    <!-- כאן ניצור את הכרטיסים של המנות דרך JavaScript -->
+    <main class="menu" id="menu"></main>
+  </div>
+
+  <!-- סרגל עגלה תחתון -->
+  <div class="cart-bar hidden" id="cart-bar">
+    <div class="cart-label" id="cart-label">
+      עגלת קניות ריקה
+    </div>
+    <button class="btn-cart-whatsapp" id="cart-whatsapp-btn">
+      <span class="emoji">💬</span>
+      המשך לווצאפ
+    </button>
+  </div>
+  <script>
+    // ===== נתוני מנות =====
+    const products = [
+      // טוסטים ובאגטים
+      {
+        id: "baguette-toast",
+        name: "באגט טוסט",
+        price: 32,
+        category: "טוסטים ובאגטים",
+        image: "images/1024x683.jpg-U010",
+        desc: "באגט טרי 'איטלקי' עם גבינה צהובה ורוטב עשיר"
+      },
+      {
+        id: "bagel-toast",
+        name: "בייגל טוסט",
+        price: 35,
+        category: "טוסטים ובאגטים",
+        image: "images/1024x683.jpg-U010",
+        desc: "בייגל טוסט קלאסי עם גבינה וממרחים לבחירה"
+      },
+      {
+        id: "baguette-salads",
+        name: "באגט סלטים",
+        price: 30,
+        category: "טוסטים ובאגטים",
+        image: "images/סלט-ירקות-מתכונים.webp",
+        desc: "באגט נדיב עם סלטים טריים לבחירה"
+      },
+      {
+        id: "baguette-omelette",
+        name: "באגט חביתה",
+        price: 32,
+        category: "טוסטים ובאגטים",
+        image: "images/סלט-ירקות-מתכונים.webp",
+        desc: "באגט חם עם חביתה, ירקות ורוטב"
+      },
+      {
+        id: "baguette-shakshuka",
+        name: "באגט שקשוקה",
+        price: 34,
+        category: "טוסטים ובאגטים",
+        image: "images/5079771622019.jpg",
+        desc: "שקשוקה עשירה מוגשת בתוך באגט טרי"
+      },
+
+      // מנות חמות
+      {
+        id: "pasta",
+        name: "פסטה מוקרמת",
+        price: 38,
+        category: "מנות חמות",
+        image: "images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg",
+        desc: "פנה ברוטב שמנת עשיר וגבינה מוקרמת"
+      },
+      {
+        id: "baked-potato",
+        name: "תפוא מוקרם",
+        price: 38,
+        category: "מנות חמות",
+        image: "images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg",
+        desc: "תפוחי אדמה בתנור עם רוטב שמנת וגבינה"
+      },
+      {
+        id: "malawach-pizza",
+        name: "מלאווח פיצה",
+        price: 24,
+        category: "מנות חמות",
+        image: "images/5079771622019.jpg",
+        desc: "מלאווח פריך עם רוטב עגבניות וגבינה"
+      },
+
+      // מטוגנים
+      {
+        id: "chips",
+        name: "צ'יפס גדול",
+        price: 25,
+        category: "מטוגנים",
+        image: "images/5079771622019.jpg",
+        desc: "צ'יפס פריך זהוב – מנה נדיבה"
+      },
+      {
+        id: "onion-rings",
+        name: "8 טבעות בצל",
+        price: 18,
+        category: "מטוגנים",
+        image: "images/5079771622019.jpg",
+        desc: "טבעות בצל מצופות וקריספיות"
+      },
+      {
+        id: "mashed-balls",
+        name: "8 כדורי פירה",
+        price: 18,
+        category: "מטוגנים",
+        image: "images/5079771622019.jpg",
+        desc: "כדורי פירה מטוגנים, נמסים בפה"
+      },
+      {
+        id: "home-fries",
+        name: "הופ פרייז",
+        price: 30,
+        category: "מטוגנים",
+        image: "images/5079771622019.jpg",
+        desc: "תפוחי אדמה בתערובת תיבול מיוחדת"
+      },
+
+      // קינוחים
+      {
+        id: "belgian-waffle",
+        name: "וופל בלגי",
+        price: 32,
+        category: "קינוחים",
+        image: "images/5010007_16062024162329_large.jpg",
+        desc: "וופל בלגי חם עם תוספות מתוקות"
+      }
+    ];
+
+    const categoriesOrder = [
+      "טוסטים ובאגטים",
+      "מנות חמות",
+      "מטוגנים",
+      "קינוחים"
+    ];
+
+    const cart = {}; // id -> { product, qty }
+
+    function renderMenu() {
+      const menuEl = document.getElementById("menu");
+      menuEl.innerHTML = "";
+
+      categoriesOrder.forEach(category => {
+        const catProducts = products.filter(p => p.category === category);
+        if (!catProducts.length) return;
+
+        const section = document.createElement("section");
+        section.className = "category-section";
+
+        const title = document.createElement("h3");
+        title.className = "category-title";
+        title.textContent = category;
+        section.appendChild(title);
+
+        catProducts.forEach(product => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.dataset.id = product.id;
+
+          card.innerHTML = `
+            <div class="product-main">
+              <div class="product-text">
+                <div class="product-name">${product.name}</div>
+                <div class="product-price">${product.price} ₪</div>
+                <div class="product-desc">${product.desc}</div>
+                <div class="product-meta">
+                  <span>גודל מנה: רגיל</span>
+                  <span>•</span>
+                  <span>מתאים לחלוקה</span>
+                </div>
+                <div class="qty-row">
+                  <div class="qty-controls">
+                    <button class="qty-btn minus" type="button">−</button>
+                    <span class="qty-value">0</span>
+                    <button class="qty-btn plus" type="button">+</button>
+                  </div>
+                </div>
+                <div class="in-cart-label" style="display:none;">נמצא בעגלה ✔</div>
               </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- בייגל טוסט -->
-        <div class="product-card" data-name="בייגל טוסט" data-price="35">
-          <img
-            src="images/images/1024x683.jpg-U010"
-            alt="בייגל טוסט"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">בייגל טוסט</div>
-              <div class="product-price">35 ₪</div>
-            </div>
-            <div class="product-category">בייגל גבינות שחיטות עשיר</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
+              <div class="product-image-wrapper">
+                <img src="${product.image}" alt="${product.name}" class="product-image">
               </div>
-              <span class="in-cart-label">בעגלה</span>
             </div>
-          </div>
-        </div>
+          `;
 
-        <!-- באגט סלטים -->
-        <div class="product-card" data-name="באגט סלטים" data-price="30">
-          <img
-            src="images/images/סלט-ירקות-מתכונים.webp"
-            alt="באגט סלטים"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">באגט סלטים</div>
-              <div class="product-price">30 ₪</div>
-            </div>
-            <div class="product-category">באגט טרי עם מגוון סלטים טריים</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
-              </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
+          section.appendChild(card);
+        });
 
-        <!-- באגט חביתה -->
-        <div class="product-card" data-name="באגט חביתה" data-price="32">
-          <img
-            src="images/images/סלט-ירקות-מתכונים.webp"
-            alt="באגט חביתה"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">באגט חביתה</div>
-              <div class="product-price">32 ₪</div>
-            </div>
-            <div class="product-category">באגט חם עם חביתה, סלטים ורטבים</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
-              </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
+        menuEl.appendChild(section);
+      });
+    }
 
-        <!-- באגט שקשוקה -->
-        <div class="product-card" data-name="באגט שקשוקה" data-price="34">
-          <img
-            src="images/images/5079771622019.jpg"
-            alt="באגט שקשוקה"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">באגט שקשוקה</div>
-              <div class="product-price">34 ₪</div>
-            </div>
-            <div class="product-category">באגט עם שקשוקה עשירה וגבינה</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
-              </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    function getCartTotals() {
+      let totalItems = 0;
+      let totalPrice = 0;
 
-      <!-- מנות חמות -->
-      <div class="section-title-row" style="margin-top: 22px;">
-        <h2 class="section-title" style="font-size: 16px;">מנות חמות</h2>
-      </div>
-      <div class="menu-grid">
-        <!-- פסטה מוקרמת -->
-        <div class="product-card" data-name="פסטה מוקרמת" data-price="38">
-          <img
-            src="images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg"
-            alt="פסטה מוקרמת"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">פסטה מוקרמת</div>
-              <div class="product-price">38 ₪</div>
-            </div>
-            <div class="product-category">פנה ברוטב שמנת עשיר וגבינה מותכת</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
-              </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
+      Object.values(cart).forEach(item => {
+        totalItems += item.qty;
+        totalPrice += item.qty * item.product.price;
+      });
 
-        <!-- תפוא מוקרם -->
-        <div class="product-card" data-name="תפוא מוקרם" data-price="38">
-          <img
-            src="images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg"
-            alt="תפוא מוקרם"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">תפוא מוקרם</div>
-              <div class="product-price">38 ₪</div>
-            </div>
-            <div class="product-category">פרוסות תפו"א בתנור עם רוטב וגבינה</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
-              </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
+      return { totalItems, totalPrice };
+    }
 
-        <!-- מלאווח פיצה -->
-        <div class="product-card" data-name="מלאווח פיצה" data-price="24">
-          <img
-            src="images/images/5079771622019.jpg"
-            alt="מלאווח פיצה"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">מלאווח פיצה</div>
-              <div class="product-price">24 ₪</div>
-            </div>
-            <div class="product-category">מלאווח פריך עם רוטב עגבניות וגבינה</div>
-            <div class="qty-row">
-              <div class="qty-controls">
-                <button class="qty-btn" data-action="minus">−</button>
-                <span class="qty-value">0</span>
-                <button class="qty-btn" data-action="plus">+</button>
-              </div>
-              <span class="in-cart-label">בעגלה</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    function updateCartUI() {
+      // עדכון כמויות בכל כרטיס
+      document.querySelectorAll(".product-card").forEach(card => {
+        const id = card.dataset.id;
+        const qtyValue = card.querySelector(".qty-value");
+        const inCartLabel = card.querySelector(".in-cart-label");
+        const item = cart[id];
 
-      <!-- קינוחים -->
-      <div class="section-title-row" style="margin-top: 22px;">
-        <h2 class="section-title" style="font-size: 16px;">קינוחים</h2>
-      </div>
-      <div class="menu-grid">
-        <!-- וופל בלגי -->
-        <div class="product-card" data-name="וופל בלגי" data-price="32">
-          <img
-            src="images/images/5010007_16062024162329_large.jpg"
-            alt="וופל בלגי"
-            class="product-image"
-          />
-          <div class="product-main">
-            <div class="product-name-row">
-              <div class="product-name">וופל בלגי</div>
-              <div class="product-price">32 ₪</div>
-            </div>
-            <div class="product-category">וופל חם עם טופינגים מתוקים</div
+        const qty = item ? item.qty : 0;
+        qtyValue.textContent = qty;
+
+        if (qty > 0) {
+          inCartLabel.style.display = "block";
+        } else {
+          inCartLabel.style.display = "none";
+        }
+      });
+
+      // עדכון סרגל עגלה
+      const { totalItems, totalPrice } = getCartTotals();
+      const bar = document.getElementById("cart-bar");
+      const label = document.getElementById("cart-label");
+
+      if (totalItems === 0) {
+        bar.classList.add("hidden");
+        label.textContent = "עגלת קניות ריקה";
+      } else {
+        bar.classList.remove("hidden");
+        label.innerHTML = `
+          <span>${totalItems} פריטים</span> • ${totalPrice} ₪
+        `;
+      }
+    }
+
+    function setupMenuInteractions() {
+      const menuEl = document.getElementById("menu");
+
+      menuEl.addEventListener("click", event => {
+        const btn = event.target.closest(".qty-btn");
+        if (!btn) return;
+
+        const card = btn.closest(".product-card");
+        if (!card) return;
+
+        const id = card.dataset.id;
+        const product = products.find(p => p.id === id);
+        if (!product) return;
+
+        if (!cart[id]) {
+          cart[id] = { product, qty: 0 };
+        }
+
+        if (btn.classList.contains("plus")) {
+          cart[id].qty += 1;
+        } else if (btn.classList.contains("minus")) {
+          cart[id].qty = Math.max(0, cart[id].qty - 1);
+        }
+
+        if (cart[id].qty === 0) {
+          delete cart[id];
+        }
+
+        updateCartUI();
+      });
+    }
+
+    function setupWhatsappButton() {
+      const btn = document.getElementById("cart-whatsapp-btn");
+
+      btn.addEventListener("click", () => {
+        const items = Object.values(cart);
+        if (!items.length) return;
+
+        const { totalItems, totalPrice } = getCartTotals();
+
+        let message = 'היי, אני רוצה להזמין מ"מתוק בכיכר":\n\n';
+
+        items.forEach(item => {
+          message += `• ${item.product.name} × ${item.qty} = ${item.qty * item.product.price} ₪\n`;
+        });
+
+        message += `\nסה"כ פריטים: ${totalItems}\nסה"כ לתשלום: ${totalPrice} ₪\n`;
+        message += "\nאפשר לחזור אליי עם זמן מוכן משוער 🙂";
+
+        const phone = "972552596022";
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        window.location.href = url;
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderMenu();
+      setupMenuInteractions();
+      setupWhatsappButton();
+      updateCartUI();
+    });
+  </script>
+</body>
+</html>
