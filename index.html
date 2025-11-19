@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
-    <title>YoniOS Complete</title>
+    <title>YoniOS Sorted</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -21,8 +21,6 @@
         [x-cloak] { display: none !important; }
         .glass-card { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; }
         .input-field { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; width: 100%; outline: none; }
-        
-        /* סרגל גלילה נסתר להרגלים */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -31,12 +29,11 @@
 
     <div x-show="status === 'loading'" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
         <div class="text-5xl mb-4 animate-bounce">💎</div>
-        <h2 class="font-bold text-gray-400 text-sm">טוען את החיים שלך...</h2>
+        <h2 class="font-bold text-gray-400 text-sm">מארגן את המשימות...</h2>
     </div>
 
     <div x-show="!user.isLoggedIn && status !== 'loading'" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8">
         <h1 class="text-4xl font-black text-blue-600 mb-2">YoniOS</h1>
-        <p class="text-gray-400 mb-8">המערכת המלאה</p>
         <div class="w-full max-w-xs space-y-4">
             <input type="text" x-model="form.name" class="input-field" placeholder="איך לקרוא לך?">
             <input type="email" x-model="form.email" class="input-field" placeholder="האימייל שלך">
@@ -80,10 +77,9 @@
                 
                 <div class="mb-6">
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <h3 class="font-bold text-gray-400 uppercase text-xs">הרגלים יומיים</h3>
+                        <h3 class="font-bold text-gray-400 uppercase text-xs">הרגלים</h3>
                         <button @click="openModal('habit')" class="text-blue-600 text-xs font-bold">+ הוסף</button>
                     </div>
-                    
                     <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
                         <template x-for="(habit, i) in habits" :key="i">
                             <div @click="toggleHabit(i)" class="flex-shrink-0 w-20 h-24 glass-card flex flex-col items-center justify-center border-2 transition-all active:scale-95 relative"
@@ -93,32 +89,41 @@
                                 <span class="text-[10px] font-bold text-center leading-tight px-1" x-text="habit.name"></span>
                             </div>
                         </template>
-                        
                         <div x-show="habits.length === 0" @click="openModal('habit')" class="flex-shrink-0 w-20 h-24 glass-card flex flex-col items-center justify-center border-2 border-dashed border-gray-300 text-gray-400">
                             <i class="fa-solid fa-plus"></i>
-                            <span class="text-[10px] mt-1">צור הרגל</span>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-gray-400 uppercase text-xs mb-3 px-1">משימות שוטפות</h3>
+                    <div class="flex justify-between items-end mb-3 px-1">
+                        <h3 class="font-bold text-gray-400 uppercase text-xs">משימות שוטפות</h3>
+                        <button x-show="hasCompletedTasks" @click="clearCompleted()" class="text-[10px] bg-red-50 text-red-500 px-2 py-1 rounded border border-red-100 font-bold">
+                            <i class="fa-solid fa-trash-can mr-1"></i> נקה שבוצעו
+                        </button>
+                    </div>
+
                     <div class="space-y-3">
                         <template x-for="(task, i) in tasks" :key="i">
-                            <div class="glass-card p-4 flex items-center gap-3 relative overflow-hidden transition-all active:scale-[0.98]">
-                                <div class="absolute right-0 top-0 bottom-0 w-1.5" :class="task.color"></div>
+                            <div class="glass-card p-4 flex items-center gap-3 relative overflow-hidden transition-all active:scale-[0.98]"
+                                 :class="task.completed ? 'opacity-60 bg-gray-50' : ''">
+                                
+                                <div class="absolute right-0 top-0 bottom-0 w-1.5" :class="task.completed ? 'bg-gray-300' : task.color"></div>
+                                
                                 <button @click="toggleTask(i)" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors mr-2" 
                                     :class="task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'">
                                     <i x-show="task.completed" class="fa-solid fa-check text-white text-[10px]"></i>
                                 </button>
+                                
                                 <div class="flex-1">
                                     <p class="font-bold" :class="task.completed ? 'line-through text-gray-400' : ''" x-text="task.title"></p>
-                                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 rounded inline-block mt-1">+<span x-text="task.reward"></span> XP</span>
+                                    <span x-show="!task.completed" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 rounded inline-block mt-1">+<span x-text="task.reward"></span> XP</span>
                                 </div>
+                                
                                 <button @click="deleteItem('tasks', i)" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </template>
-                        <div x-show="tasks.length === 0" class="text-center py-10 text-gray-400 text-sm">אין משימות כרגע. הוסף חדשה!</div>
+                        <div x-show="tasks.length === 0" class="text-center py-10 text-gray-400 text-sm">אין משימות. הכל נקי!</div>
                     </div>
                 </div>
             </div>
@@ -143,13 +148,6 @@
                 <div class="w-24 h-24 bg-white border-2 border-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl shadow-sm">👤</div>
                 <h2 class="text-2xl font-black" x-text="user.name"></h2>
                 <p class="text-gray-500 mb-8" x-text="user.email"></p>
-                
-                <div class="glass-card p-4 mb-4 text-right">
-                    <h4 class="font-bold text-sm mb-2">סטטיסטיקה</h4>
-                    <div class="flex justify-between text-sm mb-1"><span>משימות פתוחות:</span> <span class="font-bold" x-text="tasks.length"></span></div>
-                    <div class="flex justify-between text-sm"><span>הרגלים יומיים:</span> <span class="font-bold" x-text="habits.length"></span></div>
-                </div>
-
                 <button @click="logout()" class="w-full bg-red-50 text-red-500 py-4 rounded-xl font-bold mt-4">התנתק</button>
             </div>
 
@@ -173,16 +171,13 @@
                 <h3 class="text-xl font-bold mb-4" x-text="modal.title"></h3>
                 <div class="space-y-3">
                     <input x-model="modal.data.name" type="text" class="input-field" placeholder="כותרת / שם">
-                    
                     <div x-show="modal.type === 'task'" class="flex gap-2">
                         <button @click="modal.data.color = 'bg-red-500'" class="h-10 flex-1 rounded border-2 border-red-500 bg-red-50"></button>
                         <button @click="modal.data.color = 'bg-blue-500'" class="h-10 flex-1 rounded border-2 border-blue-500 bg-blue-50"></button>
                         <button @click="modal.data.color = 'bg-green-500'" class="h-10 flex-1 rounded border-2 border-green-500 bg-green-50"></button>
                         <button @click="modal.data.color = 'bg-yellow-500'" class="h-10 flex-1 rounded border-2 border-yellow-500 bg-yellow-50"></button>
                     </div>
-
-                    <input x-show="modal.type !== 'habit'" x-model="modal.data.value" type="number" class="input-field" placeholder="שווי נקודות / מחיר">
-                    
+                    <input x-show="modal.type !== 'habit'" x-model="modal.data.value" type="number" class="input-field" placeholder="ניקוד / מחיר">
                     <button @click="saveModal()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold mt-2">שמור</button>
                 </div>
             </div>
@@ -213,22 +208,24 @@
                 form: { name: '', email: '' },
                 coins: 0,
                 tasks: [],
-                habits: [],     // <--- החזרתי את ההרגלים!
-                shopItems: [],  // <--- החזרתי את החנות!
+                habits: [],
+                shopItems: [],
                 todayStr: new Date().toLocaleDateString('he-IL'),
-                
                 modal: { isOpen: false, type: '', title: '', data: { name: '', value: '', color: 'bg-blue-500' } },
                 dbRef: null,
                 isLoaded: false,
 
+                get hasCompletedTasks() {
+                    return this.tasks.some(t => t.completed);
+                },
+
                 init() {
-                    // צפייה לשינויים בכל הרשימות
                     this.$watch('tasks', () => this.save());
                     this.$watch('coins', () => this.save());
-                    this.$watch('habits', () => this.save());    // <--- שמירת הרגלים
-                    this.$watch('shopItems', () => this.save()); // <--- שמירת חנות
+                    this.$watch('habits', () => this.save());
+                    this.$watch('shopItems', () => this.save());
 
-                    const saved = localStorage.getItem('yoni_full_v1');
+                    const saved = localStorage.getItem('yoni_full_v2');
                     if (saved) {
                         this.form = JSON.parse(saved);
                         this.login(true);
@@ -239,7 +236,7 @@
 
                 login(auto = false) {
                     if (!this.form.email) return;
-                    if(!auto) localStorage.setItem('yoni_full_v1', JSON.stringify(this.form));
+                    if(!auto) localStorage.setItem('yoni_full_v2', JSON.stringify(this.form));
 
                     const safeEmail = this.form.email.toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbRef = db.ref('users/' + safeEmail);
@@ -255,30 +252,55 @@
 
                             if (val) {
                                 this.coins = val.coins || 0;
-                                this.tasks = val.tasks || [];
+                                // טעינה וסידור: קודם לא בוצעו, אחר כך בוצעו
+                                this.tasks = (val.tasks || []).sort((a, b) => a.completed - b.completed);
                                 this.shopItems = val.shopItems || [];
                                 this.habits = val.habits || [];
                             }
-                            this.isLoaded = true; // המנעול נפתח רק עכשיו
+                            this.isLoaded = true;
                         }
                     });
                 },
 
                 save() {
                     if (!this.isLoaded || !this.dbRef) return;
-                    
                     this.saveState = 'שומר...';
                     this.dbRef.set({
                         coins: this.coins,
                         tasks: this.tasks,
-                        habits: this.habits,     // <--- שולח לענן
-                        shopItems: this.shopItems // <--- שולח לענן
+                        habits: this.habits,
+                        shopItems: this.shopItems
                     }, (error) => {
                         if (!error) setTimeout(() => this.saveState = 'נשמר ✅', 500);
                     });
                 },
 
-                // --- לוגיקה ---
+                sortTasks() {
+                    // פונקציית הקסם: מזיזה את ה-V למטה
+                    this.tasks.sort((a, b) => a.completed - b.completed);
+                },
+
+                clearCompleted() {
+                    if(confirm('למחוק את כל המשימות שבוצעו?')) {
+                        this.tasks = this.tasks.filter(t => !t.completed);
+                        this.save();
+                    }
+                },
+
+                toggleTask(i) {
+                    this.tasks[i].completed = !this.tasks[i].completed;
+                    if(this.tasks[i].completed) {
+                        this.coins += parseInt(this.tasks[i].reward);
+                        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+                    } else {
+                        this.coins -= parseInt(this.tasks[i].reward);
+                    }
+                    
+                    // מיון אוטומטי אחרי סימון
+                    setTimeout(() => {
+                        this.sortTasks();
+                    }, 300); // השהייה קטנה לאנימציה
+                },
 
                 openModal(type) {
                     this.modal.type = type;
@@ -294,6 +316,7 @@
                     if(this.modal.type === 'task') {
                         if(!this.tasks) this.tasks = [];
                         this.tasks.push({ title: d.name, reward: parseInt(d.value)||10, color: d.color, completed: false });
+                        this.sortTasks();
                     } else if(this.modal.type === 'shop') {
                         if(!this.shopItems) this.shopItems = [];
                         this.shopItems.push({ name: d.name, cost: parseInt(d.value)||100 });
@@ -302,16 +325,6 @@
                         this.habits.push({ name: d.name, lastDone: '' });
                     }
                     this.modal.isOpen = false;
-                },
-
-                toggleTask(i) {
-                    this.tasks[i].completed = !this.tasks[i].completed;
-                    if(this.tasks[i].completed) {
-                        this.coins += parseInt(this.tasks[i].reward);
-                        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
-                    } else {
-                        this.coins -= parseInt(this.tasks[i].reward);
-                    }
                 },
 
                 toggleHabit(i) {
@@ -338,14 +351,4 @@
                     }
                 },
 
-                logout() {
-                    if(confirm('להתנתק?')) {
-                        localStorage.removeItem('yoni_full_v1');
-                        location.reload();
-                    }
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                logout(
