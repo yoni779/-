@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>האקדמיה לעסקים 🚀</title>
+    <style>
+        :root {
+            --primary: #2c3e50; /* כחול כהה מכובד */
+            --accent: #3498db; /* כחול בהיר */
+            --success: #27ae60;
+            --gold: #f1c40f;
+            --bg: #f4f6f7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* כותרת עליונה */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+        .subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
+
+        /* פס התקדמות */
+        .progress-area {
+            padding: 20px;
+        }
+        .progress-bg {
+            background: #eee;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .level-badge {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        /* כרטיס התוכן */
+        .content-card {
+            flex: 1;
+            padding: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .lesson-title {
+            color: var(--accent);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            border-right: 4px solid var(--gold);
+            padding-right: 10px;
+        }
+
+        .lesson-text {
+            line-height: 1.6;
+            font-size: 1.1rem;
+            color: #555;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        /* אזור המבחן */
+        .quiz-area {
+            margin-top: 30px;
+            border-top: 2px dashed #eee;
+            padding-top: 20px;
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #eee;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            text-align: right;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            background: #f0f8ff;
+        }
+
+        .option-btn.correct {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .option-btn.wrong {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        /* כפתור המשיך */
+        .next-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            margin: 20px auto;
+            display: none; /* מוסתר עד שעונים נכון */
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
+            animation: bounce 1s infinite;
+        }
+
+        /* מסך סיום */
+        .completion-screen {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        .trophy { font-size: 5rem; margin-bottom: 20px; display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>🎓 האקדמיה לעסקים</h1>
+            <div class="subtitle">צעדים ראשונים ליזמות</div>
+        </header>
+
+        <div class="progress-area">
+            <div class="progress-bg">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="level-badge" id="levelIndicator">שלב 1 מתוך 5</div>
+        </div>
+
+        <div class="content-card" id="lessonContainer">
+            <h2 class="lesson-title" id="lessonTitle">כותרת השיעור</h2>
+            <div class="lesson-text" id="lessonContent">
+                טוען תוכן...
+            </div>
+
+            <div class="quiz-area" id="quizArea">
+                <div class="question">💡 מבחן ידע: <span id="questionText">?</span></div>
+                <div id="optionsContainer">
+                    </div>
+            </div>
+
+            <button class="next-btn" id="nextBtn" onclick="nextLesson()">המשך לשיעור הבא ◀</button>
+        </div>
+
+        <div class="completion-screen" id="endScreen">
+            <span class="trophy">🏆</span>
+            <h2 style="color:var(--primary)">כל הכבוד, יוני!</h2>
+            <p>סיימת את הקורס הבסיסי לניהול עסקים.</p>
+            <p>עכשיו יש לך את הידע להתחיל לתכנן את האימפריה שלך.</p>
+            <button class="next-btn" style="display:inline-block; background:var(--gold); color:black;" onclick="resetCourse()">התחל מחדש</button>
+        </div>
+    </div>
+
+    <script>
+        // --- תוכן הקורס (אפשר להוסיף עוד) ---
+        const courseData = [
+            {
+                title: "1. למה צריך תוכנית עסקית?",
+                content: "הרבה יזמים רצים ישר לפתוח את העסק, אבל נופלים כי לא תכננו. תוכנית עסקית היא המפה שלך: מי הלקוחות? מי המתחרים? ואיך תרוויח כסף? בלי מפה - הולכים לאיבוד.",
+                question: "מה המטרה העיקרית של תוכנית עסקית?",
+                options: ["לשלם מיסים למדינה", "לשמש מפה ותכנון להצלחת העסק", "לעצב לוגו יפה"],
+                answer: 1 // האינדקס של התשובה הנכונה (מתחיל מ-0)
+            },
+            {
+                title: "2. תזרים מזומנים (המלך 👑)",
+                content: "יזמים מתבלבלים בין 'רווח' ל'מזומן'. יכול להיות שעל הנייר הרווחת מיליון שקל, אבל הלקוחות ישלמו רק עוד חודשיים. בינתיים, אין לך כסף לשלם לעובדים. תזרים מזומנים הוא האוויר לנשימה של העסק.",
+                question: "מה קורה אם יש רווח אבל אין תזרים מזומנים?",
+                options: ["העסק במצב מצוין", "העסק עלול לקרוס מחוסר נזילות", "זה לא משנה כלום"],
+                answer: 1
+            },
+            {
+                title: "3. מי הלקוח שלך?",
+                content: "טעות נפוצה: 'המוצר שלי מתאים לכולם'. זה לא נכון. אם תנסה למכור לכולם, לא תמכור לאף אחד. תגדיר 'קהל יעד' מדויק. למשל: לא 'גברים', אלא 'גברים בני 30 שמתעניינים בכושר'.",
+                question: "למה חשוב להגדיר קהל יעד ספציפי?",
+                options: ["כדי שהשיווק יהיה ממוקד ואפקטיבי", "כדי שפחות אנשים יקנו", "כדי לחסוך בנייר"],
+                answer: 0
+            },
+            {
+                title: "4. בידול (למה דווקא אתה?)",
+                content: "למה שהלקוח יקנה ממך ולא מהמתחרה? אם התשובה היא רק 'כי אני זול יותר', אתה בבעיה. בידול יכול להיות: שירות מהיר יותר, איכות גבוהה יותר, או חוויה ייחודית. תהיה שונה, לא רק זול.",
+                question: "מהי אסטרטגיית בידול טובה?",
+                options: ["להעתיק בדיוק את המתחרה", "להציע ערך מוסף ייחודי ללקוח", "להוריד מחירים עד להפסד"],
+                answer: 1
+            },
+            {
+                title: "5. האצלת סמכויות",
+                content: "בהתחלה אתה עושה הכל. אבל כדי לגדול, אתה חייב לשחרר. מנהל טוב לא עושה הכל לבד, הוא יודע לתת משימות לאנשים שטובים ממנו בתחומם. אל תהיה ה'פועל' של העסק שלך, תהיה המנהל.",
+                question: "מהו המפתח לגדילת העסק?",
+                options: ["לעשות הכל לבד כדי לחסוך", "לדעת לשחרר ולתת משימות לאחרים", "לא לישון בלילה"],
+                answer: 1
+            }
+        ];
+
+        let currentLevel = 0;
+        
+        // טעינה מזיכרון
+        if(localStorage.getItem('businessCourseLevel')) {
+            currentLevel = parseInt(localStorage.getItem('businessCourseLevel'));
+        }
+
+        // התחלה
+        loadLevel();
+
+        function loadLevel() {
+            // בדיקה אם סיימנו את הקורס
+            if (currentLevel >= courseData.length) {
+                showEndScreen();
+                return;
+            }
+
+            const data = courseData[currentLevel];
+            
+            // עדכון ממשק
+            document.getElementById('lessonTitle').innerText = data.title;
+            document.getElementById('lessonContent').innerText = data.content;
+            document.getElementById('questionText').innerText = data.question;
+            document.getElementById('levelIndicator').innerText = `שלב ${currentLevel + 1} מתוך ${courseData.length}`;
+            
+            // עדכון פס התקדמות
+            let progressPercent = (currentLevel / courseData.length) * 100;
+            document.getElementById('progressBar').style.width = progressPercent + '%';
+
+            // איפוס כפתורים
+            document.getElementById('nextBtn').style.display = 'none';
+            const optsDiv = document.getElementById('optionsContainer');
+            optsDiv.innerHTML = '';
+
+            // יצירת כפתורי תשובות
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, index, data.answer);
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btnElement, selectedIndex, correctIndex) {
+            // מניעת לחיצה כפולה אם כבר ענו נכון
+            if(document.getElementById('nextBtn').style.display === 'block') return;
+
+            if (selectedIndex === correctIndex) {
+                // תשובה נכונה
+                btnElement.classList.add('correct');
+                btnElement.innerHTML += ' ✅';
+                document.getElementById('nextBtn').style.display = 'block';
+                
+                // הסרת יכולת לחיצה על שאר הכפתורים
+                const allBtns = document.querySelectorAll('.option-btn');
+                allBtns.forEach(b => b.style.pointerEvents = 'none');
+            } else {
+                // תשובה שגויה
+                btnElement.classList.add('wrong');
+                btnElement.innerHTML += ' ❌';
+                setTimeout(() => {
+                    btnElement.classList.remove('wrong');
+                    btnElement.innerText = btnElement.innerText.replace(' ❌', '');
+                }, 1000);
+            }
+        }
+
+        function nextLesson() {
+            currentLevel++;
+            localStorage.setItem('businessCourseLevel', currentLevel);
+            
+            // אנימציית מעבר קטנה
+            document.getElementById('lessonContainer').style.opacity = 0;
+            setTimeout(() => {
+                loadLevel();
+                document.getElementById('lessonContainer').style.opacity = 1;
+            }, 300);
+        }
+
+        function showEndScreen() {
+            document.getElementById('lessonContainer').style.display = 'none';
+            document.querySelector('.progress-area').style.display = 'none';
+            document.getElementById('endScreen').style.display = 'block';
+            
+            // חגיגה
+            document.getElementById('progressBar').style.width = '100%';
+        }
+
+        function resetCourse() {
+            if(confirm("האם לאפס את ההתקדמות ולהתחיל מחדש?")) {
+                currentLevel = 0;
+                localStorage.setItem('businessCourseLevel', 0);
+                location.reload();
+            }
+        }
+
+    </script>
+</body>
+</html>
