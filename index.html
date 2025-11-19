@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>YoniOS Stable</title>
+    <title>YoniOS Force</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -21,56 +21,68 @@
             font-family: 'Rubik', sans-serif; 
             background-color: #0f172a; 
             color: white;
-            background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(37,145,251,0.98) 0.1%, rgba(0,7,128,1) 99.8% );
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             user-select: none;
         }
         [x-cloak] { display: none !important; }
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
-        .input-field { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 12px; width: 100%; color: white; outline: none; }
-        #loader { position: fixed; inset: 0; background: #020617; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
+        .input-field { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; width: 100%; color: white; outline: none; }
+        
+        /* כפתור איפוס למעלה */
+        #reset-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 999999;
+            font-size: 10px; opacity: 0.5; color: white; border: 1px solid white; padding: 2px 5px; border-radius: 4px;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
-    <button onclick="localStorage.clear(); location.reload()" style="position:fixed; top:10px; left:10px; z-index:99999; opacity:0.3; font-size:10px;">RESET</button>
+    <button id="reset-btn" onclick="localStorage.clear(); location.reload()">איפוס מלא</button>
 
-    <div id="loader">
-        <div class="text-6xl mb-4 animate-bounce">💎</div>
-        <p class="text-blue-300 font-bold">טוען YoniOS...</p>
+    <div id="loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f172a] transition-opacity duration-500">
+        <div class="text-5xl mb-4 animate-bounce">💎</div>
+        <p class="text-gray-400 text-sm">פותח מערכת...</p>
     </div>
+
+    <script>
+        setTimeout(function() {
+            const loader = document.getElementById('loader');
+            if(loader) loader.style.display = 'none';
+        }, 3000); // 3 שניות מקסימום
+    </script>
 
     <div x-data="app()" x-init="initApp()" x-cloak class="h-full flex flex-col">
 
         <div x-show="!user.isLoggedIn" class="fixed inset-0 z-50 bg-[#0f172a] flex flex-col items-center justify-center p-8">
-            <h1 class="text-5xl font-black text-white mb-2 tracking-tighter">YoniOS</h1>
-            <p class="text-blue-300 mb-10">המשרד שלך בענן</p>
+            <h1 class="text-4xl font-black text-white mb-2">YoniOS</h1>
+            <p class="text-gray-400 mb-8">כניסה מהירה</p>
             <div class="w-full max-w-xs space-y-4">
                 <input type="text" x-model="form.name" class="input-field" placeholder="שם">
                 <input type="email" x-model="form.email" class="input-field" placeholder="אימייל">
-                <button @click="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-all">כניסה</button>
+                <button @click="login()" class="w-full bg-blue-600 py-3 rounded-xl font-bold shadow-lg mt-4">כניסה</button>
             </div>
         </div>
 
         <div x-show="user.isLoggedIn" class="flex-1 flex flex-col h-full relative">
             
-            <header class="px-5 pt-12 pb-4 flex justify-between items-center bg-black/20 backdrop-blur-md z-30">
+            <header class="px-5 pt-14 pb-4 flex justify-between items-center bg-[#0f172a]/90 backdrop-blur border-b border-white/5 z-30">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center font-bold text-lg shadow-lg">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center font-bold text-lg">
                         <span x-text="user.name.charAt(0)"></span>
                     </div>
                     <div>
                         <h1 class="font-bold leading-none" x-text="user.name"></h1>
-                        <p class="text-[10px] text-green-400 mt-1 font-bold" x-text="saveState"></p>
+                        <p class="text-[10px] mt-1" :class="statusColor" x-text="saveState"></p>
                     </div>
                 </div>
-                <div class="glass px-3 py-1 font-bold text-sm flex items-center gap-2">
+                <div class="bg-white/10 px-3 py-1 rounded-full font-bold text-sm border border-white/10">
                     <span x-text="coins"></span> 💎
                 </div>
             </header>
 
             <main class="flex-1 overflow-y-auto p-4 pb-32">
                 
-                <div x-show="tab !== 'profile'" class="glass p-6 mb-6 relative overflow-hidden">
+                <div x-show="tab !== 'profile'" class="glass p-5 mb-6 relative overflow-hidden">
                     <div class="flex justify-between items-end relative z-10">
                         <div>
                             <p class="text-gray-400 text-xs font-bold mb-1">LEVEL</p>
@@ -86,32 +98,32 @@
                     
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-3 px-1">
-                            <h3 class="font-bold text-gray-300 uppercase text-xs">הרגלים יומיים ⚡</h3>
-                            <button @click="openModal('habit')" class="bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1 rounded-lg">+ הוסף</button>
+                            <h3 class="font-bold text-gray-200 uppercase text-sm">🔄 יומי (מתאפס בלילה)</h3>
+                            <button @click="openModal('habit')" class="bg-blue-600/20 text-blue-400 text-xs px-3 py-1 rounded-lg font-bold">+ הוסף</button>
                         </div>
+
                         <div class="grid grid-cols-3 gap-2">
                             <template x-for="(habit, i) in habits" :key="i">
                                 <div @click="toggleHabit(i)" 
                                      class="glass aspect-square flex flex-col items-center justify-center relative transition-all active:scale-95 cursor-pointer"
                                      :class="habit.lastDone === todayStr ? 'bg-green-500/20 border-green-500/50' : 'hover:bg-white/5'">
-                                    
-                                    <button @click.stop="deleteItem('habits', i)" class="absolute top-1 right-1 text-white/20 hover:text-red-400 p-1"><i class="fa-solid fa-times text-[10px]"></i></button>
-                                    
-                                    <div class="text-2xl mb-2 transition-transform" :class="habit.lastDone === todayStr ? 'scale-110 text-green-400' : 'text-gray-500'">
+                                    <button @click.stop="deleteItem('habits', i)" class="absolute top-1 right-1 text-white/10 hover:text-red-400 p-1"><i class="fa-solid fa-times text-[10px]"></i></button>
+                                    <div class="text-2xl mb-2" :class="habit.lastDone === todayStr ? 'text-green-400' : 'text-gray-500'">
                                         <i class="fa-solid" :class="habit.lastDone === todayStr ? 'fa-circle-check' : 'fa-circle'"></i>
                                     </div>
-                                    
                                     <span class="text-[11px] font-bold text-center leading-tight px-1 text-gray-300" x-text="habit.name"></span>
                                 </div>
                             </template>
+                            <div x-show="habits.length === 0" @click="openModal('habit')" class="glass aspect-square flex flex-col items-center justify-center border-dashed border-gray-600 text-gray-500 opacity-50">
+                                <i class="fa-solid fa-plus text-xl"></i>
+                            </div>
                         </div>
-                        <div x-show="habits.length === 0" class="text-center text-xs text-gray-500 mt-2">אין הרגלים עדיין</div>
                     </div>
 
                     <div>
                         <div class="flex justify-between items-end mb-3 px-1">
-                            <h3 class="font-bold text-gray-300 uppercase text-xs">משימות שוטפות</h3>
-                            <button x-show="tasks.some(t => t.completed)" @click="clearCompleted()" class="text-[10px] text-red-300 bg-red-900/30 px-2 py-1 rounded">נקה</button>
+                            <h3 class="font-bold text-gray-400 uppercase text-xs">משימות שוטפות</h3>
+                            <button x-show="tasks.some(t => t.completed)" @click="clearCompleted()" class="text-[10px] text-red-400 bg-red-900/20 px-2 py-1 rounded">נקה</button>
                         </div>
 
                         <div class="space-y-3">
@@ -129,58 +141,55 @@
                                 </div>
                             </template>
                         </div>
-                         <div x-show="tasks.length === 0" class="text-center py-8 text-gray-500 text-xs">אין משימות פתוחות</div>
                     </div>
                 </div>
 
                 <div x-show="tab === 'shop'">
-                    <h3 class="font-bold text-gray-300 uppercase text-xs mb-3 px-1">חנות הפינוקים</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <template x-for="(item, i) in shopItems" :key="i">
                             <div class="glass p-4 text-center relative">
                                 <button @click="deleteItem('shopItems', i)" class="absolute top-2 left-2 text-gray-500"><i class="fa-solid fa-times"></i></button>
-                                <div class="text-3xl mb-2">🎁</div>
+                                <div class="text-2xl mb-2">🎁</div>
                                 <h3 class="font-bold text-sm mb-1" x-text="item.name"></h3>
                                 <p class="text-xs text-blue-400 mb-3"><span x-text="item.cost"></span> 💎</p>
-                                <button @click="buy(item)" class="w-full py-1.5 rounded text-xs font-bold bg-white text-black hover:bg-blue-50">רכוש</button>
+                                <button @click="buy(item)" class="w-full py-1.5 rounded text-xs font-bold bg-white text-black">רכוש</button>
                             </div>
                         </template>
                     </div>
-                    <div x-show="shopItems.length === 0" class="text-center py-8 text-gray-500 text-xs">החנות ריקה</div>
                 </div>
 
                 <div x-show="tab === 'profile'" class="text-center pt-10">
-                    <div class="w-24 h-24 bg-white/10 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl shadow-xl border border-white/20">👤</div>
-                    <h2 class="text-2xl font-bold" x-text="user.name"></h2>
+                    <div class="w-20 h-20 bg-white/10 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">👤</div>
+                    <h2 class="text-xl font-bold" x-text="user.name"></h2>
                     <p class="text-gray-400 text-sm mb-8" x-text="user.email"></p>
-                    <button @click="logout()" class="bg-red-500/20 text-red-400 border border-red-500/50 px-8 py-3 rounded-xl font-bold text-sm">התנתק</button>
+                    <button @click="logout()" class="bg-red-500/20 text-red-400 border border-red-500/50 px-6 py-2 rounded-lg text-sm">התנתק</button>
                 </div>
 
             </main>
 
-            <button x-show="tab !== 'profile'" @click="openModal(tab === 'tasks' ? 'task' : 'shop')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/50 flex items-center justify-center text-2xl z-40 active:scale-95 hover:scale-105 transition-transform">
+            <button x-show="tab !== 'profile'" @click="openModal(tab === 'tasks' ? 'task' : 'shop')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 rounded-2xl shadow-lg flex items-center justify-center text-2xl z-40 active:scale-95">
                 <i class="fa-solid fa-plus"></i>
             </button>
 
             <div class="fixed bottom-6 left-4 right-4 z-40">
-                <nav class="glass px-2 py-2 flex justify-around items-center bg-black/40 backdrop-blur-xl">
-                    <button @click="tab = 'tasks'" class="p-3 rounded-xl transition-colors" :class="tab === 'tasks' ? 'bg-white/20 text-white' : 'text-gray-500'"><i class="fa-solid fa-list-check text-lg"></i></button>
-                    <button @click="tab = 'shop'" class="p-3 rounded-xl transition-colors" :class="tab === 'shop' ? 'bg-white/20 text-white' : 'text-gray-500'"><i class="fa-solid fa-store text-lg"></i></button>
-                    <button @click="tab = 'profile'" class="p-3 rounded-xl transition-colors" :class="tab === 'profile' ? 'bg-white/20 text-white' : 'text-gray-500'"><i class="fa-solid fa-user text-lg"></i></button>
+                <nav class="glass px-2 py-2 flex justify-around items-center">
+                    <button @click="tab = 'tasks'" class="p-3 rounded-xl transition-colors" :class="tab === 'tasks' ? 'bg-white/10 text-white' : 'text-gray-500'"><i class="fa-solid fa-list-check"></i></button>
+                    <button @click="tab = 'shop'" class="p-3 rounded-xl transition-colors" :class="tab === 'shop' ? 'bg-white/10 text-white' : 'text-gray-500'"><i class="fa-solid fa-store"></i></button>
+                    <button @click="tab = 'profile'" class="p-3 rounded-xl transition-colors" :class="tab === 'profile' ? 'bg-white/10 text-white' : 'text-gray-500'"><i class="fa-solid fa-user"></i></button>
                 </nav>
             </div>
 
             <div x-show="modal.isOpen" class="fixed inset-0 z-[60] flex items-end justify-center bg-black/80 backdrop-blur-sm" x-cloak>
-                <div @click.away="modal.isOpen = false" class="bg-[#1e293b] w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 shadow-2xl">
+                <div @click.away="modal.isOpen = false" class="bg-[#1e293b] w-full max-w-md rounded-t-3xl p-6 border-t border-white/10">
                     <h3 class="text-lg font-bold mb-4" x-text="modal.title"></h3>
                     <div class="space-y-3">
                         <input x-model="modal.data.name" type="text" class="input-field" placeholder="כותרת">
                         
                         <div x-show="modal.type === 'task'" class="flex gap-2">
-                            <button @click="modal.data.color = 'bg-red-500'" class="h-8 flex-1 rounded bg-red-500 opacity-50 hover:opacity-100 border-2" :class="modal.data.color == 'bg-red-500' ? 'border-white' : 'border-transparent'"></button>
-                            <button @click="modal.data.color = 'bg-blue-500'" class="h-8 flex-1 rounded bg-blue-500 opacity-50 hover:opacity-100 border-2" :class="modal.data.color == 'bg-blue-500' ? 'border-white' : 'border-transparent'"></button>
-                            <button @click="modal.data.color = 'bg-green-500'" class="h-8 flex-1 rounded bg-green-500 opacity-50 hover:opacity-100 border-2" :class="modal.data.color == 'bg-green-500' ? 'border-white' : 'border-transparent'"></button>
-                            <button @click="modal.data.color = 'bg-yellow-500'" class="h-8 flex-1 rounded bg-yellow-500 opacity-50 hover:opacity-100 border-2" :class="modal.data.color == 'bg-yellow-500' ? 'border-white' : 'border-transparent'"></button>
+                            <button @click="modal.data.color = 'bg-red-500'" class="h-8 flex-1 rounded bg-red-500 opacity-50 hover:opacity-100"></button>
+                            <button @click="modal.data.color = 'bg-blue-500'" class="h-8 flex-1 rounded bg-blue-500 opacity-50 hover:opacity-100"></button>
+                            <button @click="modal.data.color = 'bg-green-500'" class="h-8 flex-1 rounded bg-green-500 opacity-50 hover:opacity-100"></button>
+                            <button @click="modal.data.color = 'bg-yellow-500'" class="h-8 flex-1 rounded bg-yellow-500 opacity-50 hover:opacity-100"></button>
                         </div>
 
                         <input x-show="modal.type !== 'habit'" x-model="modal.data.value" type="number" class="input-field" placeholder="ערך">
@@ -193,7 +202,6 @@
     </div>
 
     <script>
-        // הגדרות Firebase (שים לב: הכתובת מדויקת לפי התמונה ששלחת)
         const firebaseConfig = {
             apiKey: "AIzaSyAMBx4Udu3w9iR6GpEcl561TNWGRc1UVQ0",
             authDomain: "yoni-os.firebaseapp.com",
@@ -203,18 +211,15 @@
             messagingSenderId: "238428366388",
             appId: "1:238428366388:web:70e54810382d3d88134c61"
         };
-
-        // אתחול יציב ללא שגיאות
-        try {
-            firebase.initializeApp(firebaseConfig);
-        } catch (e) { console.log('Firebase loaded already'); }
         
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
         const db = firebase.database();
 
         function app() {
             return {
                 tab: 'tasks',
                 saveState: '...',
+                statusColor: 'text-gray-500',
                 user: { isLoggedIn: false, name: '', email: '' },
                 form: { name: '', email: '' },
                 coins: 0,
@@ -227,12 +232,7 @@
                 isLoaded: false,
 
                 initApp() {
-                    // מחיקת מסך הטעינה אחרי שנייה (מונע תקיעות)
-                    setTimeout(() => {
-                         document.getElementById('loader').style.display = 'none';
-                    }, 1500);
-
-                    const saved = localStorage.getItem('yoni_stable_v2');
+                    const saved = localStorage.getItem('yoni_force_v1');
                     if (saved) {
                         this.form = JSON.parse(saved);
                         this.login(true);
@@ -246,12 +246,17 @@
 
                 login(auto = false) {
                     if (!this.form.email) return;
-                    if(!auto) localStorage.setItem('yoni_stable_v2', JSON.stringify(this.form));
+                    if(!auto) localStorage.setItem('yoni_force_v1', JSON.stringify(this.form));
 
                     const safeEmail = this.form.email.toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbRef = db.ref('users/' + safeEmail);
 
+                    // מאזין לשינויים מהענן
                     this.dbRef.on('value', (snap) => {
+                        // הסתרת לואדר בוודאות ברגע שמגיע מידע
+                        const loader = document.getElementById('loader');
+                        if(loader) loader.style.display = 'none';
+
                         const val = snap.val();
                         if (!this.isLoaded) {
                             this.user.isLoggedIn = true;
@@ -266,6 +271,7 @@
                             }
                             this.isLoaded = true;
                             this.saveState = 'מחובר';
+                            this.statusColor = 'text-green-400';
                         }
                     });
                 },
@@ -273,14 +279,34 @@
                 save() {
                     if (!this.isLoaded || !this.dbRef) return;
                     this.saveState = 'שומר...';
+                    this.statusColor = 'text-orange-400';
+                    
                     this.dbRef.set({
                         coins: this.coins,
                         tasks: this.tasks,
                         habits: this.habits,
                         shopItems: this.shopItems
                     }, (err) => {
-                        if(!err) setTimeout(() => this.saveState = 'נשמר ✅', 500);
+                        if(!err) {
+                            setTimeout(() => {
+                                this.saveState = 'נשמר ✅';
+                                this.statusColor = 'text-green-400';
+                            }, 500);
+                        }
                     });
+                },
+
+                // לוגיקה זהה לקודם
+                toggleHabit(i) {
+                    if(this.habits[i].lastDone === this.todayStr) {
+                         this.habits[i].lastDone = '';
+                         this.coins = Math.max(0, this.coins - 10);
+                    } else {
+                        this.habits[i].lastDone = this.todayStr;
+                        this.coins += 10;
+                        try { confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } }); } catch(e){}
+                    }
+                    this.save();
                 },
 
                 sortTasks() { this.tasks.sort((a, b) => a.completed - b.completed); },
@@ -294,7 +320,7 @@
 
                 openModal(type) {
                     this.modal.type = type;
-                    this.modal.title = type === 'task' ? 'משימה חדשה' : (type === 'habit' ? 'הרגל חדש' : 'פריט לחנות');
+                    this.modal.title = type === 'task' ? 'משימה חדשה' : (type === 'habit' ? 'הרגל יומי' : 'פריט לחנות');
                     this.modal.data = { name: '', value: '', color: 'bg-blue-500' };
                     this.modal.isOpen = true;
                 },
@@ -324,10 +350,4 @@
                         this.coins -= parseInt(this.tasks[i].reward);
                     }
                     setTimeout(() => { this.sortTasks(); this.save(); }, 300);
-                    this.save();
-                },
-
-                toggleHabit(i) {
-                    if(this.habits[i].lastDone === this.todayStr) {
-                         this.habits[i].lastDone = '';
-                         th
+                
