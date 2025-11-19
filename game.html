@@ -3,211 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Racer 🏎️</title>
+    <title>Daylight Racer ☀️</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #111;
-            font-family: 'Segoe UI', sans-serif;
-            touch-action: none; /* מונע גלילה בטלפון */
+            background-color: #87CEEB; /* שמיים כחולים */
+            font-family: 'Arial', sans-serif;
+            touch-action: none;
         }
 
-        #gameArea {
+        #gameContainer {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(to bottom, #000022, #000044);
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* הכביש */
+        #road {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* מגביל רוחב שלא יהיה ענק בטאבלט */
+            height: 100%;
+            background-color: #dcdde1; /* אפור בהיר */
+            border-left: 10px solid #44bd32; /* דשא */
+            border-right: 10px solid #44bd32;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
         /* השחקן */
         #player {
             position: absolute;
-            bottom: 20px;
-            width: 50px;
-            height: 80px;
-            background: #00ffcc;
-            border-radius: 5px;
-            box-shadow: 0 0 20px #00ffcc;
+            bottom: 30px;
+            width: 60px;
+            height: 90px;
+            background: #e84118; /* אדום בוהק */
+            border-radius: 10px;
+            border: 3px solid #c23616;
             left: 50%;
             transform: translateX(-50%);
-            transition: left 0.1s ease-out;
+            transition: left 0.08s ease-out;
             z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        /* קישוט לרכב */
+        /* תווית "אני" */
         #player::after {
-            content: '';
-            position: absolute;
-            top: 10px; left: 5px; right: 5px; bottom: 40px;
-            background: #000;
-            opacity: 0.5;
+            content: 'אני';
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
 
         /* מכשולים */
         .obstacle {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            background: #ff3366;
-            border-radius: 50%; /* עיגול */
-            box-shadow: 0 0 15px #ff3366;
+            width: 60px;
+            height: 60px;
+            background: #2f3640; /* אפור כהה/כחול */
+            border-radius: 8px;
+            border: 2px solid black;
             z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
         }
+        .obstacle::before { content: '⚠️'; font-size: 1.5rem; }
 
-        /* כביש */
-        .lane-marker {
+        /* פסי הפרדה בכביש */
+        .line {
             position: absolute;
-            width: 4px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 6px;
+            height: 60px;
+            background-color: white;
             left: 50%;
             transform: translateX(-50%);
         }
 
-        /* תצוגת ניקוד */
-        #scoreBoard {
+        /* לוח ניקוד */
+        #scorePanel {
             position: absolute;
             top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            z-index: 20;
-            text-shadow: 2px 2px 0 #000;
+            left: 20px; /* צד שמאל למעלה */
+            background: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 3px solid #2f3640;
+            color: black;
+            font-size: 2rem;
+            font-weight: 900;
+            z-index: 50;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
         }
 
-        /* מסך התחלה/סוף */
+        /* מסך פתיחה/סיום */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(255, 255, 255, 0.9); /* רקע לבן חצי שקוף */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: #2f3640;
             z-index: 100;
             text-align: center;
         }
 
         h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin: 0;
-            color: #00ffcc;
-            text-shadow: 0 0 20px #00ffcc;
-            font-style: italic;
+            color: #e84118;
+            text-transform: uppercase;
         }
 
         button {
-            background: #ff3366;
+            background: #44bd32; /* ירוק */
             border: none;
-            padding: 15px 40px;
+            padding: 20px 50px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            border-radius: 30px;
-            margin-top: 20px;
-            cursor: pointer;
-            box-shadow: 0 0 20px #ff3366;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .controls-hint {
+            border-radius: 50px;
             margin-top: 30px;
-            color: #aaa;
-            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #218c14;
+            transition: 0.1s;
         }
 
-        /* אפקט פיצוץ */
+        button:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .controls-area {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 20;
+        }
+        
+        .control-side {
+            width: 50%;
+            height: 100%;
+            /* background: rgba(0,0,0,0.05); סימון עדין לאזור הלחיצה */
+        }
+        
         .boom {
-            background: white !important;
-            transform: scale(1.5) !important;
-            opacity: 0;
-            transition: 0.5s;
+            background: black !important;
+            transform: translateX(-50%) scale(1.2) !important;
+            transition: 0.2s !important;
         }
 
     </style>
 </head>
 <body>
 
-    <div id="gameArea">
-        <div id="scoreBoard">0</div>
-        <div id="player"></div>
+    <div id="gameContainer">
+        <div id="scorePanel">0</div>
         
-        </div>
+        <div id="road">
+            <div id="player"></div>
+            </div>
+
+        <div class="controls-area">
+            <div class="control-side" onclick="moveLeft()"></div> <div class="control-side" onclick="moveRight()"></div> </div>
+    </div>
 
     <div id="overlay">
-        <h1>NEON<br>RACER</h1>
-        <p id="finalScore" style="display:none; font-size:1.2rem;">ניקוד: 0</p>
-        <button onclick="startGame()">התחל מרוץ 🏁</button>
-        <div class="controls-hint">
-            הקש בצד <span style="color:#00ffcc">ימין</span> או <span style="color:#00ffcc">שמאל</span> כדי לזוז
-        </div>
+        <h1>מירוץ<br>כביש</h1>
+        <p id="msg" style="font-size:1.5rem; margin: 10px 0;">מוכן לצאת לדרך?</p>
+        <button onclick="startGame()">התחל נסיעה ▶</button>
     </div>
 
     <script>
         const player = document.getElementById('player');
-        const gameArea = document.getElementById('gameArea');
-        const scoreDisplay = document.getElementById('scoreBoard');
+        const road = document.getElementById('road');
+        const scoreDisplay = document.getElementById('scorePanel');
         const overlay = document.getElementById('overlay');
         
         let gameActive = false;
         let score = 0;
-        let speed = 5;
-        let playerPos = 50; // אחוזים (50% זה האמצע)
+        let speed = 6;
+        let playerLane = 1; // 0=שמאל, 1=אמצע, 2=ימין (יש 3 נתיבים ברורים עכשיו)
         let obstacles = [];
-        let markers = [];
         let animationFrame;
-        let spawnRate = 60; // כל כמה פריימים נוצר מכשול
-        let frameCount = 0;
+        let spawnCounter = 0;
 
-        // שליטה במגע
-        document.addEventListener('touchstart', handleInput, {passive: false});
-        document.addEventListener('mousedown', handleInput); // למחשב
+        // מיקומים באחוזים ל-3 נתיבים
+        const LANES_POS = [20, 50, 80]; 
 
-        function handleInput(e) {
-            if (!gameActive) return;
-            
-            let x = e.clientX || e.touches[0].clientX;
-            const screenWidth = window.innerWidth;
+        function moveLeft() {
+            if(!gameActive) return;
+            if(playerLane > 0) playerLane--;
+            updatePlayerPos();
+        }
 
-            if (x > screenWidth / 2) {
-                // ימינה
-                if(playerPos < 90) playerPos += 20; // קפיצה של 20%
-            } else {
-                // שמאלה
-                if(playerPos > 10) playerPos -= 20;
-            }
+        function moveRight() {
+            if(!gameActive) return;
+            if(playerLane < 2) playerLane++;
             updatePlayerPos();
         }
 
         function updatePlayerPos() {
-            player.style.left = playerPos + '%';
+            player.style.left = LANES_POS[playerLane] + '%';
         }
 
         function startGame() {
             overlay.style.display = 'none';
-            document.getElementById('finalScore').style.display = 'none';
-            
-            // איפוס
             gameActive = true;
             score = 0;
-            speed = 6; // מהירות התחלתית
-            spawnRate = 50;
-            playerPos = 50;
-            updatePlayerPos();
+            speed = 7;
             scoreDisplay.innerText = score;
             
-            // ניקוי מכשולים ישנים
-            obstacles.forEach(ob => ob.remove());
+            // איפוס מיקום שחקן לאמצע
+            playerLane = 1;
+            updatePlayerPos();
+            player.classList.remove('boom');
+
+            // ניקוי
+            document.querySelectorAll('.obstacle').forEach(e => e.remove());
+            document.querySelectorAll('.line').forEach(e => e.remove());
             obstacles = [];
             
             loop();
@@ -216,99 +243,99 @@
         function gameOver() {
             gameActive = false;
             cancelAnimationFrame(animationFrame);
-            
             player.classList.add('boom');
-            setTimeout(() => player.classList.remove('boom'), 500);
-
-            document.getElementById('finalScore').innerText = "הפסדת! ניקוד: " + score;
-            document.getElementById('finalScore').style.display = 'block';
-            document.querySelector('button').innerText = "נסה שוב ↻";
             
-            setTimeout(() => {
-                overlay.style.display = 'flex';
-            }, 1000);
+            document.getElementById('msg').innerHTML = "התרסקת! 💥<br>ניקוד סופי: <b>" + score + "</b>";
+            document.querySelector('button').innerText = "נסה שוב ↻";
+            setTimeout(() => overlay.style.display = 'flex', 800);
         }
 
         function createObstacle() {
             const obs = document.createElement('div');
             obs.className = 'obstacle';
-            // מיקום רנדומלי ב-5 נתיבים אפשריים (10, 30, 50, 70, 90)
-            const lanes = [10, 30, 50, 70, 90];
-            const randomLane = lanes[Math.floor(Math.random() * lanes.length)];
             
-            obs.style.left = randomLane + '%';
-            obs.style.top = '-60px';
-            gameArea.appendChild(obs);
+            // בחירת נתיב רנדומלי (0, 1, או 2)
+            const laneIdx = Math.floor(Math.random() * 3);
+            
+            obs.style.left = LANES_POS[laneIdx] + '%';
+            obs.style.transform = 'translateX(-50%)'; // מרכוז
+            obs.style.top = '-100px';
+            road.appendChild(obs);
             
             obstacles.push({
-                element: obs,
-                top: -60,
-                lane: randomLane
+                el: obs,
+                top: -100,
+                lane: laneIdx
             });
+        }
+
+        function createRoadLine() {
+            const line = document.createElement('div');
+            line.className = 'line';
+            line.style.top = '-60px';
+            road.appendChild(line);
+            
+            // אנימציה פשוטה לקו
+            let lineTop = -60;
+            const interval = setInterval(() => {
+                if(!gameActive) { clearInterval(interval); line.remove(); return; }
+                lineTop += speed;
+                line.style.top = lineTop + 'px';
+                if(lineTop > window.innerHeight) {
+                    line.remove();
+                    clearInterval(interval);
+                }
+            }, 20);
         }
 
         function loop() {
             if (!gameActive) return;
 
-            frameCount++;
-            
+            spawnCounter++;
+
             // יצירת מכשולים
-            if (frameCount % spawnRate === 0) {
+            if (spawnCounter % 50 === 0) { // כל כ-50 פריימים
                 createObstacle();
-                // העלאת קושי
-                if(spawnRate > 20) spawnRate--;
-                if(speed < 15) speed += 0.05;
+                speed += 0.1; // האצה קבועה
             }
 
-            // תזוזת מכשולים
+            // יצירת פסים לכביש (בשביל תחושת מהירות)
+            if (spawnCounter % 15 === 0) {
+                createRoadLine();
+            }
+
+            // הזזת מכשולים ובדיקת פגיעה
             obstacles.forEach((ob, index) => {
                 ob.top += speed;
-                ob.element.style.top = ob.top + 'px';
+                ob.el.style.top = ob.top + 'px';
 
-                // בדיקת התנגשות
-                const playerRect = player.getBoundingClientRect();
-                const obRect = ob.element.getBoundingClientRect();
-
-                // אם יש חפיפה בין המלבנים
-                if (!(playerRect.right < obRect.left || 
-                      playerRect.left > obRect.right || 
-                      playerRect.bottom < obRect.top || 
-                      playerRect.top > obRect.bottom)) {
-                    gameOver();
+                // בדיקת התנגשות פשוטה לפי גובה ונתיב
+                // המכונית בערך ב-85% עד 95% גובה המסך
+                const carTopPercent = (window.innerHeight - 120); // מיקום המכונית בפיקסלים
+                
+                if (ob.top > carTopPercent && ob.top < carTopPercent + 90) {
+                    if (ob.lane === playerLane) {
+                        gameOver();
+                    }
                 }
 
                 // אם עבר את המסך
                 if (ob.top > window.innerHeight) {
-                    ob.element.remove();
+                    ob.el.remove();
                     obstacles.splice(index, 1);
-                    score += 10;
+                    score++;
                     scoreDisplay.innerText = score;
                 }
             });
 
             animationFrame = requestAnimationFrame(loop);
         }
-
-        // אפקט כביש זז (CSS)
-        setInterval(() => {
-            if(!gameActive) return;
-            const marker = document.createElement('div');
-            marker.className = 'lane-marker';
-            marker.style.top = '-50px';
-            gameArea.appendChild(marker);
-            
-            // אנימציה פשוטה למרקר
-            let top = -50;
-            const interval = setInterval(() => {
-                if(!gameActive) { clearInterval(interval); marker.remove(); return; }
-                top += speed;
-                marker.style.top = top + 'px';
-                if(top > window.innerHeight) {
-                    marker.remove();
-                    clearInterval(interval);
-                }
-            }, 16);
-        }, 300);
+        
+        // תמיכה במקלדת למחשב
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowLeft') moveLeft();
+            if(e.key === 'ArrowRight') moveRight();
+        });
 
     </script>
 </body>
