@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daylight Racer + High Score 🏆</title>
+    <title>Daylight Racer + Pause ⏸️</title>
     <style>
         body {
             margin: 0;
@@ -84,8 +84,8 @@
             transform: translateX(-50%);
         }
 
-        /* לוח ניקוד משודרג */
-        .score-container {
+        /* --- אזור הניקוד והכפתורים --- */
+        .top-ui {
             position: absolute;
             top: 20px;
             left: 20px;
@@ -93,9 +93,10 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            pointer-events: none; /* מאפשר לחיצה דרך האלמנטים הריקים */
         }
 
-        .score-box {
+        .score-box, .btn-pause {
             background: white;
             padding: 10px 20px;
             border-radius: 15px;
@@ -105,17 +106,30 @@
             box-shadow: 0 5px 0 rgba(0,0,0,0.2);
             min-width: 80px;
             text-align: center;
+            pointer-events: auto; /* מחזיר את הלחיצה לכפתורים */
         }
+
+        .btn-pause {
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 5px 10px;
+            background: #f39c12;
+            color: white;
+            border-color: #d35400;
+        }
+        
+        .btn-pause:active { transform: translateY(2px); box-shadow: none; }
 
         #scorePanel { font-size: 2rem; }
         
         #bestPanel { 
             font-size: 1rem; 
-            background: #f1c40f; /* צבע זהב לשיא */
+            background: #f1c40f;
             border-color: #b7950b;
         }
 
-        #overlay {
+        /* מסכים (התחלה / הפסקה) */
+        .overlay-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.95);
@@ -127,10 +141,24 @@
             z-index: 100;
             text-align: center;
         }
+        
+        /* מסך Pause ספציפי (רקע שחור שקוף) */
+        #pauseOverlay {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            display: none;
+        }
 
         h1 { font-size: 3.5rem; margin: 0; color: #e84118; text-transform: uppercase; }
+        
+        .paused-title {
+            font-size: 4rem;
+            color: white;
+            text-shadow: 0 0 20px black;
+            margin-bottom: 20px;
+        }
 
-        button {
+        button.action-btn {
             background: #44bd32;
             border: none;
             padding: 20px 50px;
@@ -143,7 +171,7 @@
             box-shadow: 0 5px 0 #218c14;
             transition: 0.1s;
         }
-        button:active { transform: translateY(5px); box-shadow: none; }
+        button.action-btn:active { transform: translateY(5px); box-shadow: none; }
 
         .controls-area {
             display: flex;
@@ -167,7 +195,6 @@
             font-weight: bold;
             animation: flash 1s infinite;
         }
-        
         @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
     </style>
@@ -175,7 +202,8 @@
 <body>
 
     <div id="gameContainer">
-        <div class="score-container">
+        <div class="top-ui">
+            <div class="btn-pause" onclick="togglePause()">⏸️</div>
             <div class="score-box" id="scorePanel">0</div>
             <div class="score-box" id="bestPanel">שיא: 0</div>
         </div>
@@ -190,11 +218,16 @@
         </div>
     </div>
 
-    <div id="overlay">
+    <div id="startOverlay" class="overlay-screen">
         <h1>מירוץ<br>כביש</h1>
         <p id="bestOnStart" style="margin-top:5px; color:#7f8c8d; font-weight:bold;">השיא שלך: 0</p>
         <p id="msg" style="font-size:1.5rem; margin: 20px 0; display:none;"></p>
-        <button onclick="startGame()">התחל נסיעה ▶</button>
+        <button class="action-btn" onclick="startGame()">התחל נסיעה ▶</button>
+    </div>
+
+    <div id="pauseOverlay" class="overlay-screen">
+        <h1 class="paused-title">PAUSED</h1>
+        <button class="action-btn" style="background:#f39c12; box-shadow:0 5px 0 #d35400;" onclick="togglePause()">המשך ▶</button>
     </div>
 
     <script>
@@ -203,12 +236,14 @@
         const scoreDisplay = document.getElementById('scorePanel');
         const bestDisplay = document.getElementById('bestPanel');
         const bestOnStart = document.getElementById('bestOnStart');
-        const overlay = document.getElementById('overlay');
+        const startOverlay = document.getElementById('startOverlay');
+        const pauseOverlay = document.getElementById('pauseOverlay');
         const msg = document.getElementById('msg');
         
         let gameActive = false;
+        let isPaused = false; // משתנה חדש למצב השהייה
         let score = 0;
-        let highScore = localStorage.getItem('racerHighScore') || 0; // טעינת השיא מהזיכרון
+        let highScore = localStorage.getItem('racerHighScore') || 0;
         let speed = 6;
         let playerLane = 1;
         let obstacles = [];
@@ -216,7 +251,6 @@
         let spawnCounter = 0;
         const LANES_POS = [20, 50, 80]; 
 
-        // עדכון תצוגה ראשוני
         updateBestDisplay();
 
         function updateBestDisplay() {
@@ -225,13 +259,13 @@
         }
 
         function moveLeft() {
-            if(!gameActive) return;
+            if(!gameActive || isPaused) return; // חסימת תזוזה בהפסקה
             if(playerLane > 0) playerLane--;
             updatePlayerPos();
         }
 
         function moveRight() {
-            if(!gameActive) return;
+            if(!gameActive || isPaused) return;
             if(playerLane < 2) playerLane++;
             updatePlayerPos();
         }
@@ -240,12 +274,34 @@
             player.style.left = LANES_POS[playerLane] + '%';
         }
 
+        // --- פונקציית ההשהייה החדשה ---
+        function togglePause() {
+            if(!gameActive) return; // אי אפשר לעצור אם לא משחקים
+
+            isPaused = !isPaused;
+
+            if(isPaused) {
+                // מצב הפסקה
+                pauseOverlay.style.display = 'flex';
+                cancelAnimationFrame(animationFrame); // עצירת הלולאה הראשית
+            } else {
+                // חזרה למשחק
+                pauseOverlay.style.display = 'none';
+                loop(); // הפעלה מחדש של הלולאה
+            }
+        }
+
         function startGame() {
-            overlay.style.display = 'none';
+            startOverlay.style.display = 'none';
             msg.style.display = 'none';
+            pauseOverlay.style.display = 'none';
+            
             gameActive = true;
+            isPaused = false;
             score = 0;
             speed = 7;
+            spawnCounter = 0;
+            
             scoreDisplay.innerText = score;
             playerLane = 1;
             updatePlayerPos();
@@ -265,19 +321,18 @@
             
             let msgText = "התרסקת! 💥<br>ניקוד: <b>" + score + "</b>";
             
-            // בדיקת שיא חדש
             if (score > highScore) {
                 highScore = score;
-                localStorage.setItem('racerHighScore', highScore); // שמירה בזיכרון
+                localStorage.setItem('racerHighScore', highScore);
                 updateBestDisplay();
                 msgText += "<br><span class='new-record'>✨ שיא חדש! ✨</span>";
             }
 
             msg.innerHTML = msgText;
             msg.style.display = 'block';
-            document.querySelector('button').innerText = "נסה שוב ↻";
+            document.querySelector('#startOverlay button').innerText = "נסה שוב ↻";
             
-            setTimeout(() => overlay.style.display = 'flex', 800);
+            setTimeout(() => startOverlay.style.display = 'flex', 800);
         }
 
         function createObstacle() {
@@ -297,8 +352,11 @@
             line.style.top = '-60px';
             road.appendChild(line);
             let lineTop = -60;
+            
             const interval = setInterval(() => {
                 if(!gameActive) { clearInterval(interval); line.remove(); return; }
+                if(isPaused) return; // אם בהפסקה - לא לזוז, אבל לא למחוק
+                
                 lineTop += speed;
                 line.style.top = lineTop + 'px';
                 if(lineTop > window.innerHeight) {
@@ -309,7 +367,8 @@
         }
 
         function loop() {
-            if (!gameActive) return;
+            if (!gameActive || isPaused) return; // עצירה מוחלטת אם בהפסקה
+
             spawnCounter++;
 
             if (spawnCounter % 50 === 0) {
