@@ -10,6 +10,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -41,7 +44,6 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
         
-        /* אנימציית טעינה */
         .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -50,7 +52,7 @@
 
     <div x-show="isLoading" class="fixed inset-0 z-[60] bg-white flex flex-col items-center justify-center" x-transition>
         <div class="loader mb-4"></div>
-        <p class="text-slate-400 text-sm font-bold">מתחבר לענן...</p>
+        <p class="text-slate-400 text-sm font-bold">טוען נתונים...</p>
     </div>
 
     <div x-show="!user.isLoggedIn && !isLoading" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8 text-center modal-enter">
@@ -58,7 +60,7 @@
             <i class="fa-solid fa-cloud-bolt"></i>
         </div>
         <h1 class="text-3xl font-black text-slate-900 mb-2">YoniOS Cloud</h1>
-        <p class="text-slate-500 mb-8">כל הנתונים שלך מסונכרנים בזמן אמת.</p>
+        <p class="text-slate-500 mb-8">הנתונים שלך, מכל מקום.</p>
         
         <div class="w-full max-w-xs space-y-4">
             <div class="text-right">
@@ -66,13 +68,12 @@
                 <input type="text" x-model="loginForm.name" class="input-field" placeholder="השם שלך">
             </div>
             <div class="text-right">
-                <label class="text-xs font-bold text-slate-400 mr-1">אימייל (זה המפתח הסודי שלך)</label>
+                <label class="text-xs font-bold text-slate-400 mr-1">אימייל (סיסמה)</label>
                 <input type="email" x-model="loginForm.email" class="input-field" placeholder="your@email.com">
-                <p class="text-[10px] text-slate-400 mt-1 pr-1">* השתמש באותו מייל כדי לראות את הנתונים במכשיר אחר</p>
             </div>
             <button @click="login()" :disabled="!loginForm.name || !loginForm.email" 
                 class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-4">
-                התחבר למערכת 🚀
+                התחבר 🚀
             </button>
         </div>
     </div>
@@ -88,7 +89,7 @@
                     <h1 class="text-lg font-black leading-none" x-text="settings.appName"></h1>
                     <div class="flex items-center gap-1">
                         <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        <p class="text-xs text-slate-500">מחובר לענן</p>
+                        <p class="text-xs text-slate-500">מחובר</p>
                     </div>
                 </div>
             </div>
@@ -129,7 +130,7 @@
                             </button>
                             <div class="flex-1">
                                 <p class="font-bold text-slate-700" :class="{'line-through text-slate-400': task.completed}" x-text="task.title"></p>
-                                <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">+<span x-text="task.reward"></span> נקודות</span>
+                                <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">+<span x-text="task.reward"></span> XP</span>
                             </div>
                             <button @click="openOptions('tasks', index)" class="text-slate-300 hover:text-slate-600 p-2">
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -233,10 +234,8 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
+    <script>
+        // 1. הגדרת החיבור ל-Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAMBx4Udu3w9iR6GpEcl561TNWGRc1UVQ0",
             authDomain: "yoni-os.firebaseapp.com",
@@ -246,16 +245,13 @@
             appId: "1:238428366388:web:70e54810382d3d88134c61"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        // 2. התחלת החיבור
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        window.firebaseDb = db;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
-        window.firebaseOnValue = onValue;
-
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('app', () => ({
+        // 3. אפליקציית Alpine
+        function app() {
+            return {
                 isLoading: false,
                 currentTab: 'tasks',
                 coins: 0,
@@ -279,12 +275,13 @@
 
                 login() {
                     this.isLoading = true;
-                    const safeEmail = this.loginForm.email.replace(/\./g, '_');
+                    // נרמול האימייל שיהיה תקין למסד נתונים
+                    const safeEmail = this.loginForm.email.replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbPath = 'users/' + safeEmail;
                     
-                    const userRef = window.firebaseRef(window.firebaseDb, this.dbPath);
+                    const userRef = db.ref(this.dbPath);
                     
-                    window.firebaseOnValue(userRef, (snapshot) => {
+                    userRef.on('value', (snapshot) => {
                         const data = snapshot.val();
                         this.isLoading = false;
                         this.user.isLoggedIn = true;
@@ -312,11 +309,11 @@
                         shopItems: this.shopItems,
                         settings: this.settings
                     };
-                    window.firebaseSet(window.firebaseRef(window.firebaseDb, this.dbPath), data);
+                    db.ref(this.dbPath).set(data);
                 },
 
                 logout() {
-                    if(confirm('להתנתק מהחשבון במכשיר זה?')) {
+                    if(confirm('להתנתק?')) {
                         localStorage.removeItem('yoni_cloud_user');
                         location.reload();
                     }
@@ -341,4 +338,13 @@
                             this.saveToCloud();
                         }
                     }
-          
+                },
+
+                openModal(type, index = -1) {
+                    this.modal.type = type;
+                    this.modal.index = index;
+                    this.modal.isEdit = index > -1;
+                    this.modal.isOpen = true;
+                    if (this.modal.isEdit) {
+                        const item = this[type][index];
+                        
