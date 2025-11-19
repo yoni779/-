@@ -3,128 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YoniOS - מערכת ניהול אישי</title>
+    <title>YoniOS - ניהול אישי</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         [x-cloak] { display: none !important; }
+        input { border: 1px solid #e5e7eb; padding: 2px 5px; borderRadius: 4px; width: 100%; }
+        .edit-mode-border { border: 2px dashed #3b82f6; padding: 5px; border-radius: 8px; background: #eff6ff; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans" x-data="app()">
+<body class="bg-gray-50 text-gray-800 font-sans pb-24" x-data="app()" x-init="initData()">
 
-    <nav class="bg-white border-b border-gray-200 p-4 sticky top-0 z-50 shadow-sm">
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-black text-blue-600">YoniOS</h1>
-            <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold">
-                💎 <span x-text="coins"></span>
-            </div>
+    <nav class="bg-white border-b border-gray-200 p-4 sticky top-0 z-50 shadow-sm flex justify-between items-center">
+        <div>
+            <h1 x-show="!editMode" class="text-2xl font-black text-blue-600" x-text="settings.appName"></h1>
+            <input x-show="editMode" x-model="settings.appName" class="text-xl font-bold border-blue-300">
         </div>
         
-        <div class="flex gap-2 overflow-x-auto pb-2">
-            <template x-for="tab in tabs">
-                <button 
-                    @click="currentTab = tab.id"
-                    :class="currentTab === tab.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'"
-                    class="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0"
-                    x-text="tab.label">
-                </button>
-            </template>
+        <div class="flex items-center gap-3">
+            <button @click="editMode = !editMode" 
+                :class="editMode ? 'bg-yellow-400 text-black' : 'bg-gray-100 text-gray-600'"
+                class="w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all">
+                <i class="fa-solid" :class="editMode ? 'fa-check' : 'fa-gear'"></i>
+            </button>
         </div>
     </nav>
 
-    <main class="p-4 pb-20 max-w-md mx-auto">
-
-        <div x-show="currentTab === 'dashboard'" x-transition>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-green-100">
-                    <p class="text-gray-500 text-xs">עובר ושב</p>
-                    <p class="text-2xl font-bold text-green-600">₪15,400</p>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
-                    <p class="text-gray-500 text-xs">יהלומים לביזבוז</p>
-                    <p class="text-2xl font-bold text-blue-600" x-text="coins"></p>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
-                <h3 class="font-bold mb-3 border-b pb-2">🔥 הרגלים להיום</h3>
-                <template x-for="habit in habits">
-                    <div class="flex justify-between items-center py-2">
-                        <span x-text="habit.name"></span>
-                        <button @click="toggleHabit(habit.id)" 
-                            class="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-                            :class="habit.done ? 'bg-green-500 text-white' : 'bg-gray-200'">
-                            <span x-show="habit.done">✓</span>
-                        </button>
-                    </div>
-                </template>
-            </div>
+    <div class="bg-blue-600 text-white p-6 text-center shadow-md mb-4">
+        <p class="text-sm opacity-80 mb-1">היתרה שלך</p>
+        <div class="flex justify-center items-center gap-2">
+            <span class="text-4xl font-bold">💎</span>
+            <span x-show="!editMode" class="text-4xl font-bold" x-text="coins"></span>
+            <input x-show="editMode" type="number" x-model="coins" class="text-black text-center text-2xl w-32 p-2 rounded">
         </div>
+        <p x-show="editMode" class="text-xs mt-2 text-yellow-300">* במצב עריכה אפשר לשנות את הכמות ידנית</p>
+    </div>
 
-        <div x-show="currentTab === 'tasks'" x-transition x-cloak>
+    <div class="flex justify-center gap-2 mb-6 px-4">
+        <template x-for="tab in tabs">
+            <button 
+                @click="currentTab = tab.id"
+                :class="currentTab === tab.id ? 'bg-blue-600 text-white shadow-lg transform scale-105' : 'bg-white text-gray-600 shadow-sm'"
+                class="px-4 py-2 rounded-xl font-medium transition-all text-sm flex-1"
+                x-text="tab.label">
+            </button>
+        </template>
+    </div>
+
+    <main class="px-4 max-w-md mx-auto">
+
+        <div x-show="currentTab === 'tasks'" x-transition>
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">המשימות שלי</h2>
-                <button @click="addTask()" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm">+ חדש</button>
+                <h2 class="text-xl font-bold">משימות</h2>
+                <button @click="addItem('tasks')" class="bg-green-500 text-white px-3 py-1 rounded-full text-sm shadow-sm">
+                    <i class="fa-solid fa-plus"></i> הוסף
+                </button>
             </div>
+
             <div class="space-y-3">
-                <template x-for="task in tasks" :key="task.id">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" x-model="task.completed" @change="checkTask(task)" class="w-5 h-5 rounded text-blue-600">
-                            <span :class="task.completed ? 'line-through text-gray-400' : ''" x-text="task.title"></span>
+                <template x-for="(task, index) in tasks" :key="index">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-2 relative"
+                         :class="editMode ? 'edit-mode-border' : ''">
+                        
+                        <button x-show="editMode" @click="deleteItem('tasks', index)" class="absolute top-2 left-2 text-red-500 bg-red-100 w-8 h-8 rounded-full">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-3 w-full">
+                                <input x-show="!editMode" type="checkbox" x-model="task.completed" @change="checkTask(task)" class="w-6 h-6 rounded text-blue-600 !w-6">
+                                
+                                <span x-show="!editMode" :class="task.completed ? 'line-through text-gray-400' : 'font-medium'" x-text="task.title"></span>
+                                <input x-show="editMode" x-model="task.title" placeholder="שם המשימה">
+                            </div>
+                            
+                            <div class="bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg font-bold text-xs flex items-center gap-1 whitespace-nowrap">
+                                <span>+</span>
+                                <span x-show="!editMode" x-text="task.reward"></span>
+                                <input x-show="editMode" type="number" x-model="task.reward" class="w-12 text-center text-xs p-0">
+                            </div>
                         </div>
-                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold" x-text="'+' + task.reward"></span>
                     </div>
                 </template>
             </div>
+            <div x-show="tasks.length === 0" class="text-center text-gray-400 mt-10">אין משימות. תתחיל לעבוד! 😉</div>
         </div>
 
         <div x-show="currentTab === 'shop'" x-transition x-cloak>
-            <h2 class="text-xl font-bold mb-4">חנות הפינוקים 🛍️</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">חנות פינוקים</h2>
+                <button @click="addItem('shop')" class="bg-green-500 text-white px-3 py-1 rounded-full text-sm shadow-sm">
+                    <i class="fa-solid fa-plus"></i> הוסף
+                </button>
+            </div>
+
             <div class="grid grid-cols-1 gap-4">
-                <template x-for="item in shopItems">
-                    <div class="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="font-bold" x-text="item.name"></p>
-                            <p class="text-sm text-gray-500">שווה את זה!</p>
+                <template x-for="(item, index) in shopItems" :key="index">
+                    <div class="bg-white p-4 rounded-xl shadow-sm flex flex-col relative" :class="editMode ? 'edit-mode-border' : ''">
+                        
+                        <button x-show="editMode" @click="deleteItem('shopItems', index)" class="absolute top-2 left-2 text-red-500 bg-red-100 w-8 h-8 rounded-full z-10">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                        <div class="mb-3">
+                            <h3 x-show="!editMode" class="font-bold text-lg" x-text="item.name"></h3>
+                            <input x-show="editMode" x-model="item.name" class="font-bold mb-2" placeholder="שם הפינוק">
                         </div>
+
                         <button @click="buyItem(item)" 
-                            :disabled="coins < item.cost"
+                            :disabled="coins < item.cost && !editMode"
                             :class="coins >= item.cost ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-500'"
-                            class="px-4 py-2 rounded-lg font-bold text-sm transition-colors">
-                            רכוש ב- <span x-text="item.cost"></span> 💎
+                            class="w-full py-2 rounded-lg font-bold text-sm transition-colors flex justify-center items-center gap-2">
+                            
+                            <span x-show="!editMode">רכוש ב-</span>
+                            <span x-show="!editMode" x-text="item.cost"></span>
+                            <input x-show="editMode" type="number" x-model="item.cost" class="w-16 text-black text-center">
+                            <span>💎</span>
                         </button>
                     </div>
                 </template>
             </div>
         </div>
 
-        <div x-show="currentTab === 'money'" x-transition x-cloak>
-            <h2 class="text-xl font-bold mb-4">ניהול כספים 💰</h2>
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="p-3">תיאור</th>
-                            <th class="p-3">סכום</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b">
-                            <td class="p-3">פרויקט אתר</td>
-                            <td class="p-3 text-green-600 font-bold">+4,500</td>
-                        </tr>
-                        <tr class="border-b">
-                            <td class="p-3">ציוד משרדי</td>
-                            <td class="p-3 text-red-600 font-bold">-320</td>
-                        </tr>
-                        <tr>
-                            <td class="p-3">מסעדה</td>
-                            <td class="p-3 text-red-600 font-bold">-150</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div x-show="currentTab === 'habits'" x-transition x-cloak>
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">הרגלים יומיים</h2>
+                <button @click="addItem('habits')" class="bg-green-500 text-white px-3 py-1 rounded-full text-sm shadow-sm">
+                    <i class="fa-solid fa-plus"></i> הוסף
+                </button>
             </div>
+            
+             <div class="space-y-3">
+                <template x-for="(habit, index) in habits" :key="index">
+                    <div class="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center" :class="editMode ? 'edit-mode-border' : ''">
+                        
+                         <div class="flex items-center gap-3 w-full">
+                             <span x-show="!editMode" x-text="habit.name" class="font-medium"></span>
+                             <input x-show="editMode" x-model="habit.name" placeholder="שם ההרגל">
+                         </div>
+
+                         <div class="flex items-center gap-2">
+                             <button x-show="!editMode" @click="toggleHabit(habit)" 
+                                class="w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-sm"
+                                :class="habit.done ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400'">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button x-show="editMode" @click="deleteItem('habits', index)" class="text-red-500 bg-red-100 w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                         </div>
+                    </div>
+                </template>
+            </div>
+             <button @click="resetHabits()" class="mt-6 w-full py-3 bg-gray-200 text-gray-600 rounded-xl font-bold text-sm">איפוס הרגלים ליום חדש ☀️</button>
         </div>
 
     </main>
@@ -132,60 +164,94 @@
     <script>
         function app() {
             return {
-                currentTab: 'dashboard',
-                coins: 120,
+                editMode: false,
+                currentTab: 'tasks',
+                coins: 0,
+                settings: { appName: 'YoniOS' },
                 tabs: [
-                    { id: 'dashboard', label: 'ראשי' },
                     { id: 'tasks', label: 'משימות' },
-                    { id: 'money', label: 'כסף' },
-                    { id: 'shop', label: 'פינוקים' },
+                    { id: 'shop', label: 'חנות' },
+                    { id: 'habits', label: 'הרגלים' },
                 ],
-                habits: [
-                    { id: 1, name: 'לקרוא ספר', done: false },
-                    { id: 2, name: 'אימון', done: true },
-                    { id: 3, name: 'לשתות מים', done: false }
-                ],
-                tasks: [
-                    { id: 1, title: 'לשלוח מייל ליוסי', reward: 50, completed: false },
-                    { id: 2, title: 'לסדר את החדר', reward: 30, completed: false },
-                ],
-                shopItems: [
-                    { id: 1, name: 'ארוחת המבורגר', cost: 100 },
-                    { id: 2, name: 'שעה בפלייסטיישן', cost: 50 },
-                    { id: 3, name: 'יום חופש', cost: 500 },
-                ],
-                toggleHabit(id) {
-                    const habit = this.habits.find(h => h.id === id);
-                    habit.done = !habit.done;
-                    if(habit.done) {
-                        this.coins += 10; // בונוס על הרגל
-                        alert('כל הכבוד! קיבלת 10 יהלומים');
+                tasks: [],
+                shopItems: [],
+                habits: [],
+
+                initData() {
+                    // טעינת נתונים מהזיכרון של הטלפון
+                    const savedData = localStorage.getItem('yonios_data_v1');
+                    if (savedData) {
+                        const data = JSON.parse(savedData);
+                        this.coins = data.coins;
+                        this.tasks = data.tasks;
+                        this.shopItems = data.shopItems;
+                        this.habits = data.habits;
+                        this.settings = data.settings || { appName: 'YoniOS' };
                     } else {
-                        this.coins -= 10;
+                        // נתונים התחלתיים אם זו פעם ראשונה
+                        this.coins = 100;
+                        this.tasks = [{ title: 'משימה ראשונה לדוגמה', reward: 50, completed: false }];
+                        this.shopItems = [{ name: 'פינוק לדוגמה', cost: 100 }];
+                        this.habits = [{ name: 'לשתות מים', done: false }];
                     }
+
+                    // שמירה אוטומטית בכל שינוי
+                    this.$watch('coins', () => this.save());
+                    this.$watch('tasks', () => this.save());
+                    this.$watch('shopItems', () => this.save());
+                    this.$watch('habits', () => this.save());
+                    this.$watch('settings', () => this.save());
                 },
+
+                save() {
+                    const data = {
+                        coins: parseInt(this.coins),
+                        tasks: this.tasks,
+                        shopItems: this.shopItems,
+                        habits: this.habits,
+                        settings: this.settings
+                    };
+                    localStorage.setItem('yonios_data_v1', JSON.stringify(data));
+                },
+
                 checkTask(task) {
                     if (task.completed) {
-                        this.coins += task.reward;
+                        this.coins = parseInt(this.coins) + parseInt(task.reward);
+                        // אפקט קול יכול להיות כאן
                     } else {
-                        this.coins -= task.reward;
+                        this.coins = parseInt(this.coins) - parseInt(task.reward);
                     }
                 },
+
+                toggleHabit(habit) {
+                    habit.done = !habit.done;
+                    if(habit.done) this.coins = parseInt(this.coins) + 10;
+                    else this.coins = parseInt(this.coins) - 10;
+                },
+
                 buyItem(item) {
                     if (this.coins >= item.cost) {
-                        this.coins -= item.cost;
-                        alert('תתחדש! קנית ' + item.name);
+                        if(confirm('לקנות את ' + item.name + '?')) {
+                            this.coins -= item.cost;
+                        }
                     }
                 },
-                addTask() {
-                    const title = prompt('שם המשימה:');
-                    if (title) {
-                        this.tasks.push({ 
-                            id: Date.now(), 
-                            title: title, 
-                            reward: 20, 
-                            completed: false 
-                        });
+
+                addItem(type) {
+                    if(type === 'tasks') this.tasks.push({ title: 'משימה חדשה', reward: 20, completed: false });
+                    if(type === 'shopItems') this.shopItems.push({ name: 'פינוק חדש', cost: 50 });
+                    if(type === 'habits') this.habits.push({ name: 'הרגל חדש', done: false });
+                },
+
+                deleteItem(type, index) {
+                    if(confirm('למחוק את זה?')) {
+                        this[type].splice(index, 1);
+                    }
+                },
+                
+                resetHabits() {
+                    if(confirm('לאפס את כל ההרגלים ליום חדש?')) {
+                        this.habits.forEach(h => h.done = false);
                     }
                 }
             }
