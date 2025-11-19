@@ -1,272 +1,315 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>מתוק בכיכר | קיוסק חלבי</title>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
   <style>
     :root {
-      --bg: #050816;
-      --card: #111827;
-      --card-soft: #1f2933;
-      --accent: #ffb84d;
-      --accent-soft: #f97316;
-      --text: #f9fafb;
-      --muted: #9ca3af;
-      --border: #1f2937;
-      --danger: #ef4444;
-      --success: #22c55e;
+      --primary: #ffb13a;
+      --primary-dark: #e27624;
+      --bg: #060712;
+      --bg-soft: #101322;
+      --card: #181b2c;
+      --text: #f5f5f7;
+      --muted: #a3a7c2;
+      --accent: #4ade80;
+      --danger: #f97373;
+      --border: #262b40;
+      --radius-lg: 20px;
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      font-family: "Heebo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
+      font-family: "Heebo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1a2240 0, #060712 55%, #020309 100%);
       color: var(--text);
+      direction: rtl;
       min-height: 100vh;
     }
 
-    .page {
-      max-width: 450px;
-      margin: 0 auto;
-      padding: 16px 12px 90px;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 14px 96px;
     }
+
+    /* ===== HEADER ===== */
 
     .brand-main {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
     }
 
-    .brand-logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.12);
-      background: #020617;
-      flex-shrink: 0;
+    .brand-text-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .brand-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .brand-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
     }
 
-    .brand-text-title {
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .brand-text-sub {
-      font-size: 12px;
+    .brand-sub {
+      font-size: 14px;
       color: var(--muted);
-    }
-
-    .tagline {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
     }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 3px 7px;
+      font-size: 12px;
+      padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(34,197,94,0.14);
-      color: #bbf7d0;
-      font-size: 11px;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.45);
       margin-top: 4px;
     }
 
+    .hero-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.18);
+    }
+
+    .brand-logo-wrapper {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #ffedd5 0, #f97316 40%, #7c2d12 100%);
+      padding: 2px;
+      box-shadow: 0 0 25px rgba(248, 148, 54, 0.6);
+      flex-shrink: 0;
+    }
+
+    .brand-logo-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .brand-logo-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+
+    /* ===== HERO ===== */
+
     .hero-card {
       margin-top: 12px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #111827, #020617);
-      border: 1px solid rgba(148,163,184,0.25);
-      padding: 12px 12px 10px;
+      border-radius: 26px;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 70%);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      padding: 18px 16px 16px;
       display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 720px) {
+      .hero-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     .hero-text-title {
-      font-weight: 600;
-      font-size: 16px;
+      font-size: 19px;
+      font-weight: 700;
       margin-bottom: 6px;
     }
 
-    .hero-text-sub {
-      font-size: 13px;
+    .hero-text-body {
+      font-size: 14px;
       color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .hero-pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      font-size: 11px;
+      line-height: 1.55;
       margin-bottom: 10px;
     }
 
-    .pill {
-      padding: 3px 8px;
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .hero-tag {
+      font-size: 11px;
+      padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(15,23,42,0.8);
-      border: 1px solid rgba(148,163,184,0.3);
+      border: 1px solid rgba(148, 163, 184, 0.4);
       color: #e5e7eb;
     }
 
-    .pill.accent {
-      background: rgba(249,115,22,0.2);
-      border-color: rgba(249,115,22,0.7);
-      color: #fed7aa;
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .btn-primary {
+    .btn-primary,
+    .btn-outline,
+    .btn-whatsapp {
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 8px 14px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 7px 13px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent-soft), #facc15);
-      color: #020617;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #111827;
       font-weight: 600;
-      font-size: 13px;
-      text-decoration: none;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(249,115,22,0.4);
+      box-shadow: 0 10px 30px rgba(248, 171, 60, 0.3);
     }
 
-    .btn-primary span.emoji {
-      font-size: 15px;
+    .btn-outline {
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+      background: transparent;
     }
 
-    .hero-image-wrapper {
-      border-radius: 14px;
+    .btn-whatsapp {
+      background: #22c55e;
+      color: #022c22;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(34, 197, 94, 0.45);
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .hero-image-wrap {
+      position: relative;
+      border-radius: 20px;
       overflow: hidden;
-      border: 1px solid rgba(148,163,184,0.35);
-      background: #020617;
+      background: radial-gradient(circle at top, #fbbf24 0, #7c2d12 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .hero-image-wrapper img {
+    .hero-main-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      transform: scale(1.03);
     }
+
+    .hero-image-label {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(15, 23, 42, 0.88);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+    }
+
+    .hero-image-label-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    /* ===== SECTIONS & MENU ===== */
 
     .section-title-row {
       display: flex;
+      align-items: baseline;
       justify-content: space-between;
-      align-items: center;
-      margin-top: 22px;
+      margin-top: 28px;
       margin-bottom: 8px;
     }
 
     .section-title {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 600;
     }
 
-    .section-caption {
+    .section-sub {
       font-size: 12px;
       color: var(--muted);
     }
 
-    .menu {
+    .products-grid {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      margin-top: 8px;
-    }
-
-    .category-section {
-      margin-bottom: 4px;
-    }
-
-    .category-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #e5e7eb;
-      margin-bottom: 6px;
-      padding-inline: 2px;
-    }
-
-    .product-card {
-      background: linear-gradient(135deg, #020617, #020617 25%, #020617);
-      border-radius: 14px;
-      border: 1px solid rgba(31,41,55,0.95);
-      padding: 9px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .product-main {
-      display: flex;
-      justify-content: space-between;
       gap: 10px;
     }
 
-    .product-text {
-      flex: 1;
-      min-width: 0;
+    .product-card {
+      border-radius: 18px;
+      background: radial-gradient(circle at top right, #1f2937 0, #020617 65%);
+      border: 1px solid rgba(30, 64, 175, 0.55);
+      padding: 10px 10px 10px 10px;
     }
 
-    .product-name {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .product-price {
-      font-size: 13px;
-      color: var(--accent);
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .product-desc {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .product-meta {
-      display: flex;
+    .product-main {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) 96px;
       gap: 8px;
-      font-size: 11px;
-      color: var(--muted);
+      align-items: center;
     }
 
-    .product-image-wrapper {
-      width: 82px;
-      height: 82px;
+    @media (max-width: 640px) {
+      .product-main {
+        grid-template-columns: minmax(0, 2fr) 88px;
+      }
+    }
+
+    .product-image-wrap {
+      position: relative;
       border-radius: 14px;
       overflow: hidden;
-      flex-shrink: 0;
       background: #020617;
-      border: 1px solid rgba(31,41,55,0.9);
+      border: 1px solid rgba(15, 23, 42, 0.8);
+      height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .product-image {
@@ -276,457 +319,539 @@
       display: block;
     }
 
+    .product-name-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .product-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .product-price {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .product-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .product-meta {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
     .qty-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-top: 6px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .qty-controls {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      background: rgba(15,23,42,0.85);
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
       border-radius: 999px;
-      padding: 3px 5px;
-      border: 1px solid rgba(31,41,55,0.9);
+      padding: 4px 6px;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      flex-shrink: 0;
     }
 
     .qty-btn {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
       border: none;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
       cursor: pointer;
-      background: #020617;
-      color: #e5e7eb;
-    }
-
-    .qty-btn.plus {
-      background: linear-gradient(135deg, var(--accent-soft), #facc15);
-      color: #020617;
     }
 
     .qty-value {
-      font-size: 13px;
-      min-width: 16px;
+      width: 22px;
       text-align: center;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     .in-cart-label {
       font-size: 11px;
-      color: var(--success);
-      margin-top: 2px;
+      color: var(--accent);
     }
 
-    .cart-bar {
+    .category-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ===== CART BAR ===== */
+
+    #cart-bar {
       position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 10px 14px;
-      background: linear-gradient(135deg, #020617, #111827);
-      border-top: 1px solid rgba(31,41,55,0.9);
+      padding: 8px 12px 10px;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+      border-top: 1px solid rgba(55, 65, 81, 0.9);
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .cart-inner {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      align-items: center;
       gap: 10px;
-      z-index: 20;
     }
 
-    .cart-label {
+    .cart-summary {
+      flex: 1;
       font-size: 13px;
+      color: var(--muted);
     }
 
-    .cart-label span {
-      font-weight: 600;
-      color: var(--accent);
+    .cart-summary strong {
+      color: var(--text);
     }
 
-    .btn-cart-whatsapp {
+    .cart-button {
       border-radius: 999px;
       border: none;
-      padding: 7px 12px;
-      background: #22c55e;
-      font-size: 13px;
+      padding: 8px 16px;
+      font-size: 14px;
       font-weight: 600;
-      color: #022c16;
+      cursor: pointer;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      cursor: pointer;
+      gap: 6px;
+      white-space: nowrap;
     }
 
-    .btn-cart-whatsapp span.emoji {
-      font-size: 15px;
+    .cart-button[disabled] {
+      opacity: 0.4;
+      cursor: default;
     }
 
-    .hidden {
-      display: none;
-    }
-
-    @media (max-width: 400px) {
-      .hero-card {
-        grid-template-columns: 1fr;
-      }
+    .cart-note {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
     }
   </style>
 </head>
+
 <body>
   <div class="page">
-    <header class="top-bar">
-      <div class="brand-main">
-        <div class="brand-logo">
-          <!-- לוגו העסק – עדכן שם קובץ אם צריך -->
-          <img src="images/images/IMG-20250120-WA0078(1).jpg" alt="לוגו מתוק בכיכר" />
+    <!-- ===== HEADER ===== -->
+    <header class="brand-main">
+      <div class="brand-text-block">
+        <div class="brand-title">מתוק בכיכר</div>
+        <div class="brand-sub">קיוסק חלבי • טוסטים, פסטות, מלאווח פיצה, וופל בלגי ועוד</div>
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          פתוח למשלוחים והזמנות בווטסאפ
         </div>
-        <div>
-          <div class="brand-text-title">מתוק בכיכר</div>
-          <div class="brand-text-sub">קיוסק חלבי • טוסטים, פסטות, וופל בלגי ועוד</div>
-          <div class="tagline">ממוקמים בכיכר – מקבלים הזמנות בווצאפ</div>
-          <div class="hero-badge">
-            🟢 פתוח למשלוחים
-          </div>
+      </div>
+
+      <div class="brand-logo-wrapper">
+        <div class="brand-logo-inner">
+          <img
+            src="images/images/IMG-20250120-WA0078(1).jpg"
+            alt="לוגו מתוק בכיכר"
+            class="brand-logo-img"
+          />
         </div>
       </div>
     </header>
 
-    <section class="hero">
-      <div class="hero-card">
-        <div>
-          <div class="hero-text-title">כשבא לך משהו חלבי טוב – אנחנו פה 🤍</div>
-          <div class="hero-text-sub">
-            באגט טוסט חם, פסטה מוקרמת, מלאווח פיצה וופל בלגי משוגע לסיום מתוק.
-            בחרו מנות, עדכנו כמויות ובקליק אחד ההזמנה עפה אלינו לווצאפ.
-          </div>
-          <div class="hero-pill-row">
-            <span class="pill">הכנה במקום</span>
-            <span class="pill">חומרי גלם איכותיים</span>
-            <span class="pill accent">הזמנה מהירה בווצאפ</span>
-          </div>
-          <a class="btn-primary" href="https://wa.me/972552596022" target="_blank" rel="noopener">
-            <span class="emoji">💬</span>
-            הזמנה מהירה בוואטסאפ
-          </a>
+    <!-- ===== HERO ===== -->
+    <section class="hero-card">
+      <div>
+        <h1 class="hero-text-title">כשבא לך משהו חלבי טוב – אנחנו פה 🧀</h1>
+        <p class="hero-text-body">
+          באגט טוסט חם, פסטה מוקרמת, מלאווח פיצה או וופל בלגי מפנק לסיום מתוק. בחרו מנות, עדכנו כמויות
+          ובקליק אחד ההזמנה עוברת אלינו לווטסאפ.
+        </p>
+
+        <div class="hero-tags">
+          <span class="hero-tag">ממוקמים בכיכר</span>
+          <span class="hero-tag">מכינים טרי במקום</span>
+          <span class="hero-tag">כשר חלבי</span>
         </div>
-        <div class="hero-image-wrapper">
-          <!-- תמונת אווירה – פסטה -->
-          <img src="images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg" alt="פסטה מוקרמת">
+
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="scrollToMenu()">לעבור לתפריט</button>
+          <button class="btn-outline" onclick="openQuickWhatsApp()">הודעה חופשית בווטסאפ</button>
+        </div>
+
+        <button class="btn-whatsapp" onclick="openQuickWhatsApp()">
+          הזמנה מהירה בווטסאפ 💬
+        </button>
+      </div>
+
+      <div class="hero-image-wrap">
+        <img
+          src="images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg"
+          alt="פסטה מוקרמת חמה"
+          class="hero-main-image"
+        />
+        <div class="hero-image-label">
+          <span class="hero-image-label-dot"></span>
+          פסטה מוקרמת • מנה חמה
         </div>
       </div>
     </section>
 
-    <div class="section-title-row">
-      <h2 class="section-title">התפריט שלנו</h2>
-      <div class="section-caption">בחרו מנות, עדכנו כמויות – ואנחנו כבר נכין 📦</div>
-    </div>
+    <!-- ===== MENU SECTIONS ===== -->
+    <section id="menu-root">
+      <div class="section-title-row">
+        <h2 class="section-title">התפריט שלנו</h2>
+        <span class="section-sub">בחרו מנות, עדכנו כמויות – ואנחנו כבר נכין 🎁</span>
+      </div>
 
-    <!-- כאן ניצור את הכרטיסים של המנות דרך JavaScript -->
-    <main class="menu" id="menu"></main>
+      <div id="menu-container"></div>
+    </section>
   </div>
 
-  <!-- סרגל עגלה תחתון -->
-  <div class="cart-bar hidden" id="cart-bar">
-    <div class="cart-label" id="cart-label">
-      עגלת קניות ריקה
+  <!-- ===== CART BAR ===== -->
+  <div id="cart-bar">
+    <div class="cart-inner">
+      <div class="cart-summary">
+        <strong><span id="cart-count">0</span> מנות בעגלה</strong>
+        &nbsp;•&nbsp;
+        סה״כ <strong><span id="cart-total">0</span> ₪</strong>
+        <div class="cart-note">אחרי שתסיימו לבחור – לוחצים על הכפתור וההזמנה נפתחת בווטסאפ.</div>
+      </div>
+
+      <button id="cart-whatsapp-btn" class="cart-button" disabled>
+        שליחת ההזמנה בווטסאפ 💬
+      </button>
     </div>
-    <button class="btn-cart-whatsapp" id="cart-whatsapp-btn">
-      <span class="emoji">💬</span>
-      המשך לווצאפ
-    </button>
   </div>
+
+  <!-- נכניס את הסקריפט כאן -->
   <script>
-    // ===== נתוני מנות =====
+    const WHATSAPP_NUMBER = "972552596022";
+
     const products = [
-      // טוסטים ובאגטים
       {
         id: "baguette-toast",
         name: "באגט טוסט",
         price: 32,
         category: "טוסטים ובאגטים",
-        image: src="images/images/1024x683.jpg-U010",
-        desc: "באגט טרי 'איטלקי' עם גבינה צהובה ורוטב עשיר",
+        image: "images/images/1024x683.jpg-U010",
+        description: "באגט טרי עם גבינה צהובה מותכת ורוטב עגבניות קל."
       },
       {
         id: "bagel-toast",
         name: "בייגל טוסט",
         price: 35,
         category: "טוסטים ובאגטים",
-        image: src="images/images/1024x683.jpg-U010",
-        desc: "בייגל טוסט קלאסי עם גבינה וממרחים לבחירה",
+        image: "images/images/1024x683.jpg-U010",
+        description: "בייגל טוסט קלאסי עם גבינה וקריספיות מושלמת."
       },
       {
         id: "baguette-salads",
         name: "באגט סלטים",
         price: 30,
         category: "טוסטים ובאגטים",
-        image: src="images/images/סלט-ירקות-מתכונים.webp",
-        desc: "באגט נדיב עם סלטים טריים לבחירה",
+        image: "images/images/סלט-ירקות-מתכונים.webp",
+        description: "באגט עם ממרח וסלטים טריים."
       },
       {
         id: "baguette-omelette",
         name: "באגט חביתה",
         price: 32,
         category: "טוסטים ובאגטים",
-        image: "images/סלט-ירקות-מתכונים.webp",
-        desc: "באגט חם עם חביתה, ירקות ורוטב",
+        image: "images/images/סלט-ירקות-מתכונים.webp",
+        description: "באגט עם חביתה טרייה וסלט."
       },
       {
         id: "baguette-shakshuka",
         name: "באגט שקשוקה",
         price: 34,
         category: "טוסטים ובאגטים",
-        image: "images/5079771622019.jpg",
-        desc: "שקשוקה עשירה מוגשת בתוך באגט טרי",
+        image: "images/images/5079771622019.jpg",
+        description: "באגט חם עם רוטב שקשוקה וגבינה."
       },
-
-      // מנות חמות
       {
         id: "pasta",
         name: "פסטה מוקרמת",
         price: 38,
         category: "מנות חמות",
-        image: src="images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg",
-        desc: "פנה ברוטב שמנת עשיר וגבינה מוקרמת"
+        image: "images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg",
+        description: "פנה ברוטב שמנת עשיר וגבינות."
       },
       {
         id: "baked-potato",
-        name: "תפוא מוקרם",
+        name: "תפוח אדמה מוקרם",
         price: 38,
         category: "מנות חמות",
-        image: "images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg",
-        desc: "תפוחי אדמה בתנור עם רוטב שמנת וגבינה",
+        image: "images/images/פסטה-פנה-מוקרמת-ברוטב-בטטה-וקוקוס.jpg",
+        description: "תפוח אדמה בתנור עם רוטב שמנת וגבינה."
       },
       {
-        id: "malawach-pizza",
+        id: "mlawach-pizza",
         name: "מלאווח פיצה",
         price: 24,
         category: "מנות חמות",
-        image: src="images/images/5079771622019.jpg",
-        desc: "מלאווח פריך עם רוטב עגבניות וגבינה",
+        image: "images/images/5079771622019.jpg",
+        description: "מלאווח עם רוטב פיצה וגבינה צהובה."
       },
-
-      // מטוגנים
+      {
+        id: "waffle",
+        name: "וופל בלגי",
+        price: 32,
+        category: "קינוחים",
+        image: "images/images/5010007_16062024162329_large.jpg",
+        description: "וופל בלגי חם עם תוספות מתוקות."
+      },
       {
         id: "chips",
-        name: "צ'יפס גדול",
+        name: "צ׳יפס גדול",
         price: 25,
         category: "מטוגנים",
-        image: src"images/images/5079771622019.jpg",
-        desc: "צ'יפס פריך זהוב – מנה נדיבה",
+        image: "images/images/5079771622019.jpg",
+        description: "צ׳יפס פריך חם."
       },
       {
         id: "onion-rings",
         name: "8 טבעות בצל",
         price: 18,
         category: "מטוגנים",
-        image: "images/5079771622019.jpg",
-        desc: "טבעות בצל מצופות וקריספיות",
+        image: "images/images/5079771622019.jpg",
+        description: "טבעות בצל מצופות ומטוגנות."
       },
       {
         id: "mashed-balls",
         name: "8 כדורי פירה",
         price: 18,
         category: "מטוגנים",
-        image: "images/5079771622019.jpg",
-        desc: "כדורי פירה מטוגנים, נמסים בפה",
+        image: "images/images/5079771622019.jpg",
+        description: "כדורי פירה מטוגנים מבחוץ ורכים מבפנים."
       },
       {
-        id: "home-fries",
+        id: "hope-fries",
         name: "הופ פרייז",
         price: 30,
         category: "מטוגנים",
-        image: "images/5079771622019.jpg",
-        desc: "תפוחי אדמה בתערובת תיבול מיוחדת",
-      },
-
-      // קינוחים
-      {
-        id: "belgian-waffle",
-        name: "וופל בלגי",
-        price: 32,
-        category: "קינוחים",
-        image: src="images/images/5010007_16062024162329_large.jpg",
-        desc: "וופל בלגי חם עם תוספות מתוקות",
+        image: "images/images/5079771622019.jpg",
+        description: "תערובת צ׳יפס ותפוחי אדמה מתובלים."
       }
     ];
 
     const categoriesOrder = [
       "טוסטים ובאגטים",
       "מנות חמות",
-      "מטוגנים",
       "קינוחים",
+      "מטוגנים"
     ];
 
-    const cart = {}; // id -> { product, qty }
+    const cart = {};
+    const productsById = {};
+    products.forEach(p => (productsById[p.id] = p));
+
+    function scrollToMenu() {
+      const el = document.getElementById("menu-root");
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function openQuickWhatsApp() {
+      const text = encodeURIComponent("היי, אשמח לבצע הזמנה ממתוק בכיכר 🙂");
+      window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+    }
 
     function renderMenu() {
-      const menuEl = document.getElementById("menu");
-      menuEl.innerHTML = "";
+      const container = document.getElementById("menu-container");
+      if (!container) return;
+
+      container.innerHTML = "";
 
       categoriesOrder.forEach(category => {
-        const catProducts = products.filter(p => p.category === category);
-        if (!catProducts.length) return;
+        const items = products.filter(p => p.category === category);
+        if (!items.length) return;
 
         const section = document.createElement("section");
-        section.className = "category-section";
+        const titleRow = document.createElement("div");
+        titleRow.className = "section-title-row";
 
-        const title = document.createElement("h3");
-        title.className = "category-title";
-        title.textContent = category;
-        section.appendChild(title);
+        const h2 = document.createElement("h2");
+        h2.className = "section-title";
+        h2.textContent = category;
 
-        catProducts.forEach(product => {
+        const sub = document.createElement("span");
+        sub.className = "section-sub";
+        sub.textContent = "בחרו כמות לכל מנה";
+
+        titleRow.appendChild(h2);
+        titleRow.appendChild(sub);
+        section.appendChild(titleRow);
+
+        const list = document.createElement("div");
+        list.className = "products-grid";
+
+        items.forEach(p => {
           const card = document.createElement("div");
           card.className = "product-card";
-          card.dataset.id = product.id;
+          card.dataset.id = p.id;
 
           card.innerHTML = `
             <div class="product-main">
-              <div class="product-text">
-                <div class="product-name">${product.name}</div>
-                <div class="product-price">${product.price} ₪</div>
-                <div class="product-desc">${product.desc}</div>
-                <div class="product-meta">
-                  <span>גודל מנה: רגיל</span>
-                  <span>•</span>
-                  <span>מתאים לחלוקה</span>
+              <div>
+                <div class="product-name-row">
+                  <div class="product-name">${p.name}</div>
+                  <div class="product-price">₪${p.price}</div>
                 </div>
+                <div class="product-desc">${p.description}</div>
+                <div class="product-meta">מחיר למנה אחת</div>
                 <div class="qty-row">
                   <div class="qty-controls">
-                    <button class="qty-btn minus" type="button">−</button>
+                    <button class="qty-btn" data-action="minus">-</button>
                     <span class="qty-value">0</span>
-                    <button class="qty-btn plus" type="button">+</button>
+                    <button class="qty-btn" data-action="plus">+</button>
                   </div>
+                  <span class="in-cart-label">הוספה לעגלה</span>
                 </div>
-                <div class="in-cart-label" style="display:none;">נמצא בעגלה ✔</div>
               </div>
-              <div class="product-image-wrapper">
-                <img src="${product.image}" alt="${product.name}" class="product-image">
+              <div class="product-image-wrap">
+                <img
+                  src="${p.image}"
+                  alt="${p.name}"
+                  class="product-image"
+                />
               </div>
             </div>
           `;
 
-          section.appendChild(card);
+          list.appendChild(card);
         });
 
-        menuEl.appendChild(section);
+        section.appendChild(list);
+        container.appendChild(section);
       });
     }
 
-    function getCartTotals() {
-      let totalItems = 0;
+    function updateCartDisplay() {
+      const countSpan = document.getElementById("cart-count");
+      const totalSpan = document.getElementById("cart-total");
+      const btn = document.getElementById("cart-whatsapp-btn");
+
+      let totalCount = 0;
       let totalPrice = 0;
 
-      Object.values(cart).forEach(item => {
-        totalItems += item.qty;
-        totalPrice += item.qty * item.product.price;
+      Object.keys(cart).forEach(id => {
+        const qty = cart[id];
+        const p = productsById[id];
+        if (!p || qty <= 0) return;
+        totalCount += qty;
+        totalPrice += qty * p.price;
       });
 
-      return { totalItems, totalPrice };
-    }
+      countSpan.textContent = totalCount;
+      totalSpan.textContent = totalPrice;
 
-    function updateCartUI() {
-      // עדכון כמויות בכל כרטיס
-      document.querySelectorAll(".product-card").forEach(card => {
-        const id = card.dataset.id;
-        const qtyValue = card.querySelector(".qty-value");
-        const inCartLabel = card.querySelector(".in-cart-label");
-        const item = cart[id];
-
-        const qty = item ? item.qty : 0;
-        qtyValue.textContent = qty;
-
-        if (qty > 0) {
-          inCartLabel.style.display = "block";
-        } else {
-          inCartLabel.style.display = "none";
-        }
-      });
-
-      // עדכון סרגל עגלה
-      const { totalItems, totalPrice } = getCartTotals();
-      const bar = document.getElementById("cart-bar");
-      const label = document.getElementById("cart-label");
-
-      if (totalItems === 0) {
-        bar.classList.add("hidden");
-        label.textContent = "עגלת קניות ריקה";
+      if (totalCount > 0) {
+        btn.disabled = false;
       } else {
-        bar.classList.remove("hidden");
-        label.innerHTML = `
-          <span>${totalItems} פריטים</span> • ${totalPrice} ₪
-        `;
+        btn.disabled = true;
       }
     }
 
-    function setupMenuInteractions() {
-      const menuEl = document.getElementById("menu");
-
-      menuEl.addEventListener("click", event => {
-        const btn = event.target.closest(".qty-btn");
-        if (!btn) return;
-
-        const card = btn.closest(".product-card");
+    function syncQtyValues() {
+      Object.keys(cart).forEach(id => {
+        const card = document.querySelector(`.product-card[data-id="${id}"]`);
         if (!card) return;
-
-        const id = card.dataset.id;
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-
-        if (!cart[id]) {
-          cart[id] = { product, qty: 0 };
-        }
-
-        if (btn.classList.contains("plus")) {
-          cart[id].qty += 1;
-        } else if (btn.classList.contains("minus")) {
-          cart[id].qty = Math.max(0, cart[id].qty - 1);
-        }
-
-        if (cart[id].qty === 0) {
-          delete cart[id];
-        }
-
-        updateCartUI();
+        const span = card.querySelector(".qty-value");
+        if (!span) return;
+        span.textContent = cart[id] || 0;
       });
     }
 
-    function setupWhatsappButton() {
-      const btn = document.getElementById("cart-whatsapp-btn");
+    document.addEventListener("click", event => {
+      const btn = event.target.closest(".qty-btn");
+      if (!btn) return;
 
-      btn.addEventListener("click", () => {
-        const items = Object.values(cart);
-        if (!items.length) return;
+      const action = btn.dataset.action;
+      const card = btn.closest(".product-card");
+      if (!card) return;
 
-        const { totalItems, totalPrice } = getCartTotals();
+      const id = card.dataset.id;
+      if (!productsById[id]) return;
 
-        let message = 'היי, אני רוצה להזמין מ"מתוק בכיכר":\n\n';
+      if (!cart[id]) cart[id] = 0;
 
-        items.forEach(item => {
-          message += `• ${item.product.name} × ${item.qty} = ${item.qty * item.product.price} ₪\n`;
-        });
+      if (action === "plus") {
+        cart[id] += 1;
+      } else if (action === "minus" && cart[id] > 0) {
+        cart[id] -= 1;
+      }
 
-        message += `\nסה"כ פריטים: ${totalItems}\nסה"כ לתשלום: ${totalPrice} ₪\n`;
-        message += "\nאפשר לחזור אליי עם זמן מוכן משוער 🙂";
+      if (cart[id] <= 0) delete cart[id];
 
-        const phone = "972552596022";
-        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-        window.location.href = url;
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      renderMenu();
-      setupMenuInteractions();
-      setupWhatsappButton();
-      updateCartUI();
+      syncQtyValues();
+      updateCartDisplay();
     });
+
+    function sendCartToWhatsApp() {
+      let lines = [];
+      let totalPrice = 0;
+
+      Object.keys(cart).forEach(id => {
+        const qty = cart[id];
+        const p = productsById[id];
+        if (!p || qty <= 0) return;
+        const lineTotal = qty * p.price;
+        totalPrice += lineTotal;
+        lines.push(`${p.name} × ${qty} – ${lineTotal} ₪`);
+      });
+
+      if (!lines.length) {
+        alert("לא בחרת מנות לעגלה עדיין 🙂");
+        return;
+      }
+
+      const header = "היי, אני רוצה להזמין ממתוק בכיכר:\n";
+      const body = lines.join("\n");
+      const footer = `\n\nסה\"כ: ${totalPrice} ₪\n\nשם הלקוח:\nשעת איסוף / משלוח:`;      
+
+      const text = encodeURIComponent(header + body + footer);
+      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+      window.location.href = url;
+    }
+
+    document.getElementById("cart-whatsapp-btn").addEventListener("click", sendCartToWhatsApp);
+
+    renderMenu();
+    updateCartDisplay();
   </script>
 </body>
 </html>
