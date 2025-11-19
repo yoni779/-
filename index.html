@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
-    <title>YoniOS Sorted</title>
+    <title>YoniOS Safe</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -14,7 +14,8 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
 
     <style>
         body { font-family: 'Rubik', sans-serif; background-color: #F3F4F6; user-select: none; }
@@ -22,21 +23,25 @@
         .glass-card { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; }
         .input-field { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; width: 100%; outline: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden" x-data="app()">
 
     <div x-show="status === 'loading'" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
         <div class="text-5xl mb-4 animate-bounce">💎</div>
-        <h2 class="font-bold text-gray-400 text-sm">מארגן את המשימות...</h2>
+        <h2 class="font-bold text-gray-400 text-sm">מאתחל מערכת...</h2>
+        
+        <button onclick="localStorage.clear(); location.reload();" class="mt-12 text-xs text-red-400 border border-red-100 px-4 py-2 rounded-full">
+            נתקע? לחץ כאן לאיפוס
+        </button>
     </div>
 
     <div x-show="!user.isLoggedIn && status !== 'loading'" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8">
         <h1 class="text-4xl font-black text-blue-600 mb-2">YoniOS</h1>
+        <p class="text-gray-400 mb-8">כניסה מאובטחת</p>
         <div class="w-full max-w-xs space-y-4">
-            <input type="text" x-model="form.name" class="input-field" placeholder="איך לקרוא לך?">
-            <input type="email" x-model="form.email" class="input-field" placeholder="האימייל שלך">
+            <input type="text" x-model="form.name" class="input-field" placeholder="שם">
+            <input type="email" x-model="form.email" class="input-field" placeholder="אימייל">
             <button @click="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95">כניסה</button>
         </div>
     </div>
@@ -97,42 +102,35 @@
 
                 <div>
                     <div class="flex justify-between items-end mb-3 px-1">
-                        <h3 class="font-bold text-gray-400 uppercase text-xs">משימות שוטפות</h3>
-                        <button x-show="hasCompletedTasks" @click="clearCompleted()" class="text-[10px] bg-red-50 text-red-500 px-2 py-1 rounded border border-red-100 font-bold">
-                            <i class="fa-solid fa-trash-can mr-1"></i> נקה שבוצעו
-                        </button>
+                        <h3 class="font-bold text-gray-400 uppercase text-xs">משימות</h3>
+                        <button x-show="tasks.some(t => t.completed)" @click="clearCompleted()" class="text-[10px] text-red-400 border border-red-100 px-2 py-1 rounded">נקה שבוצעו</button>
                     </div>
 
                     <div class="space-y-3">
                         <template x-for="(task, i) in tasks" :key="i">
                             <div class="glass-card p-4 flex items-center gap-3 relative overflow-hidden transition-all active:scale-[0.98]"
-                                 :class="task.completed ? 'opacity-60 bg-gray-50' : ''">
-                                
+                                 :class="task.completed ? 'opacity-50 bg-gray-50' : ''">
                                 <div class="absolute right-0 top-0 bottom-0 w-1.5" :class="task.completed ? 'bg-gray-300' : task.color"></div>
-                                
                                 <button @click="toggleTask(i)" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors mr-2" 
                                     :class="task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'">
                                     <i x-show="task.completed" class="fa-solid fa-check text-white text-[10px]"></i>
                                 </button>
-                                
                                 <div class="flex-1">
                                     <p class="font-bold" :class="task.completed ? 'line-through text-gray-400' : ''" x-text="task.title"></p>
                                     <span x-show="!task.completed" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 rounded inline-block mt-1">+<span x-text="task.reward"></span> XP</span>
                                 </div>
-                                
                                 <button @click="deleteItem('tasks', i)" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </template>
-                        <div x-show="tasks.length === 0" class="text-center py-10 text-gray-400 text-sm">אין משימות. הכל נקי!</div>
+                        <div x-show="tasks.length === 0" class="text-center py-10 text-gray-400 text-sm">אין משימות.</div>
                     </div>
                 </div>
             </div>
 
             <div x-show="tab === 'shop'">
-                <h3 class="font-bold text-gray-400 uppercase text-xs mb-3 px-1">חנות הפינוקים</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <template x-for="(item, i) in shopItems" :key="i">
-                        <div class="glass-card p-4 text-center relative border border-transparent active:border-blue-200">
+                        <div class="glass-card p-4 text-center relative">
                             <button @click="deleteItem('shopItems', i)" class="absolute top-2 left-2 text-gray-300"><i class="fa-solid fa-times"></i></button>
                             <div class="text-3xl mb-2">🎁</div>
                             <h3 class="font-bold text-sm mb-1" x-text="item.name"></h3>
@@ -141,7 +139,6 @@
                         </div>
                     </template>
                 </div>
-                <div x-show="shopItems.length === 0" class="text-center py-10 text-gray-400">החנות ריקה. הוסף פינוקים!</div>
             </div>
 
             <div x-show="tab === 'profile'" class="px-4 text-center pt-6">
@@ -170,7 +167,7 @@
             <div @click.away="modal.isOpen = false" class="bg-white w-full max-w-md rounded-t-3xl p-6 shadow-2xl">
                 <h3 class="text-xl font-bold mb-4" x-text="modal.title"></h3>
                 <div class="space-y-3">
-                    <input x-model="modal.data.name" type="text" class="input-field" placeholder="כותרת / שם">
+                    <input x-model="modal.data.name" type="text" class="input-field" placeholder="שם / כותרת">
                     <div x-show="modal.type === 'task'" class="flex gap-2">
                         <button @click="modal.data.color = 'bg-red-500'" class="h-10 flex-1 rounded border-2 border-red-500 bg-red-50"></button>
                         <button @click="modal.data.color = 'bg-blue-500'" class="h-10 flex-1 rounded border-2 border-blue-500 bg-blue-50"></button>
@@ -196,7 +193,7 @@
             appId: "1:238428366388:web:70e54810382d3d88134c61"
         };
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
         const db = firebase.database();
 
         function app() {
@@ -215,17 +212,8 @@
                 dbRef: null,
                 isLoaded: false,
 
-                get hasCompletedTasks() {
-                    return this.tasks.some(t => t.completed);
-                },
-
                 init() {
-                    this.$watch('tasks', () => this.save());
-                    this.$watch('coins', () => this.save());
-                    this.$watch('habits', () => this.save());
-                    this.$watch('shopItems', () => this.save());
-
-                    const saved = localStorage.getItem('yoni_full_v2');
+                    const saved = localStorage.getItem('yoni_v6');
                     if (saved) {
                         this.form = JSON.parse(saved);
                         this.login(true);
@@ -236,7 +224,7 @@
 
                 login(auto = false) {
                     if (!this.form.email) return;
-                    if(!auto) localStorage.setItem('yoni_full_v2', JSON.stringify(this.form));
+                    if(!auto) localStorage.setItem('yoni_v6', JSON.stringify(this.form));
 
                     const safeEmail = this.form.email.toLowerCase().replace(/\./g, '_').replace(/@/g, '_at_');
                     this.dbRef = db.ref('users/' + safeEmail);
@@ -250,12 +238,12 @@
                             this.user.name = this.form.name;
                             this.user.email = this.form.email;
 
+                            // תיקון קריטי: אם המידע מגיע כ-null או כ-Object במקום Array, אנחנו מתקנים אותו
                             if (val) {
                                 this.coins = val.coins || 0;
-                                // טעינה וסידור: קודם לא בוצעו, אחר כך בוצעו
-                                this.tasks = (val.tasks || []).sort((a, b) => a.completed - b.completed);
-                                this.shopItems = val.shopItems || [];
-                                this.habits = val.habits || [];
+                                this.tasks = val.tasks ? Object.values(val.tasks).sort((a, b) => (a.completed === b.completed) ? 0 : a.completed ? 1 : -1) : [];
+                                this.shopItems = val.shopItems ? Object.values(val.shopItems) : [];
+                                this.habits = val.habits ? Object.values(val.habits) : [];
                             }
                             this.isLoaded = true;
                         }
@@ -275,31 +263,17 @@
                     });
                 },
 
+                // --- Logic ---
+
                 sortTasks() {
-                    // פונקציית הקסם: מזיזה את ה-V למטה
-                    this.tasks.sort((a, b) => a.completed - b.completed);
+                    this.tasks.sort((a, b) => (a.completed === b.completed) ? 0 : a.completed ? 1 : -1);
                 },
 
                 clearCompleted() {
-                    if(confirm('למחוק את כל המשימות שבוצעו?')) {
+                    if(confirm('לנקות?')) {
                         this.tasks = this.tasks.filter(t => !t.completed);
                         this.save();
                     }
-                },
-
-                toggleTask(i) {
-                    this.tasks[i].completed = !this.tasks[i].completed;
-                    if(this.tasks[i].completed) {
-                        this.coins += parseInt(this.tasks[i].reward);
-                        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
-                    } else {
-                        this.coins -= parseInt(this.tasks[i].reward);
-                    }
-                    
-                    // מיון אוטומטי אחרי סימון
-                    setTimeout(() => {
-                        this.sortTasks();
-                    }, 300); // השהייה קטנה לאנימציה
                 },
 
                 openModal(type) {
@@ -314,17 +288,32 @@
                     if(!d.name) return;
 
                     if(this.modal.type === 'task') {
-                        if(!this.tasks) this.tasks = [];
                         this.tasks.push({ title: d.name, reward: parseInt(d.value)||10, color: d.color, completed: false });
                         this.sortTasks();
                     } else if(this.modal.type === 'shop') {
-                        if(!this.shopItems) this.shopItems = [];
                         this.shopItems.push({ name: d.name, cost: parseInt(d.value)||100 });
                     } else {
-                        if(!this.habits) this.habits = [];
                         this.habits.push({ name: d.name, lastDone: '' });
                     }
+                    this.save();
                     this.modal.isOpen = false;
+                },
+
+                toggleTask(i) {
+                    this.tasks[i].completed = !this.tasks[i].completed;
+                    if(this.tasks[i].completed) {
+                        this.coins += parseInt(this.tasks[i].reward);
+                        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+                    } else {
+                        this.coins -= parseInt(this.tasks[i].reward);
+                    }
+                    
+                    // מיון אחרי השהיה קצרה
+                    setTimeout(() => {
+                        this.sortTasks();
+                        this.save();
+                    }, 300);
+                    this.save(); // שמירה מיידית גם לפני המיון
                 },
 
                 toggleHabit(i) {
@@ -332,11 +321,13 @@
                     this.habits[i].lastDone = this.todayStr;
                     this.coins += 10;
                     confetti({ particleCount: 30, spread: 50, origin: { y: 0.5 } });
+                    this.save();
                 },
 
                 deleteItem(type, i) {
                     if(confirm('למחוק?')) {
                         this[type].splice(i, 1);
+                        this.save();
                     }
                 },
 
@@ -345,10 +336,21 @@
                         if(confirm('לקנות?')) {
                             this.coins -= item.cost;
                             confetti();
+                            this.save();
                         }
                     } else {
                         alert('חסר כסף');
                     }
                 },
 
-                logout(
+                logout() {
+                    if(confirm('להתנתק?')) {
+                        localStorage.removeItem('yoni_v6');
+                        location.reload();
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
