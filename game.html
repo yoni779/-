@@ -2,309 +2,313 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>המעבדה הסודית ⚗️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Racer 🏎️</title>
     <style>
-        :root {
-            --bg: #1a1a2e;
-            --card-bg: #16213e;
-            --highlight: #e94560;
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #111;
+            font-family: 'Segoe UI', sans-serif;
+            touch-action: none; /* מונע גלילה בטלפון */
         }
 
-        body {
-            background-color: var(--bg);
+        #gameArea {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #000022, #000044);
+            overflow: hidden;
+        }
+
+        /* השחקן */
+        #player {
+            position: absolute;
+            bottom: 20px;
+            width: 50px;
+            height: 80px;
+            background: #00ffcc;
+            border-radius: 5px;
+            box-shadow: 0 0 20px #00ffcc;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.1s ease-out;
+            z-index: 10;
+        }
+
+        /* קישוט לרכב */
+        #player::after {
+            content: '';
+            position: absolute;
+            top: 10px; left: 5px; right: 5px; bottom: 40px;
+            background: #000;
+            opacity: 0.5;
+        }
+
+        /* מכשולים */
+        .obstacle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #ff3366;
+            border-radius: 50%; /* עיגול */
+            box-shadow: 0 0 15px #ff3366;
+            z-index: 5;
+        }
+
+        /* כביש */
+        .lane-marker {
+            position: absolute;
+            width: 4px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* תצוגת ניקוד */
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 20;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* מסך התחלה/סוף */
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
             text-align: center;
-            margin: 0;
-            padding: 20px;
-            user-select: none;
-            overflow-x: hidden;
         }
 
         h1 {
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            font-size: 3rem;
+            margin: 0;
+            color: #00ffcc;
+            text-shadow: 0 0 20px #00ffcc;
+            font-style: italic;
         }
 
-        /* אזור הערבוב */
-        .mixing-area {
-            height: 150px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .slot {
-            width: 80px;
-            height: 80px;
-            border: 2px dashed #555;
-            border-radius: 50%;
-            margin: 0 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5rem;
-            background: rgba(0,0,0,0.3);
-            transition: 0.3s;
-        }
-
-        .slot.active {
-            border-color: white;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
-        }
-
-        .plus-sign { font-size: 2rem; color: #888; }
-
-        /* רשימת היסודות */
-        .inventory {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 15px;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
-        .element {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
+        button {
+            background: #ff3366;
+            border: none;
+            padding: 15px 40px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            margin-top: 20px;
             cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid transparent;
+            box-shadow: 0 0 20px #ff3366;
+            animation: pulse 1.5s infinite;
         }
 
-        .element:hover { transform: translateY(-5px); background: #1f2b4d; }
-        .element:active { transform: scale(0.95); }
-        
-        .element.selected {
-            border-color: var(--highlight);
-            box-shadow: 0 0 15px var(--highlight);
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .icon { font-size: 2rem; margin-bottom: 5px; }
-        .name { font-size: 0.8rem; color: #ccc; }
-
-        /* אנימציית גילוי */
-        #discoveryModal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            animation: fadeIn 0.5s;
+        .controls-hint {
+            margin-top: 30px;
+            color: #aaa;
+            font-size: 0.9rem;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .new-item-glow {
-            font-size: 5rem;
-            filter: drop-shadow(0 0 30px gold);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* אפקט פיצוץ */
+        .boom {
+            background: white !important;
+            transform: scale(1.5) !important;
+            opacity: 0;
+            transition: 0.5s;
         }
 
-        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-
-        .reset-btn {
-            margin-top: 50px;
-            background: none;
-            border: 1px solid #444;
-            color: #666;
-            padding: 8px 15px;
-            border-radius: 20px;
-        }
     </style>
 </head>
 <body>
 
-    <h1>🧪 המעבדה</h1>
-    <p style="color:#888; font-size:0.9rem;">מצאת <span id="count">4</span> מתוך 14 יסודות</p>
-
-    <div class="mixing-area">
-        <div class="slot" id="slot1" onclick="clearSlot(1)"></div>
-        <div class="plus-sign">+</div>
-        <div class="slot" id="slot2" onclick="clearSlot(2)"></div>
-    </div>
-
-    <div class="inventory" id="inventoryGrid">
+    <div id="gameArea">
+        <div id="scoreBoard">0</div>
+        <div id="player"></div>
+        
         </div>
 
-    <div id="discoveryModal" onclick="closeModal()">
-        <h2 style="color: gold; margin-bottom: 20px;">✨ תגלית חדשה! ✨</h2>
-        <div id="newIcon" class="new-item-glow"></div>
-        <h3 id="newName" style="margin-top: 20px; font-size: 1.5rem;"></h3>
-        <p style="color: #aaa; margin-top: 30px;">(לחץ כדי להמשיך)</p>
+    <div id="overlay">
+        <h1>NEON<br>RACER</h1>
+        <p id="finalScore" style="display:none; font-size:1.2rem;">ניקוד: 0</p>
+        <button onclick="startGame()">התחל מרוץ 🏁</button>
+        <div class="controls-hint">
+            הקש בצד <span style="color:#00ffcc">ימין</span> או <span style="color:#00ffcc">שמאל</span> כדי לזוז
+        </div>
     </div>
 
-    <button class="reset-btn" onclick="resetGame()">איפוס משחק</button>
-
     <script>
-        // --- הגדרות המשחק ---
+        const player = document.getElementById('player');
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('scoreBoard');
+        const overlay = document.getElementById('overlay');
         
-        // היסודות הקיימים בהתחלה
-        const STARTING_ELEMENTS = ['fire', 'water', 'earth', 'air'];
+        let gameActive = false;
+        let score = 0;
+        let speed = 5;
+        let playerPos = 50; // אחוזים (50% זה האמצע)
+        let obstacles = [];
+        let markers = [];
+        let animationFrame;
+        let spawnRate = 60; // כל כמה פריימים נוצר מכשול
+        let frameCount = 0;
 
-        // בסיס הנתונים של כל היסודות
-        const DB = {
-            'fire': { icon: '🔥', name: 'אש', color: '#ff4d4d' },
-            'water': { icon: '💧', name: 'מים', color: '#4d94ff' },
-            'earth': { icon: '🌱', name: 'אדמה', color: '#8cd98c' },
-            'air': { icon: '💨', name: 'אוויר', color: '#e6e6e6' },
+        // שליטה במגע
+        document.addEventListener('touchstart', handleInput, {passive: false});
+        document.addEventListener('mousedown', handleInput); // למחשב
+
+        function handleInput(e) {
+            if (!gameActive) return;
             
-            // רמה 2
-            'steam': { icon: '☁️', name: 'קיטור', color: '#ddd' }, // אש + מים
-            'lava': { icon: '🌋', name: 'לבה', color: '#ff8c1a' }, // אש + אדמה
-            'dust': { icon: '🌫️', name: 'אבק', color: '#bfbfbf' }, // אוויר + אדמה
-            'rain': { icon: '🌧️', name: 'גשם', color: '#6666ff' }, // אוויר + מים
-            'energy': { icon: '⚡', name: 'אנרגיה', color: '#ffff66' }, // אש + אוויר
-            'mud': { icon: '💩', name: 'בוץ', color: '#663300' }, // מים + אדמה
+            let x = e.clientX || e.touches[0].clientX;
+            const screenWidth = window.innerWidth;
 
-            // רמה 3 (דוגמאות)
-            'stone': { icon: '🪨', name: 'אבן', color: '#888' }, // לבה + מים
-            'plant': { icon: '🌻', name: 'צמח', color: '#00cc00' }, // גשם + אדמה
-            'storm': { icon: '⛈️', name: 'סופה', color: '#333' }, // אנרגיה + גשם
-            'life': { icon: '🧬', name: 'חיים', color: '#ff00ff' } // בוץ + אנרגיה (הכי קשה)
-        };
-
-        // מתכונים (סדר לא משנה)
-        const RECIPES = [
-            { in: ['fire', 'water'], out: 'steam' },
-            { in: ['fire', 'earth'], out: 'lava' },
-            { in: ['air', 'earth'], out: 'dust' },
-            { in: ['air', 'water'], out: 'rain' },
-            { in: ['fire', 'air'], out: 'energy' },
-            { in: ['water', 'earth'], out: 'mud' },
-            
-            { in: ['lava', 'water'], out: 'stone' },
-            { in: ['rain', 'earth'], out: 'plant' },
-            { in: ['energy', 'rain'], out: 'storm' },
-            { in: ['mud', 'energy'], out: 'life' }
-        ];
-
-        // --- לוגיקה ---
-
-        let myElements = [...STARTING_ELEMENTS];
-        let selected = [null, null]; // שני הסלוטים
-
-        // טעינה
-        if(localStorage.getItem('alchemySave')) {
-            myElements = JSON.parse(localStorage.getItem('alchemySave'));
-        }
-
-        renderInventory();
-
-        function renderInventory() {
-            const grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = '';
-            document.getElementById('count').innerText = myElements.length;
-
-            myElements.forEach(key => {
-                const el = DB[key];
-                const div = document.createElement('div');
-                div.className = 'element';
-                div.innerHTML = `<div class="icon">${el.icon}</div><div class="name">${el.name}</div>`;
-                div.onclick = () => addToMix(key);
-                grid.appendChild(div);
-            });
-        }
-
-        function addToMix(key) {
-            // אם סלוט 1 ריק
-            if (!selected[0]) {
-                selected[0] = key;
-                document.getElementById('slot1').innerHTML = DB[key].icon;
-                document.getElementById('slot1').style.borderColor = DB[key].color;
-            } 
-            // אם סלוט 2 ריק
-            else if (!selected[1]) {
-                selected[1] = key;
-                document.getElementById('slot2').innerHTML = DB[key].icon;
-                document.getElementById('slot2').style.borderColor = DB[key].color;
-                
-                // בדיקת שילוב (דיליי קטן לאפקט)
-                setTimeout(checkMix, 300);
-            }
-        }
-
-        function clearSlot(num) {
-            selected[num-1] = null;
-            const el = document.getElementById('slot'+num);
-            el.innerHTML = '';
-            el.style.borderColor = '#555';
-        }
-
-        function checkMix() {
-            const [a, b] = selected;
-            
-            // חיפוש מתכון
-            const recipe = RECIPES.find(r => 
-                (r.in[0] === a && r.in[1] === b) || 
-                (r.in[0] === b && r.in[1] === a)
-            );
-
-            if (recipe) {
-                // יש התאמה!
-                if (!myElements.includes(recipe.out)) {
-                    // יסוד חדש לגמרי!
-                    myElements.push(recipe.out);
-                    saveGame();
-                    showNewDiscovery(recipe.out);
-                } else {
-                    // כבר יש לנו את זה
-                    shakeSlots(); // אפקט "כבר יש לך את זה"
-                }
+            if (x > screenWidth / 2) {
+                // ימינה
+                if(playerPos < 90) playerPos += 20; // קפיצה של 20%
             } else {
-                // שילוב נכשל
-                shakeSlots();
+                // שמאלה
+                if(playerPos > 10) playerPos -= 20;
             }
+            updatePlayerPos();
+        }
 
-            // איפוס הסלוטים אחרי רגע
+        function updatePlayerPos() {
+            player.style.left = playerPos + '%';
+        }
+
+        function startGame() {
+            overlay.style.display = 'none';
+            document.getElementById('finalScore').style.display = 'none';
+            
+            // איפוס
+            gameActive = true;
+            score = 0;
+            speed = 6; // מהירות התחלתית
+            spawnRate = 50;
+            playerPos = 50;
+            updatePlayerPos();
+            scoreDisplay.innerText = score;
+            
+            // ניקוי מכשולים ישנים
+            obstacles.forEach(ob => ob.remove());
+            obstacles = [];
+            
+            loop();
+        }
+
+        function gameOver() {
+            gameActive = false;
+            cancelAnimationFrame(animationFrame);
+            
+            player.classList.add('boom');
+            setTimeout(() => player.classList.remove('boom'), 500);
+
+            document.getElementById('finalScore').innerText = "הפסדת! ניקוד: " + score;
+            document.getElementById('finalScore').style.display = 'block';
+            document.querySelector('button').innerText = "נסה שוב ↻";
+            
             setTimeout(() => {
-                clearSlot(1);
-                clearSlot(2);
+                overlay.style.display = 'flex';
             }, 1000);
         }
 
-        function showNewDiscovery(key) {
-            const el = DB[key];
-            document.getElementById('newIcon').innerHTML = el.icon;
-            document.getElementById('newName').innerText = el.name;
-            document.getElementById('discoveryModal').style.display = 'flex';
-            renderInventory();
+        function createObstacle() {
+            const obs = document.createElement('div');
+            obs.className = 'obstacle';
+            // מיקום רנדומלי ב-5 נתיבים אפשריים (10, 30, 50, 70, 90)
+            const lanes = [10, 30, 50, 70, 90];
+            const randomLane = lanes[Math.floor(Math.random() * lanes.length)];
+            
+            obs.style.left = randomLane + '%';
+            obs.style.top = '-60px';
+            gameArea.appendChild(obs);
+            
+            obstacles.push({
+                element: obs,
+                top: -60,
+                lane: randomLane
+            });
         }
 
-        function closeModal() {
-            document.getElementById('discoveryModal').style.display = 'none';
-        }
+        function loop() {
+            if (!gameActive) return;
 
-        function shakeSlots() {
-            const area = document.querySelector('.mixing-area');
-            area.style.transform = "translateX(10px)";
-            setTimeout(() => area.style.transform = "translateX(-10px)", 50);
-            setTimeout(() => area.style.transform = "translateX(5px)", 100);
-            setTimeout(() => area.style.transform = "translateX(0)", 150);
-        }
-
-        function saveGame() {
-            localStorage.setItem('alchemySave', JSON.stringify(myElements));
-        }
-
-        function resetGame() {
-            if(confirm('בטוח? זה ימחק את כל התגליות.')) {
-                localStorage.removeItem('alchemySave');
-                location.reload();
+            frameCount++;
+            
+            // יצירת מכשולים
+            if (frameCount % spawnRate === 0) {
+                createObstacle();
+                // העלאת קושי
+                if(spawnRate > 20) spawnRate--;
+                if(speed < 15) speed += 0.05;
             }
+
+            // תזוזת מכשולים
+            obstacles.forEach((ob, index) => {
+                ob.top += speed;
+                ob.element.style.top = ob.top + 'px';
+
+                // בדיקת התנגשות
+                const playerRect = player.getBoundingClientRect();
+                const obRect = ob.element.getBoundingClientRect();
+
+                // אם יש חפיפה בין המלבנים
+                if (!(playerRect.right < obRect.left || 
+                      playerRect.left > obRect.right || 
+                      playerRect.bottom < obRect.top || 
+                      playerRect.top > obRect.bottom)) {
+                    gameOver();
+                }
+
+                // אם עבר את המסך
+                if (ob.top > window.innerHeight) {
+                    ob.element.remove();
+                    obstacles.splice(index, 1);
+                    score += 10;
+                    scoreDisplay.innerText = score;
+                }
+            });
+
+            animationFrame = requestAnimationFrame(loop);
         }
+
+        // אפקט כביש זז (CSS)
+        setInterval(() => {
+            if(!gameActive) return;
+            const marker = document.createElement('div');
+            marker.className = 'lane-marker';
+            marker.style.top = '-50px';
+            gameArea.appendChild(marker);
+            
+            // אנימציה פשוטה למרקר
+            let top = -50;
+            const interval = setInterval(() => {
+                if(!gameActive) { clearInterval(interval); marker.remove(); return; }
+                top += speed;
+                marker.style.top = top + 'px';
+                if(top > window.innerHeight) {
+                    marker.remove();
+                    clearInterval(interval);
+                }
+            }, 16);
+        }, 300);
 
     </script>
 </body>
