@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daylight Racer Fixed ☀️</title>
+    <title>Daylight Racer + High Score 🏆</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #87CEEB; /* שמיים כחולים */
+            background-color: #87CEEB;
             font-family: 'Arial', sans-serif;
             touch-action: none;
         }
@@ -22,26 +22,24 @@
             overflow: hidden;
         }
 
-        /* הכביש */
         #road {
             position: relative;
             width: 100%;
             max-width: 600px;
             height: 100%;
-            background-color: #dcdde1; /* אפור בהיר */
-            border-left: 10px solid #44bd32; /* דשא */
+            background-color: #dcdde1;
+            border-left: 10px solid #44bd32;
             border-right: 10px solid #44bd32;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        /* השחקן */
         #player {
             position: absolute;
             bottom: 30px;
             width: 60px;
             height: 90px;
-            background: #e84118; /* אדום בוהק */
+            background: #e84118;
             border-radius: 10px;
             border: 3px solid #c23616;
             left: 50%;
@@ -61,7 +59,6 @@
             font-size: 1.2rem;
         }
 
-        /* מכשולים */
         .obstacle {
             position: absolute;
             width: 60px;
@@ -78,7 +75,6 @@
         }
         .obstacle::before { content: '⚠️'; font-size: 1.5rem; }
 
-        /* פסי הפרדה */
         .line {
             position: absolute;
             width: 6px;
@@ -88,27 +84,41 @@
             transform: translateX(-50%);
         }
 
-        /* לוח ניקוד */
-        #scorePanel {
+        /* לוח ניקוד משודרג */
+        .score-container {
             position: absolute;
             top: 20px;
             left: 20px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .score-box {
             background: white;
             padding: 10px 20px;
             border-radius: 15px;
             border: 3px solid #2f3640;
             color: black;
-            font-size: 2rem;
             font-weight: 900;
-            z-index: 50;
             box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+            min-width: 80px;
+            text-align: center;
         }
 
-        /* מסך פתיחה/סיום */
+        #scorePanel { font-size: 2rem; }
+        
+        #bestPanel { 
+            font-size: 1rem; 
+            background: #f1c40f; /* צבע זהב לשיא */
+            border-color: #b7950b;
+        }
+
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -135,7 +145,6 @@
         }
         button:active { transform: translateY(5px); box-shadow: none; }
 
-        /* תיקון כפתורי השליטה */
         .controls-area {
             display: flex;
             width: 100%;
@@ -145,10 +154,7 @@
             z-index: 20;
         }
         
-        .control-side {
-            width: 50%;
-            height: 100%;
-        }
+        .control-side { width: 50%; height: 100%; }
         
         .boom {
             background: black !important;
@@ -156,24 +162,38 @@
             transition: 0.2s !important;
         }
 
+        .new-record {
+            color: #e67e22;
+            font-weight: bold;
+            animation: flash 1s infinite;
+        }
+        
+        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
     </style>
 </head>
 <body>
 
     <div id="gameContainer">
-        <div id="scorePanel">0</div>
+        <div class="score-container">
+            <div class="score-box" id="scorePanel">0</div>
+            <div class="score-box" id="bestPanel">שיא: 0</div>
+        </div>
         
         <div id="road">
             <div id="player"></div>
         </div>
 
         <div class="controls-area">
-            <div class="control-side" onclick="moveRight()"></div> <div class="control-side" onclick="moveLeft()"></div>  </div>
+            <div class="control-side" onclick="moveRight()"></div>
+            <div class="control-side" onclick="moveLeft()"></div>
+        </div>
     </div>
 
     <div id="overlay">
         <h1>מירוץ<br>כביש</h1>
-        <p id="msg" style="font-size:1.5rem; margin: 10px 0;">הגה מתוקן! מוכן?</p>
+        <p id="bestOnStart" style="margin-top:5px; color:#7f8c8d; font-weight:bold;">השיא שלך: 0</p>
+        <p id="msg" style="font-size:1.5rem; margin: 20px 0; display:none;"></p>
         <button onclick="startGame()">התחל נסיעה ▶</button>
     </div>
 
@@ -181,16 +201,28 @@
         const player = document.getElementById('player');
         const road = document.getElementById('road');
         const scoreDisplay = document.getElementById('scorePanel');
+        const bestDisplay = document.getElementById('bestPanel');
+        const bestOnStart = document.getElementById('bestOnStart');
         const overlay = document.getElementById('overlay');
+        const msg = document.getElementById('msg');
         
         let gameActive = false;
         let score = 0;
+        let highScore = localStorage.getItem('racerHighScore') || 0; // טעינת השיא מהזיכרון
         let speed = 6;
         let playerLane = 1;
         let obstacles = [];
         let animationFrame;
         let spawnCounter = 0;
         const LANES_POS = [20, 50, 80]; 
+
+        // עדכון תצוגה ראשוני
+        updateBestDisplay();
+
+        function updateBestDisplay() {
+            bestDisplay.innerText = "שיא: " + highScore;
+            bestOnStart.innerText = "השיא שלך: " + highScore;
+        }
 
         function moveLeft() {
             if(!gameActive) return;
@@ -210,6 +242,7 @@
 
         function startGame() {
             overlay.style.display = 'none';
+            msg.style.display = 'none';
             gameActive = true;
             score = 0;
             speed = 7;
@@ -230,8 +263,20 @@
             cancelAnimationFrame(animationFrame);
             player.classList.add('boom');
             
-            document.getElementById('msg').innerHTML = "התרסקת! 💥<br>ניקוד סופי: <b>" + score + "</b>";
+            let msgText = "התרסקת! 💥<br>ניקוד: <b>" + score + "</b>";
+            
+            // בדיקת שיא חדש
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('racerHighScore', highScore); // שמירה בזיכרון
+                updateBestDisplay();
+                msgText += "<br><span class='new-record'>✨ שיא חדש! ✨</span>";
+            }
+
+            msg.innerHTML = msgText;
+            msg.style.display = 'block';
             document.querySelector('button').innerText = "נסה שוב ↻";
+            
             setTimeout(() => overlay.style.display = 'flex', 800);
         }
 
