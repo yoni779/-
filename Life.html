@@ -3,334 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YoniOS Pro</title>
+    <title>YoniOS Cloud</title>
     
+    <!-- ספריות עיצוב -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Alpine.js חייב להיטען אחרי שהגדרנו את הנתונים -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { font-family: 'Rubik', sans-serif; background-color: #F3F4F6; }
+        body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         [x-cloak] { display: none !important; }
         
         /* אנימציות */
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-enter { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        /* עיצוב רקע וזכוכית */
-        .bg-mesh {
-            background: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-color: #111827;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .glass-dark {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+        .scale-in { animation: scaleIn 0.2s ease-out; }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* הסתרת פס גלילה אבל השארת פונקציונליות */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background-color: #f1f5f9;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .input-field:focus {
+            background-color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* אנימציית טעינה */
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 h-screen overflow-hidden flex flex-col" x-data="app()" x-init="initData()">
+<body class="text-slate-800 h-screen overflow-hidden flex flex-col" x-data="app()">
 
-    <div class="fixed top-0 left-0 w-full h-[30vh] bg-mesh rounded-b-[3rem] shadow-2xl z-0"></div>
+    <!-- ==================== מסך טעינה ==================== -->
+    <div x-show="isLoading" class="fixed inset-0 z-[60] bg-white flex flex-col items-center justify-center" x-transition>
+        <div class="loader mb-4"></div>
+        <p class="text-slate-400 text-sm font-bold">מתחבר לענן...</p>
+    </div>
 
-    <header class="relative z-10 p-6 pt-8 text-white flex justify-between items-start">
-        <div>
-            <p class="text-gray-300 text-sm mb-1">ברוך שובך,</p>
-            <h1 x-show="!editMode" class="text-3xl font-black tracking-tight" x-text="settings.appName"></h1>
-            <input x-show="editMode" x-model="settings.appName" class="text-2xl font-bold bg-white/20 border-white/30 text-white rounded px-2 w-40 backdrop-blur-sm">
-            
-            <div class="mt-4 flex items-center gap-3">
-                <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-1000" :style="`width: ${Math.min(coins/10, 100)}%`"></div>
+    <!-- ==================== מסך התחברות ==================== -->
+    <div x-show="!user.isLoggedIn && !isLoading" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8 text-center modal-enter">
+        <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-200 mb-6 rotate-3">
+            <i class="fa-solid fa-cloud-bolt"></i>
+        </div>
+        <h1 class="text-3xl font-black text-slate-900 mb-2">YoniOS Cloud</h1>
+        <p class="text-slate-500 mb-8">כל הנתונים שלך מסונכרנים בזמן אמת.</p>
+        
+        <div class="w-full max-w-xs space-y-4">
+            <div class="text-right">
+                <label class="text-xs font-bold text-slate-400 mr-1">שם משתמש</label>
+                <input type="text" x-model="loginForm.name" class="input-field" placeholder="השם שלך">
+            </div>
+            <div class="text-right">
+                <label class="text-xs font-bold text-slate-400 mr-1">אימייל (זה המפתח הסודי שלך)</label>
+                <input type="email" x-model="loginForm.email" class="input-field" placeholder="your@email.com">
+                <p class="text-[10px] text-slate-400 mt-1 pr-1">* השתמש באותו מייל כדי לראות את הנתונים במכשיר אחר</p>
+            </div>
+            <button @click="login()" :disabled="!loginForm.name || !loginForm.email" 
+                class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-4">
+                התחבר למערכת 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== אפליקציה ראשית ==================== -->
+    <div x-show="user.isLoggedIn" class="flex-1 flex flex-col h-full relative" x-cloak>
+        
+        <!-- כותרת עליונה -->
+        <header class="px-6 pt-8 pb-4 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-30">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    <span x-text="user.name ? user.name.charAt(0) : 'A'"></span>
                 </div>
-                <span class="text-xs font-bold text-blue-300">LVL <span x-text="Math.floor(coins/100) + 1"></span></span>
+                <div>
+                    <h1 class="text-lg font-black leading-none" x-text="settings.appName"></h1>
+                    <div class="flex items-center gap-1">
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                        <p class="text-xs text-slate-500">מחובר לענן</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-slate-100 shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                <span class="text-blue-600 font-black" x-text="coins"></span>
+                <span class="text-sm">💎</span>
+            </div>
+        </header>
+
+        <!-- איזור תוכן גלילה -->
+        <main class="flex-1 overflow-y-auto no-scrollbar px-5 pb-28">
+            
+            <!-- באנר התקדמות -->
+            <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl shadow-slate-200 mb-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                <div class="relative z-10 flex justify-between items-end">
+                    <div>
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">הדרגה שלי</p>
+                        <h2 class="text-3xl font-black">Level <span x-text="Math.floor(coins/100) + 1"></span></h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-400 mb-1">עוד <span x-text="100 - (coins % 100)"></span> לדרגה הבאה</p>
+                        <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500 transition-all duration-1000" :style="`width: ${coins % 100}%`"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- לשונית משימות -->
+            <div x-show="currentTab === 'tasks'" class="scale-in">
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-xl font-bold text-slate-800">משימות</h2>
+                </div>
+                <div class="space-y-3">
+                    <template x-for="(task, index) in tasks" :key="index">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 relative group">
+                            <button @click="toggleTask(task, index)" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                                 :class="task.completed ? 'bg-green-500 border-green-500' : 'border-slate-300'">
+                                <i x-show="task.completed" class="fa-solid fa-check text-white text-[10px]"></i>
+                            </button>
+                            <div class="flex-1">
+                                <p class="font-bold text-slate-700" :class="{'line-through text-slate-400': task.completed}" x-text="task.title"></p>
+                                <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded">+<span x-text="task.reward"></span> נקודות</span>
+                            </div>
+                            <button @click="openOptions('tasks', index)" class="text-slate-300 hover:text-slate-600 p-2">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                 <button @click="openModal('tasks')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-300 flex items-center justify-center text-2xl active:scale-90 transition-transform z-40">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <!-- לשונית חנות -->
+            <div x-show="currentTab === 'shop'" class="scale-in" x-cloak>
+                <h2 class="text-xl font-bold text-slate-800 mb-4">חנות הפינוקים</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <template x-for="(item, index) in shopItems" :key="index">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-48 relative">
+                             <button @click="openOptions('shopItems', index)" class="absolute top-2 left-2 text-slate-300 hover:text-slate-600 p-1">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div class="flex-1 flex flex-col items-center justify-center text-center">
+                                <div class="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 text-xl mb-2">
+                                    <i class="fa-solid fa-gift"></i>
+                                </div>
+                                <h3 class="font-bold text-sm leading-tight mb-1" x-text="item.name"></h3>
+                                <p class="text-xs text-slate-400 font-bold"><span x-text="item.cost"></span> 💎</p>
+                            </div>
+                            <button @click="buyItem(item)" :disabled="coins < item.cost"
+                                class="w-full py-2 rounded-xl text-xs font-bold mt-2 transition-colors"
+                                :class="coins >= item.cost ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'">
+                                רכוש
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                 <button @click="openModal('shopItems')" class="fixed bottom-24 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-300 flex items-center justify-center text-2xl active:scale-90 transition-transform z-40">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- תפריט תחתון -->
+        <nav class="bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center fixed bottom-0 w-full z-30 pb-6">
+            <button @click="currentTab = 'tasks'" :class="currentTab === 'tasks' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
+                <i class="fa-solid fa-list-check text-xl"></i><span class="text-[10px] font-bold">משימות</span>
+            </button>
+            <button @click="currentTab = 'shop'" :class="currentTab === 'shop' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
+                <i class="fa-solid fa-store text-xl"></i><span class="text-[10px] font-bold">חנות</span>
+            </button>
+            <button @click="currentTab = 'profile'" :class="currentTab === 'profile' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
+                <i class="fa-solid fa-user text-xl"></i><span class="text-[10px] font-bold">פרופיל</span>
+            </button>
+        </nav>
+
+        <!-- מודאלים (Popup) -->
+        <div x-show="modal.isOpen" class="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/50 backdrop-blur-sm" x-cloak>
+            <div @click.away="closeModal()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 modal-enter">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold" x-text="modal.isEdit ? 'עריכת פריט' : 'הוספת חדש'"></h3>
+                    <button @click="closeModal()" class="bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400">כותרת</label>
+                        <input type="text" x-model="modal.data.title" class="input-field" placeholder="מה לכתוב כאן?">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400" x-text="modal.type === 'tasks' ? 'שווי ניקוד (XP)' : 'מחיר ביהלומים'"></label>
+                        <input type="number" x-model="modal.data.value" class="input-field" placeholder="0">
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button @click="saveItem()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-200">שמור שינויים</button>
+                        <button x-show="modal.isEdit" @click="deleteCurrentItem()" class="flex-1 bg-red-50 text-red-500 py-3 rounded-xl font-bold">מחק</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <button @click="editMode = !editMode" 
-            class="w-10 h-10 rounded-full glass-dark flex items-center justify-center text-white transition-transform active:scale-95">
-            <i class="fa-solid" :class="editMode ? 'fa-check text-green-400' : 'fa-gear'"></i>
-        </button>
-    </header>
-
-    <div class="relative z-10 px-6 -mt-4 mb-4">
-        <div class="glass shadow-xl rounded-3xl p-5 flex justify-between items-center transform transition-all">
-            <div>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">הבנק שלי</p>
-                <div class="flex items-baseline gap-1">
-                    <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600" x-text="coins"></span>
-                    <span class="text-2xl">💎</span>
-                </div>
-                <input x-show="editMode" type="number" x-model="coins" class="mt-2 w-full bg-gray-100 rounded p-1 border border-gray-300">
+        <div x-show="actions.isOpen" class="fixed inset-0 z-50 flex items-end justify-center bg-black/20" x-cloak>
+            <div @click.away="actions.isOpen = false" class="bg-white w-full max-w-md rounded-t-3xl p-6 modal-enter space-y-2">
+                <button @click="editFromActions()" class="w-full bg-slate-50 py-4 rounded-xl font-bold text-slate-700 flex items-center justify-center gap-2"><i class="fa-solid fa-pen"></i> ערוך</button>
+                <button @click="deleteFromActions()" class="w-full bg-red-50 py-4 rounded-xl font-bold text-red-500 flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> מחק</button>
+                <button @click="actions.isOpen = false" class="w-full py-3 font-bold text-slate-400">ביטול</button>
             </div>
-            <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-xl shadow-inner">
-                <i class="fa-solid fa-wallet"></i>
+        </div>
+
+        <!-- לשונית פרופיל -->
+        <div x-show="currentTab === 'profile'" class="scale-in px-6" x-cloak>
+            <h2 class="text-2xl font-bold mb-6 mt-4">הגדרות משתמש</h2>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center mb-6">
+                <div class="w-20 h-20 rounded-full bg-slate-900 text-white text-3xl flex items-center justify-center mx-auto mb-3">
+                    <span x-text="user.name.charAt(0)"></span>
+                </div>
+                <h3 class="text-xl font-bold" x-text="user.name"></h3>
+                <p class="text-slate-400 text-sm" x-text="user.email"></p>
+            </div>
+            <div class="space-y-3">
+                <div class="bg-white p-4 rounded-xl border border-slate-100 flex justify-between items-center">
+                    <span>שם האפליקציה</span>
+                    <input x-model="settings.appName" @change="saveToCloud()" class="text-left bg-transparent font-bold text-blue-600 outline-none w-32">
+                </div>
+                <button @click="logout()" class="w-full bg-red-50 text-red-500 py-4 rounded-xl font-bold mt-8">התנתק</button>
             </div>
         </div>
     </div>
 
-    <main class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-6 pb-24 fade-in">
-        
-        <div x-show="currentTab === 'tasks'">
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-xl font-bold text-gray-800">משימות להיום</h2>
-                <button @click="addItem('tasks')" class="text-blue-600 bg-blue-100 px-3 py-1 rounded-full text-xs font-bold shadow-sm active:scale-95">
-                    <i class="fa-solid fa-plus mr-1"></i> הוסף
-                </button>
-            </div>
-            
-            <div class="space-y-3">
-                <template x-for="(task, index) in tasks" :key="index">
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group transition-all duration-300"
-                         :class="{'opacity-60': task.completed, 'border-blue-500 ring-2 ring-blue-100': editMode}">
-                        
-                        <button x-show="editMode" @click="deleteItem('tasks', index)" class="absolute left-0 top-0 h-full w-12 bg-red-500 text-white z-20 flex items-center justify-center">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+    <!-- לוגיקה (מודול) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-                        <div @click="!editMode && toggleTask(task)" class="w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors z-10"
-                             :class="task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'">
-                            <i x-show="task.completed" class="fa-solid fa-check text-white text-xs"></i>
-                        </div>
+        // הקוד ששלחת לי שולב כאן!
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMBx4Udu3w9iR6GpEcl561TNWGRc1UVQ0",
+            authDomain: "yoni-os.firebaseapp.com",
+            projectId: "yoni-os",
+            storageBucket: "yoni-os.firebasestorage.app",
+            messagingSenderId: "238428366388",
+            appId: "1:238428366388:web:70e54810382d3d88134c61"
+        };
 
-                        <div class="flex-1 z-10">
-                            <input x-show="editMode" x-model="task.title" class="w-full bg-gray-50 p-1 rounded mb-1">
-                            <p x-show="!editMode" class="font-bold text-gray-800" :class="{'line-through text-gray-400': task.completed}" x-text="task.title"></p>
-                            
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold">
-                                    +<span x-text="task.reward"></span> <span x-show="editMode"><input type="number" x-model="task.reward" class="w-8 bg-transparent text-center"></span> XP
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        <div x-show="currentTab === 'shop'" x-cloak>
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-xl font-bold text-gray-800">מרקטפלייס</h2>
-                <button @click="addItem('shopItems')" class="text-purple-600 bg-purple-100 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                    <i class="fa-solid fa-plus mr-1"></i> הוסף
-                </button>
-            </div>
+        // חשיפת הפונקציות לאלפיין
+        window.firebaseDb = db;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseOnValue = onValue;
 
-            <div class="grid grid-cols-2 gap-4">
-                <template x-for="(item, index) in shopItems" :key="index">
-                    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col justify-between h-40 relative border border-gray-100"
-                         :class="{'border-blue-500 ring-2 ring-blue-100': editMode}">
-                        
-                        <button x-show="editMode" @click="deleteItem('shopItems', index)" class="absolute top-2 left-2 text-red-500 bg-white shadow rounded-full w-6 h-6 text-xs z-20">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-
-                        <div>
-                            <div class="w-10 h-10 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center text-orange-500 mb-3">
-                                <i class="fa-solid fa-gift"></i>
-                            </div>
-                            <input x-show="editMode" x-model="item.name" class="w-full text-sm font-bold mb-1 bg-gray-50">
-                            <h3 x-show="!editMode" class="font-bold text-gray-800 leading-tight" x-text="item.name"></h3>
-                        </div>
-
-                        <button @click="buyItem(item)" 
-                                :disabled="coins < item.cost && !editMode"
-                                class="mt-2 w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex justify-center items-center gap-1"
-                                :class="coins >= item.cost ? 'bg-gray-900 text-white shadow-lg shadow-gray-300' : 'bg-gray-200 text-gray-400'">
-                            <span x-show="!editMode" x-text="item.cost"></span>
-                            <input x-show="editMode" type="number" x-model="item.cost" class="w-10 text-black text-center rounded">
-                            💎 רכוש
-                        </button>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'habits'" x-cloak>
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-xl font-bold text-gray-800">מעקב הרגלים</h2>
-                <button @click="addItem('habits')" class="text-green-600 bg-green-100 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                    <i class="fa-solid fa-plus mr-1"></i> הוסף
-                </button>
-            </div>
-
-             <div class="space-y-3">
-                <template x-for="(habit, index) in habits" :key="index">
-                    <div class="bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center relative"
-                         :class="{'border-blue-500 ring-2 ring-blue-100': editMode}">
-                        
-                         <button x-show="editMode" @click="deleteItem('habits', index)" class="absolute top-1/2 -translate-y-1/2 left-2 text-red-500 text-sm z-20 bg-red-50 p-2 rounded-full">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-
-                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all"
-                                 :class="habit.done ? 'bg-green-500 text-white shadow-green-200 shadow-lg scale-110' : 'bg-gray-100 text-gray-300'">
-                                <i class="fa-solid" :class="habit.done ? 'fa-fire' : 'fa-fire'"></i>
-                            </div>
-                            <div>
-                                <input x-show="editMode" x-model="habit.name" class="bg-gray-50 rounded p-1">
-                                <h4 x-show="!editMode" class="font-bold text-gray-700" x-text="habit.name"></h4>
-                                <p class="text-[10px] text-gray-400">יומי • 10 נק'</p>
-                            </div>
-                         </div>
-
-                         <button x-show="!editMode" @click="toggleHabit(habit)" class="w-8 h-8 rounded-full border flex items-center justify-center transition-colors"
-                            :class="habit.done ? 'bg-green-50 border-green-200 text-green-600' : 'border-gray-200 text-gray-300'">
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                    </div>
-                </template>
-            </div>
-            
-            <button @click="resetHabits()" class="mt-8 w-full py-3 bg-white border border-gray-200 text-gray-500 rounded-2xl text-sm font-medium shadow-sm active:scale-95">
-                🔄 אפס יום חדש
-            </button>
-        </div>
-
-    </main>
-
-    <nav class="fixed bottom-4 left-4 right-4 bg-gray-900/90 backdrop-blur-lg text-white rounded-2xl p-2 shadow-2xl z-50 flex justify-around items-center border border-white/10">
-        <template x-for="tab in tabs">
-            <button 
-                @click="currentTab = tab.id"
-                class="flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all duration-300"
-                :class="currentTab === tab.id ? 'bg-white/20 text-white shadow-lg scale-105' : 'text-gray-400 hover:text-white'">
-                <i class="fa-solid text-lg mb-1" :class="tab.icon"></i>
-                <span class="text-[10px] font-medium" x-text="tab.label"></span>
-            </button>
-        </template>
-    </nav>
-
-    <script>
-        function app() {
-            return {
-                editMode: false,
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('app', () => ({
+                isLoading: false,
                 currentTab: 'tasks',
                 coins: 0,
-                settings: { appName: 'YoniOS' },
-                tabs: [
-                    { id: 'tasks', label: 'משימות', icon: 'fa-list-check' },
-                    { id: 'shop', label: 'חנות', icon: 'fa-store' },
-                    { id: 'habits', label: 'הרגלים', icon: 'fa-heart-pulse' },
-                ],
+                user: { isLoggedIn: false, name: '', email: '' },
+                settings: { appName: 'YoniOS Cloud' },
                 tasks: [],
                 shopItems: [],
-                habits: [],
+                loginForm: { name: '', email: '' },
+                modal: { isOpen: false, isEdit: false, type: '', index: -1, data: { title: '', value: '' } },
+                actions: { isOpen: false, type: '', index: -1 },
+                dbPath: null, // הנתיב האישי שלך בדאטה בייס
 
-                initData() {
-                    const savedData = localStorage.getItem('yonios_pro_v1');
-                    if (savedData) {
-                        const data = JSON.parse(savedData);
-                        this.coins = data.coins;
-                        this.tasks = data.tasks;
-                        this.shopItems = data.shopItems;
-                        this.habits = data.habits;
-                        this.settings = data.settings || { appName: 'YoniOS' };
-                    } else {
-                        this.coins = 250;
-                        this.tasks = [
-                            { title: 'לסיים את האתר החדש', reward: 100, completed: false },
-                            { title: 'אימון כוח', reward: 50, completed: false }
-                        ];
-                        this.shopItems = [
-                            { name: 'קפה קר מפנק', cost: 40 },
-                            { name: 'ערב פיצה', cost: 200 }
-                        ];
-                        this.habits = [
-                            { name: 'לקום ב-7 בבוקר', done: false },
-                            { name: '2 ליטר מים', done: false }
-                        ];
+                init() {
+                    // בדיקה אם כבר מחובר מהעבר
+                    const savedUser = localStorage.getItem('yoni_cloud_user');
+                    if (savedUser) {
+                        const userData = JSON.parse(savedUser);
+                        this.loginForm = userData;
+                        this.login();
                     }
-
-                    this.$watch('coins', () => this.save());
-                    this.$watch('tasks', () => this.save());
-                    this.$watch('shopItems', () => this.save());
-                    this.$watch('habits', () => this.save());
-                    this.$watch('settings', () => this.save());
                 },
 
-                save() {
-                    const data = {
-                        coins: parseInt(this.coins),
-                        tasks: this.tasks,
-                        shopItems: this.shopItems,
-                        habits: this.habits,
-                        settings: this.settings
-                    };
-                    localStorage.setItem('yonios_pro_v1', JSON.stringify(data));
-                },
+                login() {
+                    this.isLoading = true;
+                    // יצירת מפתח ייחודי מהאימייל (החלפת נקודות בפסיקים כי Firebase לא אוהב נקודות)
+                    const safeEmail = this.loginForm.email.replace(/\./g, '_');
+                    this.dbPath = 'users/' + safeEmail;
+                    
+                    // חיבור ל-Firebase בזמן אמת!
+                    const userRef = window.firebaseRef(window.firebaseDb, this.dbPath);
+                    
+                    window.firebaseOnValue(userRef, (snapshot) => {
+                        const data = snapshot.val();
+                        this.isLoading = false;
+                        this.user.isLoggedIn = true;
+                        this.user.name = this.loginForm.name;
+                        this.user.email = this.loginForm.email;
+                        
+                        // שמירת פרטי התחברות מקומית (כדי לא להתחבר כל פעם מחדש)
+                        localStorage.setItem('yoni_cloud_user', JSON.stringify({name: this.user.name, email: this.user.email}));
 
-                celebrate() {
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#60A5FA', '#A78BFA', '#F472B6']
+                        if (data) {
+                            // טעינת נתונים מהענן
+                            this.coins = data.coins || 0;
+                            this.tasks = data.tasks || [];
+                            this.shopItems = data.shopItems || [];
+                            this.settings = data.settings || { appName: 'YoniOS Cloud' };
+                        } else {
+                            // משתמש חדש? ניצור נתונים התחלתיים
+                            this.saveToCloud();
+                        }
                     });
                 },
 
-                toggleTask(task) {
-                    task.completed = !task.completed;
-                    if (task.completed) {
-                        this.coins = parseInt(this.coins) + parseInt(task.reward);
-                        this.celebrate();
-                    } else {
-                        this.coins = parseInt(this.coins) - parseInt(task.reward);
-                    }
-                },
-
-                toggleHabit(habit) {
-                    habit.done = !habit.done;
-                    if(habit.done) {
-                        this.coins = parseInt(this.coins) + 10;
-                        this.celebrate();
-                    }
-                    else this.coins = parseInt(this.coins) - 10;
-                },
-
-                buyItem(item) {
-                    if (this.coins >= item.cost) {
-                        if(confirm('לרכוש את ' + item.name + '?')) {
-                            this.coins -= item.cost;
-                            this.celebrate();
-                        }
-                    }
-                },
-
-                addItem(type) {
-                    if(type === 'tasks') this.tasks.push({ title: 'משימה חדשה', reward: 50, completed: false });
-                    if(type === 'shopItems') this.shopItems.push({ name: 'פינוק חדש', cost: 100 });
-                    if(type === 'habits') this.habits.push({ name: 'הרגל חדש', done: false });
-                },
-
-                deleteItem(type, index) {
-                    if(confirm('למחוק?')) {
-                        this[type].splice(index, 1);
-                    }
-                },
-                
-                resetHabits() {
-                    if(confirm('יום חדש התחיל?')) {
-                        this.habits.forEach(h => h.done = false);
-                    }
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                saveToCloud() {
+                    if (!this.dbPath) return;
+                    const data = {
+                        coins: this.coins,
+                        tasks: this.tasks,
+                        shopItems: this.shopItems,
+                        settings: this.settings
+                    };
+                    // שליחה לענן
+                    window.firebaseSet(window.firebaseRef(window.fire
