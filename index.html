@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YoniOS Cloud</title>
     
-    <!-- ספריות עיצוב -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
 
-    <!-- Alpine.js חייב להיטען אחרי שהגדרנו את הנתונים -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -50,13 +48,11 @@
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex flex-col" x-data="app()">
 
-    <!-- ==================== מסך טעינה ==================== -->
     <div x-show="isLoading" class="fixed inset-0 z-[60] bg-white flex flex-col items-center justify-center" x-transition>
         <div class="loader mb-4"></div>
         <p class="text-slate-400 text-sm font-bold">מתחבר לענן...</p>
     </div>
 
-    <!-- ==================== מסך התחברות ==================== -->
     <div x-show="!user.isLoggedIn && !isLoading" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-8 text-center modal-enter">
         <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-200 mb-6 rotate-3">
             <i class="fa-solid fa-cloud-bolt"></i>
@@ -81,10 +77,8 @@
         </div>
     </div>
 
-    <!-- ==================== אפליקציה ראשית ==================== -->
     <div x-show="user.isLoggedIn" class="flex-1 flex flex-col h-full relative" x-cloak>
         
-        <!-- כותרת עליונה -->
         <header class="px-6 pt-8 pb-4 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-30">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -104,10 +98,8 @@
             </div>
         </header>
 
-        <!-- איזור תוכן גלילה -->
         <main class="flex-1 overflow-y-auto no-scrollbar px-5 pb-28">
             
-            <!-- באנר התקדמות -->
             <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl shadow-slate-200 mb-8 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                 <div class="relative z-10 flex justify-between items-end">
@@ -124,7 +116,6 @@
                 </div>
             </div>
 
-            <!-- לשונית משימות -->
             <div x-show="currentTab === 'tasks'" class="scale-in">
                 <div class="flex justify-between items-end mb-4">
                     <h2 class="text-xl font-bold text-slate-800">משימות</h2>
@@ -151,7 +142,6 @@
                 </button>
             </div>
 
-            <!-- לשונית חנות -->
             <div x-show="currentTab === 'shop'" class="scale-in" x-cloak>
                 <h2 class="text-xl font-bold text-slate-800 mb-4">חנות הפינוקים</h2>
                 <div class="grid grid-cols-2 gap-4">
@@ -181,7 +171,6 @@
             </div>
         </main>
 
-        <!-- תפריט תחתון -->
         <nav class="bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center fixed bottom-0 w-full z-30 pb-6">
             <button @click="currentTab = 'tasks'" :class="currentTab === 'tasks' ? 'text-blue-600' : 'text-slate-400'" class="flex flex-col items-center gap-1 transition-colors">
                 <i class="fa-solid fa-list-check text-xl"></i><span class="text-[10px] font-bold">משימות</span>
@@ -194,7 +183,6 @@
             </button>
         </nav>
 
-        <!-- מודאלים (Popup) -->
         <div x-show="modal.isOpen" class="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/50 backdrop-blur-sm" x-cloak>
             <div @click.away="closeModal()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 modal-enter">
                 <div class="flex justify-between items-center mb-6">
@@ -226,7 +214,6 @@
             </div>
         </div>
 
-        <!-- לשונית פרופיל -->
         <div x-show="currentTab === 'profile'" class="scale-in px-6" x-cloak>
             <h2 class="text-2xl font-bold mb-6 mt-4">הגדרות משתמש</h2>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center mb-6">
@@ -246,12 +233,10 @@
         </div>
     </div>
 
-    <!-- לוגיקה (מודול) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        // הקוד ששלחת לי שולב כאן!
         const firebaseConfig = {
             apiKey: "AIzaSyAMBx4Udu3w9iR6GpEcl561TNWGRc1UVQ0",
             authDomain: "yoni-os.firebaseapp.com",
@@ -264,7 +249,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // חשיפת הפונקציות לאלפיין
         window.firebaseDb = db;
         window.firebaseRef = ref;
         window.firebaseSet = set;
@@ -282,10 +266,9 @@
                 loginForm: { name: '', email: '' },
                 modal: { isOpen: false, isEdit: false, type: '', index: -1, data: { title: '', value: '' } },
                 actions: { isOpen: false, type: '', index: -1 },
-                dbPath: null, // הנתיב האישי שלך בדאטה בייס
+                dbPath: null,
 
                 init() {
-                    // בדיקה אם כבר מחובר מהעבר
                     const savedUser = localStorage.getItem('yoni_cloud_user');
                     if (savedUser) {
                         const userData = JSON.parse(savedUser);
@@ -296,11 +279,9 @@
 
                 login() {
                     this.isLoading = true;
-                    // יצירת מפתח ייחודי מהאימייל (החלפת נקודות בפסיקים כי Firebase לא אוהב נקודות)
                     const safeEmail = this.loginForm.email.replace(/\./g, '_');
                     this.dbPath = 'users/' + safeEmail;
                     
-                    // חיבור ל-Firebase בזמן אמת!
                     const userRef = window.firebaseRef(window.firebaseDb, this.dbPath);
                     
                     window.firebaseOnValue(userRef, (snapshot) => {
@@ -310,17 +291,14 @@
                         this.user.name = this.loginForm.name;
                         this.user.email = this.loginForm.email;
                         
-                        // שמירת פרטי התחברות מקומית (כדי לא להתחבר כל פעם מחדש)
                         localStorage.setItem('yoni_cloud_user', JSON.stringify({name: this.user.name, email: this.user.email}));
 
                         if (data) {
-                            // טעינת נתונים מהענן
                             this.coins = data.coins || 0;
                             this.tasks = data.tasks || [];
                             this.shopItems = data.shopItems || [];
                             this.settings = data.settings || { appName: 'YoniOS Cloud' };
                         } else {
-                            // משתמש חדש? ניצור נתונים התחלתיים
                             this.saveToCloud();
                         }
                     });
@@ -334,5 +312,33 @@
                         shopItems: this.shopItems,
                         settings: this.settings
                     };
-                    // שליחה לענן
-                    window.firebaseSet(window.firebaseRef(window.fire
+                    window.firebaseSet(window.firebaseRef(window.firebaseDb, this.dbPath), data);
+                },
+
+                logout() {
+                    if(confirm('להתנתק מהחשבון במכשיר זה?')) {
+                        localStorage.removeItem('yoni_cloud_user');
+                        location.reload();
+                    }
+                },
+
+                toggleTask(task, index) {
+                    this.tasks[index].completed = !this.tasks[index].completed;
+                    if (this.tasks[index].completed) {
+                        this.coins += parseInt(task.reward);
+                        this.celebrate();
+                    } else {
+                        this.coins -= parseInt(task.reward);
+                    }
+                    this.saveToCloud();
+                },
+
+                buyItem(item) {
+                    if (this.coins >= item.cost) {
+                        if(confirm('לרכוש את ' + item.name + '?')) {
+                            this.coins -= item.cost;
+                            this.celebrate();
+                            this.saveToCloud();
+                        }
+                    }
+          
