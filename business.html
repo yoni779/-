@@ -1,473 +1,588 @@
-<script>
-    // --- קטגוריות עסק ---
-    const CATEGORIES = {
-        finance:  { name: "פיננסים",       color: "#10b981" },
-        marketing:{ name: "שיווק",         color: "#f472b6" },
-        hr:       { name: "ניהול עובדים",  color: "#a78bfa" },
-        ops:      { name: "תפעול",         color: "#fbbf24" },
-        crisis:   { name: "ניהול משברים",  color: "#ef4444" }
-    };
-
-    // --- שאלות בסיס (טוטוריאל) – מסבירות מושגים, קשורות לקיוסק חלבי ---
-    const BASE_QUESTIONS = [
-        {
-            id: 'cashflow-basic',
-            cat: 'finance',
-            t: "תזרים בקיוסק",
-            q: "יום ראשון היה חזק, אבל בסוף שבוע אין לך כסף לשלם לספקים. מה בעצם הבעיה?",
-            opts: [
-                "בעיית תזרים – הכסף נכנס לא בזמן",
-                "המחירים שלך יקרים מדי",
-                "העובדים מרוויחים יותר מדי"
-            ],
-            a: 0
-        },
-        {
-            id: 'marketing-basic',
-            cat: 'marketing',
-            t: "מי קהל היעד שלך?",
-            q: "קיוסק חלבי במרכז, ליד תחנת אוטובוס ורחוב ראשי. על מי כדאי להתמקד?",
-            opts: [
-                "כולם – כל מי שעובר ברחוב",
-                "עובדים ואנשים ממהרים בשעות עומס + תלמידים אחרי הלימודים",
-                "רק תיירים מחו\"ל"
-            ],
-            a: 1
-        },
-        {
-            id: 'hr-basic',
-            cat: 'hr',
-            t: "עובד במשמרת בערב",
-            q: "עובד חדש עובד סביר, אבל לא מסודר, מאחר לפעמים, ושוכח לנקות. מה הכי חכם?",
-            opts: [
-                "לפטר מיד – אין זמן להתעסק",
-                "לתת לו שיחה ברורה, ציפיות, וחניכה למשמרת-שתיים",
-                "להתעלם, כל עוד הוא מוציא מנות"
-            ],
-            a: 1
-        },
-        {
-            id: 'ops-basic',
-            cat: 'ops',
-            t: "ניהול מלאי – גבינות",
-            q: "המקרר מפוצץ בגבינות, חלק כבר מתקרבות לתוקף. מה הכי נכון לעשות?",
-            opts: [
-                "להזמין עוד כדי שלא יחסר",
-                "לעשות מבצע על מנות עם גבינה לפני שפג תוקף",
-                "לזרוק הכול ולהתחיל מאפס"
-            ],
-            a: 1
-        }
-    ];
-
-    // --- ספריית אירועים ריאליסטיים לקיוסק חלבי ---
-    // כל אירוע: id, cat, title, text, opts, correctIdx, costBase, rewardBase
-    const EVENTS = [
-        {
-            id: 'cheese-shortage',
-            cat: 'ops',
-            title: "נגמרה גבינה צהובה באמצע ערב",
-            text: "שעת עומס בערב, ותוך כדי עבודה אתה קולט שנשאר לך גבינה צהובה לעוד 5 טוסטים בלבד.",
-            opts: [
-                "עוצר מכירה של טוסטים ונותן משהו אחר במקומם",
-                "ממשיך למכור כרגיל ומקווה שלא ישימו לב כשיגמר",
-                "רץ למכולת הקרובה וקונה גבינה במחיר יקר יותר"
-            ],
-            correctIdx: 2,
-            costBase: 250,
-            rewardBase: 600
-        },
-        {
-            id: 'milk-expire',
-            cat: 'ops',
-            title: "חלב על הסף",
-            text: "אתה רואה שבמקרר יש 6 קרטוני חלב שתוקף שלהם היום בלילה.",
-            opts: [
-                "זורק הכל – לא מתעסק",
-                "מכניס אותם לשימוש במנות חמות ושתייה חמה היום, ועושה מבצע",
-                "מערבב עם חדשים כדי 'לא להרגיש'"
-            ],
-            correctIdx: 1,
-            costBase: 300,
-            rewardBase: 700
-        },
-        {
-            id: 'supplier-price-up',
-            cat: 'finance',
-            title: "ספק הגבינות מעלה מחיר",
-            text: "ספק הגבינות מודיע שהמחיר עולה ב-12% מהחודש הבא.",
-            opts: [
-                "מעלה מחיר לכל המנות מיד באותו אחוז",
-                "מנסה להתמקח, לבחון ספקים נוספים, ולהחליט לפי מספרים",
-                "מתעלם, 'קטן עליי', וממשיך רגיל"
-            ],
-            correctIdx: 1,
-            costBase: 0,
-            rewardBase: 900
-        },
-        {
-            id: 'slow-day-cash',
-            cat: 'finance',
-            title: "יום חלש בקופה",
-            text: "היו כמה ימים חלשים ברצף והקופה דלה. מחר צריך לשלם לספק ירקות.",
-            opts: [
-                "מבקש דחייה מהספק ל-3 ימים ומרים מבצע מיוחד להיום בערב",
-                "לוקח הלוואה יומית מהריבית הכי יקרה",
-                "לא משלם בזמן ומתעלם מהספק"
-            ],
-            correctIdx: 0,
-            costBase: 500,
-            rewardBase: 1200
-        },
-        {
-            id: 'bad-review',
-            cat: 'marketing',
-            title: "ביקורת רעה בוואטסאפ",
-            text: "לקוחה מעלה בקבוצת שכונה הודעה: 'המלאווח שלהם הגיע קר, לא מומלץ'.",
-            opts: [
-                "להתעלם – 'זה רק אחת'",
-                "להגיב בנימוס, להתנצל ולהציע לה פיצוי/מנה חדשה",
-                "להתווכח איתה בפומבי ולהאשים אותה"
-            ],
-            correctIdx: 1,
-            costBase: 200,
-            rewardBase: 900
-        },
-        {
-            id: 'good-review',
-            cat: 'marketing',
-            title: "ביקורת מטורפת לטובה",
-            text: "לקוח כתב פוסט מחמיא מאוד עליך: 'הטוסט הכי טוב בשכונה, שירות מדהים'.",
-            opts: [
-                "לא להגיב – שלא יחשבו שאתה לחוץ",
-                "להודות לו בפומבי, לשתף לסטורי, ולהציע לו הפתעה בפעם הבאה",
-                "להוריד את הרמה כדי שלא יעמיסו עליך עבודה"
-            ],
-            correctIdx: 1,
-            costBase: 100,
-            rewardBase: 800
-        },
-        {
-            id: 'employee-late',
-            cat: 'hr',
-            title: "עובד מאחר קבוע",
-            text: "עובד משמרת ערב מאחר כמעט כל פעם 10–15 דקות, אבל עובד טוב בזמן המשמרת.",
-            opts: [
-                "להתעלם – העיקר שעובד טוב",
-                "לשבת איתו על ציפיות ברורות, להגדיר גבולות וסנקציה על איחורים חוזרים",
-                "להשפיל אותו מול כולם כדי שילמד"
-            ],
-            correctIdx: 1,
-            costBase: 0,
-            rewardBase: 700
-        },
-        {
-            id: 'employee-raise',
-            cat: 'hr',
-            title: "עובדת ותיקה מבקשת העלאה",
-            text: "עובדת רצינית, חצי שנה אצלך, מבקשת עוד 3 ₪ לשעה.",
-            opts: [
-                "לזרוק אותה ולהביא מישהי חדשה וזולה",
-                "לבדוק מספרים – לראות כמה היא שווה לעסק, ואם כן להעלות עם ציפיות ברורות",
-                "להבטיח לה העלאה 'חודש הבא' בלי כוונה אמיתית"
-            ],
-            correctIdx: 1,
-            costBase: 400,
-            rewardBase: 1000
-        },
-        {
-            id: 'line-mess',
-            cat: 'ops',
-            title: "תור מתפוצץ",
-            text: "עומס ענק, תור יוצא מהמקום, חלק מהלקוחות מתחילים להתעצבן.",
-            opts: [
-                "לצעק על כולם שיירגעו",
-                "לארגן תהליך: אחד לוקח הזמנות, אחד מכין, אחד מוציא, ולהרגיע בחיוך",
-                "לסגור חצי תפריט כדי שיהיה פחות מורכב"
-            ],
-            correctIdx: 1,
-            costBase: 300,
-            rewardBase: 1100
-        },
-        {
-            id: 'fridge-broken',
-            cat: 'crisis',
-            title: "המקרר הראשי התקלקל",
-            text: "בוקר, אתה מגיע ורואה שהמקרר כבוי, חלק מהגבינות והחלב כבר חמימים.",
-            opts: [
-                "להמשיך להשתמש בחלק שנראה בסדר, 'חבל על הכסף'",
-                "לזרוק את מה שמסוכן, לקרוא לטכנאי דחוף, ולהביא מקרר גיבוי אם צריך",
-                "לשים הכול שוב במקרר אחרי שתתקן, 'זה יתקרר'"
-            ],
-            correctIdx: 1,
-            costBase: 1500,
-            rewardBase: 2500
-        },
-        {
-            id: 'health-inspection',
-            cat: 'crisis',
-            title: "פיקוח בריאות 🌡️",
-            text: "ביקורת פתע מהעירייה נכנסת. המקום קצת מבולגן, אבל האוכל נקי.",
-            opts: [
-                "להרביץ פאניקה ולהתחיל לצעוק על העובדים תוך כדי",
-                "להיות רגוע, לשתף פעולה, להסביר תהליכים, ולתת תחושה מקצועית",
-                "לנסות להסתיר דברים ולשקר"
-            ],
-            correctIdx: 1,
-            costBase: 0,
-            rewardBase: 1200
-        },
-        {
-            id: 'menu-change',
-            cat: 'marketing',
-            title: "רעיון לתפריט חדש",
-            text: "חבר מציע שתוסיף עוד 15 סוגי מנות חדשים לתפריט.",
-            opts: [
-                "להוסיף הכול – שיראו שיש המון בחירה",
-                "לבחון 1–2 מנות חדשות כנסיון, למדוד רווחיות וביקוש",
-                "לא לשנות כלום לעולם"
-            ],
-            correctIdx: 1,
-            costBase: 400,
-            rewardBase: 900
-        },
-        {
-            id: 'big-order-school',
-            cat: 'finance',
-            title: "הזמנה גדולה מבית ספר",
-            text: "בית ספר מציע הזמנה של 120 טוסטים למחר בבוקר במחיר קצת נמוך מהרגיל.",
-            opts: [
-                "מסרב – 'אני לא מוריד מחיר'",
-                "בודק עלויות, מדבר על כמות קבועה, וסוגר מחיר שנותן רווח סביר ונפח קבוע",
-                "מקבל בלי לבדוק עלויות בכלל"
-            ],
-            correctIdx: 1,
-            costBase: 1000,
-            rewardBase: 3000
-        },
-        {
-            id: 'social-media-trend',
-            cat: 'marketing',
-            title: "טרנד בטיקטוק",
-            text: "מישהו העלה טרנד על מלאווח מגולגל מיוחד. אנשים שואלים אם יש אצלך כזה.",
-            opts: [
-                "להתעלם – אין לי כוח לחידושים",
-                "להכניס גרסה משלך למלאווח מיוחד, לצלם, ולהעלות ברשתות",
-                "להבטיח שיש ולהביא משהו אחר"
-            ],
-            correctIdx: 1,
-            costBase: 350,
-            rewardBase: 1100
-        }
-    ];
-
-    // סט אירועים שכבר שוחקו כדי לא לחזור על עצמם עד שעוברים על כולם
-    let usedEvents = new Set();
-
-    // --- מצב שחקן ---
-    let player = {
-        money: 10000,
-        xp: 0,
-        level: 1,
-        questionIndex: 0 // כמה שאלות ענה סה"כ (כולל בסיס + אירועים)
-    };
-
-    // טעינה משמירה אם קיימת
-    if (localStorage.getItem('infCeoSave')) {
-        try {
-            player = JSON.parse(localStorage.getItem('infCeoSave'));
-        } catch (e) {
-            console.error("בעיה בקריאת שמירה, מתחיל מחדש", e);
-        }
-    }
-
-    renderUI();
-    nextTurn(); // התחלת המשחק
-
-    // --- לוגיקה ראשית ---
-
-    function nextTurn() {
-        checkLevelUp();
-        renderUI();
-
-        const container = document.getElementById('game-container');
-        container.innerHTML = '';
-
-        let scenario;
-        if (player.questionIndex < BASE_QUESTIONS.length) {
-            // שאלות בסיס – לימוד מושגים
-            const base = BASE_QUESTIONS[player.questionIndex];
-            scenario = {
-                cat: base.cat,
-                t: base.t,
-                q: base.q,
-                opts: base.opts,
-                a: base.a,
-                cost: 0,
-                reward: 500
-            };
-        } else {
-            // עוברים למנוע אירועים אינסופי
-            scenario = generateScenario();
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ניהול קיוסק - המנכ"ל האינסופי 🥯</title>
+    <style>
+        :root {
+            --bg: #111827;
+            --card: #1f2937;
+            --text: #f3f4f6;
+            --accent: #6366f1; /* אינדיגו */
+            --green: #10b981;
+            --red: #ef4444;
+            --gold: #fbbf24;
         }
 
-        renderCard(scenario);
-    }
-
-    function generateScenario() {
-        // אם עברנו על כל האירועים – מאפסים ומעלים קצת את הקושי
-        if (usedEvents.size >= EVENTS.length) {
-            usedEvents.clear();
-            player.level++;
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        const available = EVENTS.filter(ev => !usedEvents.has(ev.id));
-        const ev = available[Math.floor(Math.random() * available.length)];
-        usedEvents.add(ev.id);
+        /* --- Header --- */
+        header {
+            background: #0f172a;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #374151;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
 
-        const difficulty = Math.max(1, 0.7 + player.level * 0.4);
-        const cost = Math.floor(ev.costBase * difficulty);
-        const rewardBase = ev.rewardBase || ev.costBase * 1.6;
-        const reward = Math.floor(rewardBase * difficulty);
+        .stats-box { text-align: center; }
+        .label { font-size: 0.75rem; color: #9ca3af; }
+        .value { font-size: 1.1rem; font-weight: bold; }
+        .money { color: var(--green); }
+        .level { color: var(--accent); }
 
-        return {
-            cat: ev.cat,
-            t: ev.title,
-            q: ev.text,
-            opts: ev.opts,
-            a: ev.correctIdx,
-            cost,
-            reward
+        /* --- Main Game Area --- */
+        #game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            transition: opacity 0.3s;
+        }
+
+        .question-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #374151;
+            animation: floatIn 0.4s ease-out;
+        }
+
+        @keyframes floatIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 { margin: 0 0 15px 0; font-size: 1.4rem; line-height: 1.3; }
+        p { color: #d1d5db; line-height: 1.6; margin-bottom: 25px; font-size: 1rem; }
+
+        /* --- Options --- */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #374151;
+            border: 2px solid transparent;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: right;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:active { transform: scale(0.98); }
+        
+        .option-btn.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        
+        .option-btn.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .option-btn.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* --- Feedback Overlay --- */
+        #feedback-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.9);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 100;
+            border: 2px solid #555;
+            min-width: 200px;
+        }
+
+        #feedback-overlay.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .feedback-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+        .feedback-text { font-size: 1.5rem; font-weight: bold; }
+        .feedback-sub { font-size: 1rem; color: #aaa; margin-top: 5px; }
+
+        /* Progress Bar */
+        #xp-bar-container {
+            height: 6px;
+            background: #374151;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+        #xp-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="stats-box">
+            <div class="label">דרגה</div>
+            <div class="value level" id="ui-level">1</div>
+        </div>
+        <div class="stats-box">
+            <div class="label">מזומן</div>
+            <div class="value money" id="ui-money">$10,000</div>
+        </div>
+        <div class="stats-box">
+            <div class="label">XP</div>
+            <div class="value" id="ui-xp">0</div>
+        </div>
+    </header>
+
+    <div id="game-container">
+        </div>
+
+    <div id="feedback-overlay">
+        <div class="feedback-icon" id="fb-icon">✅</div>
+        <div class="feedback-text" id="fb-text">מצוין!</div>
+        <div class="feedback-sub" id="fb-sub">+$500</div>
+    </div>
+
+    <div id="xp-bar-container">
+        <div id="xp-bar-fill"></div>
+    </div>
+
+    <script>
+        // --- קטגוריות עסק ---
+        const CATEGORIES = {
+            finance:  { name: "פיננסים",       color: "#10b981" },
+            marketing:{ name: "שיווק",         color: "#f472b6" },
+            hr:       { name: "ניהול עובדים",  color: "#a78bfa" },
+            ops:      { name: "תפעול",         color: "#fbbf24" },
+            crisis:   { name: "ניהול משברים",  color: "#ef4444" }
         };
-    }
 
-    function renderCard(scenario) {
-        const container = document.getElementById('game-container');
-        const catInfo = CATEGORIES[scenario.cat];
-
-        const card = document.createElement('div');
-        card.className = 'question-card';
-
-        const color = catInfo ? catInfo.color : '#fff';
-        const catName = catInfo ? catInfo.name : 'עסק';
-
-        let html = `
-            <div class="category-badge" style="background:${color}20; color:${color}">
-                ${catName}
-            </div>
-            <h2>${scenario.t}</h2>
-            <p>${scenario.q}</p>
-            <div class="options-grid">
-        `;
-
-        scenario.opts.forEach((opt, i) => {
-            html += `
-                <div class="option-btn"
-                     onclick="handleAnswer(this, ${i}, ${scenario.a}, ${scenario.reward}, ${scenario.cost})">
-                    ${opt}
-                </div>`;
-        });
-
-        html += `</div>`;
-        card.innerHTML = html;
-        container.appendChild(card);
-    }
-
-    function handleAnswer(btn, selectedIdx, correctIdx, reward, potentialCost) {
-        const allBtns = document.querySelectorAll('.option-btn');
-        allBtns.forEach(b => b.classList.add('disabled'));
-
-        const isCorrect = (selectedIdx === correctIdx);
-
-        if (isCorrect) {
-            btn.classList.add('correct');
-            processResult(true, reward);
-        } else {
-            btn.classList.add('wrong');
-            if (allBtns[correctIdx]) {
-                allBtns[correctIdx].classList.remove('disabled');
-                allBtns[correctIdx].classList.add('correct');
+        // --- שאלות בסיס (טוטוריאל) ---
+        const BASE_QUESTIONS = [
+            {
+                id: 'cashflow-basic',
+                cat: 'finance',
+                t: "תזרים בקיוסק",
+                q: "יום ראשון היה חזק, אבל בסוף שבוע אין לך כסף לשלם לספקים. מה בעצם הבעיה?",
+                opts: [
+                    "בעיית תזרים – הכסף נכנס לא בזמן",
+                    "המחירים שלך יקרים מדי",
+                    "העובדים מרוויחים יותר מדי"
+                ],
+                a: 0
+            },
+            {
+                id: 'marketing-basic',
+                cat: 'marketing',
+                t: "מי קהל היעד שלך?",
+                q: "קיוסק חלבי במרכז, ליד תחנת אוטובוס ורחוב ראשי. על מי כדאי להתמקד?",
+                opts: [
+                    "כולם – כל מי שעובר ברחוב",
+                    "עובדים ואנשים ממהרים בשעות עומס + תלמידים אחרי הלימודים",
+                    "רק תיירים מחו\"ל"
+                ],
+                a: 1
+            },
+            {
+                id: 'hr-basic',
+                cat: 'hr',
+                t: "עובד במשמרת בערב",
+                q: "עובד חדש עובד סביר, אבל לא מסודר, מאחר לפעמים, ושוכח לנקות. מה הכי חכם?",
+                opts: [
+                    "לפטר מיד – אין זמן להתעסק",
+                    "לתת לו שיחה ברורה, ציפיות, וחניכה למשמרת-שתיים",
+                    "להתעלם, כל עוד הוא מוציא מנות"
+                ],
+                a: 1
+            },
+            {
+                id: 'ops-basic',
+                cat: 'ops',
+                t: "ניהול מלאי – גבינות",
+                q: "המקרר מפוצץ בגבינות, חלק כבר מתקרבות לתוקף. מה הכי נכון לעשות?",
+                opts: [
+                    "להזמין עוד כדי שלא יחסר",
+                    "לעשות מבצע על מנות עם גבינה לפני שפג תוקף",
+                    "לזרוק הכול ולהתחיל מאפס"
+                ],
+                a: 1
             }
-            const penalty = potentialCost > 0 ? potentialCost : 200 * player.level;
-            processResult(false, -penalty);
+        ];
+
+        // --- ספריית אירועים ---
+        const EVENTS = [
+            {
+                id: 'cheese-shortage',
+                cat: 'ops',
+                title: "נגמרה גבינה צהובה באמצע ערב",
+                text: "שעת עומס בערב, ותוך כדי עבודה אתה קולט שנשאר לך גבינה צהובה לעוד 5 טוסטים בלבד.",
+                opts: [
+                    "עוצר מכירה של טוסטים ונותן משהו אחר במקומם",
+                    "ממשיך למכור כרגיל ומקווה שלא ישימו לב כשיגמר",
+                    "רץ למכולת הקרובה וקונה גבינה במחיר יקר יותר"
+                ],
+                correctIdx: 2,
+                costBase: 250,
+                rewardBase: 600
+            },
+            {
+                id: 'milk-expire',
+                cat: 'ops',
+                title: "חלב על הסף",
+                text: "אתה רואה שבמקרר יש 6 קרטוני חלב שתוקף שלהם היום בלילה.",
+                opts: [
+                    "זורק הכל – לא מתעסק",
+                    "מכניס אותם לשימוש במנות חמות ושתייה חמה היום, ועושה מבצע",
+                    "מערבב עם חדשים כדי 'לא להרגיש'"
+                ],
+                correctIdx: 1,
+                costBase: 300,
+                rewardBase: 700
+            },
+            {
+                id: 'supplier-price-up',
+                cat: 'finance',
+                title: "ספק הגבינות מעלה מחיר",
+                text: "ספק הגבינות מודיע שהמחיר עולה ב-12% מהחודש הבא.",
+                opts: [
+                    "מעלה מחיר לכל המנות מיד באותו אחוז",
+                    "מנסה להתמקח, לבחון ספקים נוספים, ולהחליט לפי מספרים",
+                    "מתעלם, 'קטן עליי', וממשיך רגיל"
+                ],
+                correctIdx: 1,
+                costBase: 0,
+                rewardBase: 900
+            },
+            {
+                id: 'slow-day-cash',
+                cat: 'finance',
+                title: "יום חלש בקופה",
+                text: "היו כמה ימים חלשים ברצף והקופה דלה. מחר צריך לשלם לספק ירקות.",
+                opts: [
+                    "מבקש דחייה מהספק ל-3 ימים ומרים מבצע מיוחד להיום בערב",
+                    "לוקח הלוואה יומית מהריבית הכי יקרה",
+                    "לא משלם בזמן ומתעלם מהספק"
+                ],
+                correctIdx: 0,
+                costBase: 500,
+                rewardBase: 1200
+            },
+            {
+                id: 'bad-review',
+                cat: 'marketing',
+                title: "ביקורת רעה בוואטסאפ",
+                text: "לקוחה מעלה בקבוצת שכונה הודעה: 'המלאווח שלהם הגיע קר, לא מומלץ'.",
+                opts: [
+                    "להתעלם – 'זה רק אחת'",
+                    "להגיב בנימוס, להתנצל ולהציע לה פיצוי/מנה חדשה",
+                    "להתווכח איתה בפומבי ולהאשים אותה"
+                ],
+                correctIdx: 1,
+                costBase: 200,
+                rewardBase: 900
+            },
+            {
+                id: 'good-review',
+                cat: 'marketing',
+                title: "ביקורת מטורפת לטובה",
+                text: "לקוח כתב פוסט מחמיא מאוד עליך: 'הטוסט הכי טוב בשכונה, שירות מדהים'.",
+                opts: [
+                    "לא להגיב – שלא יחשבו שאתה לחוץ",
+                    "להודות לו בפומבי, לשתף לסטורי, ולהציע לו הפתעה בפעם הבאה",
+                    "להוריד את הרמה כדי שלא יעמיסו עליך עבודה"
+                ],
+                correctIdx: 1,
+                costBase: 100,
+                rewardBase: 800
+            },
+            {
+                id: 'employee-late',
+                cat: 'hr',
+                title: "עובד מאחר קבוע",
+                text: "עובד משמרת ערב מאחר כמעט כל פעם 10–15 דקות, אבל עובד טוב בזמן המשמרת.",
+                opts: [
+                    "להתעלם – העיקר שעובד טוב",
+                    "לשבת איתו על ציפיות ברורות, להגדיר גבולות וסנקציה על איחורים חוזרים",
+                    "להשפיל אותו מול כולם כדי שילמד"
+                ],
+                correctIdx: 1,
+                costBase: 0,
+                rewardBase: 700
+            },
+            {
+                id: 'employee-raise',
+                cat: 'hr',
+                title: "עובדת ותיקה מבקשת העלאה",
+                text: "עובדת רצינית, חצי שנה אצלך, מבקשת עוד 3 ₪ לשעה.",
+                opts: [
+                    "לזרוק אותה ולהביא מישהי חדשה וזולה",
+                    "לבדוק מספרים – לראות כמה היא שווה לעסק, ואם כן להעלות עם ציפיות ברורות",
+                    "להבטיח לה העלאה 'חודש הבא' בלי כוונה אמיתית"
+                ],
+                correctIdx: 1,
+                costBase: 400,
+                rewardBase: 1000
+            },
+            {
+                id: 'line-mess',
+                cat: 'ops',
+                title: "תור מתפוצץ",
+                text: "עומס ענק, תור יוצא מהמקום, חלק מהלקוחות מתחילים להתעצבן.",
+                opts: [
+                    "לצעק על כולם שיירגעו",
+                    "לארגן תהליך: אחד לוקח הזמנות, אחד מכין, אחד מוציא, ולהרגיע בחיוך",
+                    "לסגור חצי תפריט כדי שיהיה פחות מורכב"
+                ],
+                correctIdx: 1,
+                costBase: 300,
+                rewardBase: 1100
+            },
+            {
+                id: 'fridge-broken',
+                cat: 'crisis',
+                title: "המקרר הראשי התקלקל",
+                text: "בוקר, אתה מגיע ורואה שהמקרר כבוי, חלק מהגבינות והחלב כבר חמימים.",
+                opts: [
+                    "להמשיך להשתמש בחלק שנראה בסדר, 'חבל על הכסף'",
+                    "לזרוק את מה שמסוכן, לקרוא לטכנאי דחוף, ולהביא מקרר גיבוי אם צריך",
+                    "לשים הכול שוב במקרר אחרי שתתקן, 'זה יתקרר'"
+                ],
+                correctIdx: 1,
+                costBase: 1500,
+                rewardBase: 2500
+            },
+            {
+                id: 'health-inspection',
+                cat: 'crisis',
+                title: "פיקוח בריאות 🌡️",
+                text: "ביקורת פתע מהעירייה נכנסת. המקום קצת מבולגן, אבל האוכל נקי.",
+                opts: [
+                    "להרביץ פאניקה ולהתחיל לצעוק על העובדים תוך כדי",
+                    "להיות רגוע, לשתף פעולה, להסביר תהליכים, ולתת תחושה מקצועית",
+                    "לנסות להסתיר דברים ולשקר"
+                ],
+                correctIdx: 1,
+                costBase: 0,
+                rewardBase: 1200
+            },
+            {
+                id: 'menu-change',
+                cat: 'marketing',
+                title: "רעיון לתפריט חדש",
+                text: "חבר מציע שתוסיף עוד 15 סוגי מנות חדשים לתפריט.",
+                opts: [
+                    "להוסיף הכול – שיראו שיש המון בחירה",
+                    "לבחון 1–2 מנות חדשות כנסיון, למדוד רווחיות וביקוש",
+                    "לא לשנות כלום לעולם"
+                ],
+                correctIdx: 1,
+                costBase: 400,
+                rewardBase: 900
+            },
+            {
+                id: 'big-order-school',
+                cat: 'finance',
+                title: "הזמנה גדולה מבית ספר",
+                text: "בית ספר מציע הזמנה של 120 טוסטים למחר בבוקר במחיר קצת נמוך מהרגיל.",
+                opts: [
+                    "מסרב – 'אני לא מוריד מחיר'",
+                    "בודק עלויות, מדבר על כמות קבועה, וסוגר מחיר שנותן רווח סביר ונפח קבוע",
+                    "מקבל בלי לבדוק עלויות בכלל"
+                ],
+                correctIdx: 1,
+                costBase: 1000,
+                rewardBase: 3000
+            },
+            {
+                id: 'social-media-trend',
+                cat: 'marketing',
+                title: "טרנד בטיקטוק",
+                text: "מישהו העלה טרנד על מלאווח מגולגל מיוחד. אנשים שואלים אם יש אצלך כזה.",
+                opts: [
+                    "להתעלם – אין לי כוח לחידושים",
+                    "להכניס גרסה משלך למלאווח מיוחד, לצלם, ולהעלות ברשתות",
+                    "להבטיח שיש ולהביא משהו אחר"
+                ],
+                correctIdx: 1,
+                costBase: 350,
+                rewardBase: 1100
+            }
+        ];
+
+        // סט אירועים שכבר שוחקו
+        let usedEvents = new Set();
+
+        // --- מצב שחקן ---
+        let player = {
+            money: 10000,
+            xp: 0,
+            level: 1,
+            questionIndex: 0 
+        };
+
+        // טעינה
+        if (localStorage.getItem('infCeoSave')) {
+            try {
+                player = JSON.parse(localStorage.getItem('infCeoSave'));
+            } catch (e) { console.error(e); }
         }
 
-        player.questionIndex++;
-        saveGame();
-
-        setTimeout(() => {
-            hideFeedback();
-            nextTurn();
-        }, 1500);
-    }
-
-    function processResult(isWin, amount) {
-        player.money += amount;
-        if (isWin) {
-            player.xp += 100 * player.level;
-        } else {
-            player.xp += 20 * player.level;
-        }
-
-        showFeedback(isWin, amount);
         renderUI();
-    }
+        nextTurn(); 
 
-    // --- UI / פידבק ---
+        // --- לוגיקה ---
 
-    function showFeedback(isWin, amount) {
-        const overlay = document.getElementById('feedback-overlay');
-        const icon = document.getElementById('fb-icon');
-        const text = document.getElementById('fb-text');
-        const sub = document.getElementById('fb-sub');
+        function nextTurn() {
+            checkLevelUp();
+            renderUI();
 
-        overlay.classList.add('show');
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
 
-        if (isWin) {
-            icon.innerText = "🤑";
-            text.innerText = "הצלחה!";
-            text.style.color = "var(--green)";
-            sub.innerText = "+$" + amount.toLocaleString();
-            overlay.style.borderColor = "var(--green)";
-        } else {
-            icon.innerText = "📉";
-            text.innerText = "הפסד...";
-            text.style.color = "var(--red)";
-            sub.innerText = "-$" + Math.abs(amount).toLocaleString();
-            overlay.style.borderColor = "var(--red)";
+            let scenario;
+            if (player.questionIndex < BASE_QUESTIONS.length) {
+                const base = BASE_QUESTIONS[player.questionIndex];
+                scenario = {
+                    cat: base.cat,
+                    t: base.t,
+                    q: base.q,
+                    opts: base.opts,
+                    a: base.a,
+                    cost: 0,
+                    reward: 500
+                };
+            } else {
+                scenario = generateScenario();
+            }
+
+            renderCard(scenario);
         }
-    }
 
-    function hideFeedback() {
-        document.getElementById('feedback-overlay').classList.remove('show');
-    }
+        function generateScenario() {
+            // איפוס אם נגמרו השאלות
+            if (usedEvents.size >= EVENTS.length) {
+                usedEvents.clear();
+                player.level++; 
+            }
 
-    function renderUI() {
-        document.getElementById('ui-money').innerText = "$" + player.money.toLocaleString();
-        document.getElementById('ui-level').innerText = player.level;
-        document.getElementById('ui-xp').innerText = formatXP(player.xp);
+            const available = EVENTS.filter(ev => !usedEvents.has(ev.id));
+            const ev = available[Math.floor(Math.random() * available.length)];
+            usedEvents.add(ev.id);
 
-        const xpNeeded = player.level * 1000;
-        let percent = (player.xp / xpNeeded) * 100;
-        if (percent > 100) percent = 100;
-        document.getElementById('xp-bar-fill').style.width = percent + "%";
-    }
+            const difficulty = Math.max(1, 0.7 + player.level * 0.4);
+            const cost = Math.floor(ev.costBase * difficulty);
+            const rewardBase = ev.rewardBase || ev.costBase * 1.6;
+            const reward = Math.floor(rewardBase * difficulty);
 
-    function checkLevelUp() {
-        const xpNeeded = player.level * 1000;
-        if (player.xp >= xpNeeded) {
-            player.level++;
-            player.xp = 0;
-            alert("🎉 עלית לדרגה " + player.level + "!\nהעסק נהיה מורכב יותר.");
+            return {
+                cat: ev.cat,
+                t: ev.title,
+                q: ev.text,
+                opts: ev.opts,
+                a: ev.correctIdx,
+                cost,
+                reward
+            };
         }
-    }
 
-    function formatXP(num) {
-        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-        return num;
-    }
+        function renderCard(scenario) {
+            const container = document.getElementById('game-container');
+            const catInfo = CATEGORIES[scenario.cat];
 
-    function saveGame() {
-        localStorage.setItem('infCeoSave', JSON.stringify(player));
-    }
-</script>
+            const card = document.createElement('div');
+            card.className = 'question-card';
+
+            const color = catInfo ? catInfo.color : '#fff';
+            const catName = catInfo ? catInfo.name : 'עסק';
+
+            let html = `
+                <div class="category-badge" style="background:${color}20; color:${color}">
+                    ${catName}
+                </div>
+                <h2>${scenario.t}</h2>
+                <p>${scenario.q}</p>
+                <div class="options-grid">
+            `;
+
+            scenario.opts.forEach((opt, i) => {
+                html += `
+                    <div class="option-btn"
+                         onclick="handleAnswer(this, ${i}, ${scenario.a}, ${scenario.reward}, ${scenario.cost})">
+                        ${opt}
+                    </div>`;
+            });
+
+            html += `</div>`;
+            card.innerHTML = html;
+            container.appendChild(card);
+        }
+
+        function handleAnswer(btn, selectedIdx, correctIdx, reward, potentialCost) {
+            // מניעת לחיצות כפולות
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.classList.add('disabled'));
+
+            const isCorrect = (selectedIdx === correctIdx);
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                processResult(true, reward);
+            } else {
+                btn.classList.add('wrong');
+                // הדגשת התשובה הנכונה
+                if (allBtns[correctIdx]) {
+                    allBtns[correctIdx].classList.remove('disabled');
+                    allBtns[correctIdx].classList.add('correct');
+                }
+                const penalty = potentialCost > 0 ? potentialCost : 200 * player.level;
