@@ -36,76 +36,72 @@
         progress: { finance: 0, marketing: 0, ops: 0, hr: 0 }
     };
 
-    // מצב משחק לצורך המעבר האוטומטי
-    let gameState = {
-        lastType: null,      // 'lesson' או 'event'
-        lastCategory: null   // 'finance' | 'marketing' | 'ops' | 'hr' | null
-    };
-
+    // למעבר אוטומטי
     let autoNextTimeout = null;
 
-    // טעינה
+    // טעינה משמירה
     if (localStorage.getItem('ceoSimSave')) {
         player = JSON.parse(localStorage.getItem('ceoSimSave'));
-        updateUI();
-    } else {
-        updateUI();
     }
+    updateUI();
 
     function updateUI() {
         document.getElementById('moneyDisplay').innerText = "$" + player.money.toLocaleString();
         document.getElementById('rankDisplay').innerText = getRankName();
-        
-        document.getElementById('prog-finance').innerText = `שיעור ${player.progress.finance + 1}`;
-        document.getElementById('prog-marketing').innerText = `שיעור ${player.progress.marketing + 1}`;
-        document.getElementById('prog-ops').innerText = `שיעור ${player.progress.ops + 1}`;
-        document.getElementById('prog-hr').innerText = `שיעור ${player.progress.hr + 1}`;
+
+        document.getElementById('prog-finance').innerText = "שיעור " + (player.progress.finance + 1);
+        document.getElementById('prog-marketing').innerText = "שיעור " + (player.progress.marketing + 1);
+        document.getElementById('prog-ops').innerText = "שיעור " + (player.progress.ops + 1);
+        document.getElementById('prog-hr').innerText = "שיעור " + (player.progress.hr + 1);
     }
 
     function getRankName() {
         let total = player.progress.finance + player.progress.marketing + player.progress.ops + player.progress.hr;
-        // חשוב: מסדרים מהגבוה לנמוך
+        // קודם הגבוה, אח"כ הנמוך
         if (total > 20) return "מנכ\"ל אימפריה";
         if (total > 10) return "סמנכ\"ל";
         if (total > 5) return "מנהל מנוסה";
         return "מנכ\"ל מתחיל";
     }
 
+    function clearAutoNext() {
+        if (autoNextTimeout) {
+            clearTimeout(autoNextTimeout);
+            autoNextTimeout = null;
+        }
+    }
+
     // פתיחת שיעור מובנה
     function openCategory(cat) {
+        clearAutoNext();
+
         const idx = player.progress[cat];
 
-        // אם נגמרו השיעורים הכתובים בקטגוריה הזאת – עוברים לאירועים אינסופיים
+        // אם נגמרו השיעורים בקטגוריה – קופצים ישר לסימולציות
         if (!DATABASE[cat][idx]) {
             generateRandomEvent(cat);
             return;
         }
 
         const lesson = DATABASE[cat][idx];
-
-        gameState.lastType = 'lesson';
-        gameState.lastCategory = cat;
-
         showLessonUI(cat, lesson.t, lesson.c, lesson.q, lesson.o, lesson.a);
     }
 
-    // יצירת אירוע רנדומלי (המצב האינסופי)
+    // יצירת אירוע רנדומלי
     function generateRandomEvent(forcedCat = null) {
-        const template = EVENTS_TEMPLATES[Math.floor(Math.random() * EVENTS_TEMPLATES.length)];
-
-        gameState.lastType = 'event';
-        gameState.lastCategory = forcedCat; // יכול להיות גם null (אירוע כללי)
-
-        const uiTitle = "🔥 אירוע בזמן אמת!";
-        showEventUI(forcedCat, uiTitle, template.text, template.opts, template.outcomes);
-    }
-
-    // הצגת ממשק שיעור (למידה)
-    function showLessonUI(cat, title, content, q, opts, correctIdx) {
         clearAutoNext();
 
+        const template = EVENTS_TEMPLATES[Math.floor(Math.random() * EVENTS_TEMPLATES.length)];
+        const uiCat = forcedCat ? forcedCat : "general";
+
+        showEventUI(uiCat, "🔥 אירוע בזמן אמת!", template.text, template.opts, template.outcomes, forcedCat);
+    }
+
+    // הצגת שיעור
+    function showLessonUI(cat, title, content, q, opts, correctIdx) {
         const area = document.getElementById('lessonArea');
         area.style.display = 'block';
+
         document.getElementById('lessonTag').innerText = getCatHebrew(cat);
         document.getElementById('lessonTag').style.backgroundColor = getCatColor(cat);
         document.getElementById('lessonTitle').innerText = title;
@@ -115,11 +111,12 @@
         feedback.style.display = 'none';
         feedback.className = 'feedback';
 
-        document.getElementById('nextBtn').style.display = 'none';
+        const nextBtn = document.getElementById('nextBtn');
+        nextBtn.style.display = 'none';
 
         const optsDiv = document.getElementById('optionsArea');
-        optsDiv.innerHTML = `<p style="font-weight:bold;">${q}</p>`;
-        
+        optsDiv.innerHTML = "<p style=\"font-weight:bold;\">" + q + "</p>";
+
         opts.forEach((opt, i) => {
             const btn = document.createElement('div');
             btn.className = 'btn-option';
@@ -128,7 +125,7 @@
             optsDiv.appendChild(btn);
         });
 
-        area.scrollIntoView({behavior: "smooth"});
+        area.scrollIntoView({ behavior: "smooth" });
     }
 
     // בדיקת תשובה בשיעור
@@ -142,28 +139,32 @@
 
             player.money += 500;
             player.progress[cat]++;
-
             localStorage.setItem('ceoSimSave', JSON.stringify(player));
             updateUI();
 
-            // נעילה זמנית של תשובות
+            // נועל את האפשרויות
             document.getElementById('optionsArea').innerHTML = "";
 
-            // מעבר אוטומטי אחרי 3 שניות
-            autoNextTimeout = setTimeout(goNextStep, 3000);
+            // אחרי 3 שניות – לשיעור הבא / סימולציה
+            autoNextTimeout = setTimeout(function () {
+                const idx = player.progress[cat];
+                if (DATABASE[cat][idx]) {
+                    openCategory(cat);
+                } else {
+                    generateRandomEvent(cat);
+                }
+            }, 3000);
         } else {
             feedback.className = 'feedback f-bad';
             feedback.innerText = "טעות. נסה שוב.";
-            // השחקן נשאר על אותו שיעור עד שיענה נכון
         }
     }
 
-    // הצגת ממשק אירוע (אינסופי)
-    function showEventUI(cat, title, content, opts, outcomes) {
-        clearAutoNext();
-
+    // הצגת אירוע (סימולציה)
+    function showEventUI(cat, title, content, opts, outcomes, forcedCat) {
         const area = document.getElementById('lessonArea');
         area.style.display = 'block';
+
         document.getElementById('lessonTag').innerText = "סימולציה";
         document.getElementById('lessonTag').style.background = "linear-gradient(45deg, #6366f1, #8b5cf6)";
         document.getElementById('lessonTitle').innerText = title;
@@ -173,28 +174,32 @@
         feedback.style.display = 'none';
         feedback.className = 'feedback';
 
-        document.getElementById('nextBtn').style.display = 'none';
+        const nextBtn = document.getElementById('nextBtn');
+        nextBtn.style.display = 'none';
 
         const optsDiv = document.getElementById('optionsArea');
         optsDiv.innerHTML = "";
-        
+
         opts.forEach((opt, i) => {
             const btn = document.createElement('div');
             btn.className = 'btn-option';
             btn.innerText = opt;
-            btn.onclick = () => resolveEvent(outcomes[i]);
+            // מעבירים גם את הקטגוריה כדי שנדע להמשיך בשרשרת
+            btn.onclick = () => resolveEvent(outcomes[i], forcedCat || null);
             optsDiv.appendChild(btn);
         });
 
-        area.scrollIntoView({behavior: "smooth"});
+        area.scrollIntoView({ behavior: "smooth" });
     }
 
     // טיפול בתוצאה של אירוע
-    function resolveEvent(outcomeMoney) {
+    function resolveEvent(outcomeMoney, forcedCat) {
+        clearAutoNext();
+
         const feedback = document.getElementById('feedbackArea');
         const optsDiv = document.getElementById('optionsArea');
 
-        optsDiv.innerHTML = ""; // אין אפשרות לבחור שוב
+        optsDiv.innerHTML = "";
         feedback.style.display = 'block';
 
         player.money += outcomeMoney;
@@ -203,48 +208,20 @@
 
         if (outcomeMoney > 0) {
             feedback.className = 'feedback f-good';
-            feedback.innerText = `החלטה טובה! הרווחת $${outcomeMoney}`;
+            feedback.innerText = "החלטה טובה! הרווחת $" + outcomeMoney;
         } else if (outcomeMoney < 0) {
             feedback.className = 'feedback f-bad';
-            feedback.innerText = `החלטה כואבת... הפסדת $${Math.abs(outcomeMoney)}`;
+            feedback.innerText = "החלטה כואבת... הפסדת $" + Math.abs(outcomeMoney);
         } else {
             feedback.className = 'feedback';
             feedback.style.border = '1px solid #ccc';
             feedback.innerText = "החלטה נייטרלית. המצב נשאר יציב.";
         }
 
-        // מעבר אוטומטי לאירוע הבא אחרי 3 שניות
-        autoNextTimeout = setTimeout(goNextStep, 3000);
-    }
-
-    // פונקצית מעבר אוטומטי לשלב הבא לפי מצב המשחק
-    function goNextStep() {
-        clearAutoNext();
-
-        if (gameState.lastType === 'lesson') {
-            const cat = gameState.lastCategory;
-            if (!cat) return;
-
-            const idx = player.progress[cat];
-            if (DATABASE[cat][idx]) {
-                openCategory(cat);          // שיעור הבא באותה קטגוריה
-            } else {
-                generateRandomEvent(cat);   // אם נגמרו שיעורים – עוברים לסימולציות
-            }
-        } else if (gameState.lastType === 'event') {
-            // ממשיכים לאירוע אינסופי חדש באותה קטגוריה (או כללי)
-            generateRandomEvent(gameState.lastCategory);
-        } else {
-            // במקרה שאין מצב – פשוט נסגור
-            closeLesson();
-        }
-    }
-
-    function clearAutoNext() {
-        if (autoNextTimeout) {
-            clearTimeout(autoNextTimeout);
-            autoNextTimeout = null;
-        }
+        // אחרי 3 שניות – אירוע חדש
+        autoNextTimeout = setTimeout(function () {
+            generateRandomEvent(forcedCat || null);
+        }, 3000);
     }
 
     function closeLesson() {
@@ -254,18 +231,18 @@
 
     // עזרים
     function getCatHebrew(cat) {
-        if(cat=='finance') return 'פיננסי';
-        if(cat=='marketing') return 'שיווק';
-        if(cat=='ops') return 'תפעול';
-        if(cat=='hr') return 'משאבי אנוש';
+        if (cat == 'finance') return 'פיננסי';
+        if (cat == 'marketing') return 'שיווק';
+        if (cat == 'ops') return 'תפעול';
+        if (cat == 'hr') return 'משאבי אנוש';
         return 'כללי';
     }
 
     function getCatColor(cat) {
-        if(cat=='finance') return 'var(--finance)';
-        if(cat=='marketing') return 'var(--marketing)';
-        if(cat=='ops') return 'var(--ops)';
-        if(cat=='hr') return 'var(--hr)';
+        if (cat == 'finance') return 'var(--finance)';
+        if (cat == 'marketing') return 'var(--marketing)';
+        if (cat == 'ops') return 'var(--ops)';
+        if (cat == 'hr') return 'var(--hr)';
         return '#ccc';
     }
 </script>
