@@ -1,248 +1,445 @@
-<script>
-    // --- מסד נתונים: שיעורים מובנים ---
-    const DATABASE = {
-        finance: [
-            { t: "תזרים מזומנים", c: "ההבדל בין רווח לכסף בבנק הוא קריטי. רווח הוא תיאורטי (חשבונית שיצאה), תזרים הוא הכסף שנכנס בפועל. אם יש לך הוצאות היום אבל הכסף נכנס עוד 60 יום, אתה בבעיה.", q: "מה הפתרון לבעיית תזרים?", o: ["לקחת הלוואות ללא כיסוי", "לבקש מקדמות מלקוחות ודחיית תשלום לספקים", "להתעלם"], a: 1 },
-            { t: "דוח רווח והפסד (P&L)", c: "מנכ\"ל חייב לדעת לקרוא דוח רווח והפסד. ההכנסות למעלה, ההוצאות באמצע, הרווח למטה. שים לב להוצאות קבועות (שכירות) מול משתנות (חומר גלם).", q: "מהי הוצאה קבועה?", o: ["קניית סחורה", "שכר דירה וארנונה", "בונוס לעובד מצטיין"], a: 1 },
-            { t: "ROI (החזר השקעה)", c: "לפני כל הוצאה תשאל: מה ה-ROI? אם השקעת 100 שקל בפרסום והכנסת 150, ה-ROI הוא חיובי. אם השקעת במכונה חדשה והיא חוסכת לך זמן עבודה, זה גם ROI.", q: "מתי כדאי להשקיע?", o: ["כשההחזר הצפוי גבוה מהעלות", "כשבא לי להתחדש", "כשכולם משקיעים"], a: 0 }
-        ],
-        marketing: [
-            { t: "מי קהל היעד?", c: "אל תמכור לכולם. תמכור למי שצריך אותך. תגדיר: גיל, מיקום, תחומי עניין. ככל שתהיה ממוקד יותר, השיווק יעלה פחות ויכניס יותר.", q: "למה לפלח שוק?", o: ["כדי להגיע לאנשים הרלוונטיים ביותר", "כדי להפסיד לקוחות", "זה לא חשוב"], a: 0 },
-            { t: "LTV (ערך חיי לקוח)", c: "לקוח הוא לא עסקה חד פעמית. המטרה היא שהוא יחזור שוב ושוב. לקוח שקנה ב-50 שקל אבל חוזר כל חודש במשך שנה, שווה לך 600 שקל.", q: "איך מגדילים LTV?", o: ["מעלים מחיר בלי להודיע", "שומרים על קשר ושירות מעולה לאורך זמן", "מתעלמים ממנו אחרי הקנייה"], a: 1 }
-        ],
-        ops: [
-            { t: "ניהול מלאי", c: "מלאי זה כסף שיושב על המדף. יותר מדי מלאי? הכסף תקוע. פחות מדי? אתה מפספס מכירות. החוכמה היא למצוא את האיזון (Just in Time).", q: "מה הסכנה במלאי עודף?", o: ["שהמדפים יראו מלאים", "בלאי, גניבות וכסף תקוע", "אין סכנה"], a: 1 },
-            { t: "אחזקה מונעת", c: "אל תחכה שהמזגן יתפוצץ ביום הכי חם. אחזקה מונעת עולה כסף עכשיו, אבל חוסכת הון אחר כך על השבתת העסק ותיקוני חירום.", q: "מהי גישת אחזקה מונעת?", o: ["לתקן רק כשנשבר", "לבצע בדיקות תקופתיות כדי למנוע תקלות", "לקנות תמיד חדש"], a: 1 }
-        ],
-        hr: [
-            { t: "גיוס עובדים", c: "אל תגייס את מי שהכי זול, תגייס את מי שהכי מתאים. עובד גרוע עולה לך בנזקים, זמן ניהול ועוגמת נפש יותר מהמשכורת שלו.", q: "מה חשוב בראיון?", o: ["רק השכר שהוא מבקש", "היכולת, האופי וההתאמה לצוות", "איפה הוא גר"], a: 1 },
-            { t: "האצלת סמכויות", c: "אתה לא יכול לעשות הכל. אם אתה עושה עבודה של עובד זוטר, אתה מפסיד כסף כמנכ\"ל. תלמד לסמוך, לתת משימות ולבדוק ביצועים.", q: "למה מנהלים חוששים להאציל?", o: ["פחד שהעובד יעשה טעות", "כי אין להם עבודה", "כי הם עצלנים"], a: 0 }
-        ]
-    };
-
-    // --- מחולל האירועים האינסופי ---
-    const EVENTS_TEMPLATES = [
-        { text: "צינור מים התפוצץ בחנות באמצע היום!", opts: ["סגור את החנות ותקן לבד (הפסד הכנסה)", "הזמן אינסטלטור חירום ($500)", "שים דלי ותמשיך כרגיל"], outcomes: [-1000, -500, -2000] },
-        { text: "לקוח כועס מאיים בתביעה בגלל מוצר פגום.", opts: ["הצע לו פיצוי מלא ומתנה ($100)", "התעלם ממנו", "תאשים את חברת המשלוחים"], outcomes: [-100, -1000, -500] },
-        { text: "המתחרה הוריד מחירים ב-20%. מה תעשה?", opts: ["הורד מחירים גם אתה (פגיעה ברווח)", "צא בקמפיין על איכות המוצר ($300)", "אל תעשה כלום"], outcomes: [-500, -300, -100] },
-        { text: "עובד מרכזי מבקש העלאה או שהוא עוזב.", opts: ["תן לו העלאה ($200 בחודש)", "תן לו ללכת ותגייס חדש", "הצע בונוס חד פעמי ($500)"], outcomes: [-200, -1000, -500] },
-        { text: "יש לך עודף מזומנים של $5,000. מה תעשה?", opts: ["השאר בבנק ליום שחור", "השקע בשיפוץ העסק", "חלק דיבידנד (קח לכיס)"], outcomes: [0, 1000, 5000] }
-    ];
-
-    // --- משתני מערכת ---
-    let player = {
-        money: 10000,
-        rank: "מנכ\"ל מתחיל",
-        progress: { finance: 0, marketing: 0, ops: 0, hr: 0 }
-    };
-
-    // למעבר אוטומטי
-    let autoNextTimeout = null;
-
-    // טעינה משמירה
-    if (localStorage.getItem('ceoSimSave')) {
-        player = JSON.parse(localStorage.getItem('ceoSimSave'));
-    }
-    updateUI();
-
-    function updateUI() {
-        document.getElementById('moneyDisplay').innerText = "$" + player.money.toLocaleString();
-        document.getElementById('rankDisplay').innerText = getRankName();
-
-        document.getElementById('prog-finance').innerText = "שיעור " + (player.progress.finance + 1);
-        document.getElementById('prog-marketing').innerText = "שיעור " + (player.progress.marketing + 1);
-        document.getElementById('prog-ops').innerText = "שיעור " + (player.progress.ops + 1);
-        document.getElementById('prog-hr').innerText = "שיעור " + (player.progress.hr + 1);
-    }
-
-    function getRankName() {
-        let total = player.progress.finance + player.progress.marketing + player.progress.ops + player.progress.hr;
-        // קודם הגבוה, אח"כ הנמוך
-        if (total > 20) return "מנכ\"ל אימפריה";
-        if (total > 10) return "סמנכ\"ל";
-        if (total > 5) return "מנהל מנוסה";
-        return "מנכ\"ל מתחיל";
-    }
-
-    function clearAutoNext() {
-        if (autoNextTimeout) {
-            clearTimeout(autoNextTimeout);
-            autoNextTimeout = null;
-        }
-    }
-
-    // פתיחת שיעור מובנה
-    function openCategory(cat) {
-        clearAutoNext();
-
-        const idx = player.progress[cat];
-
-        // אם נגמרו השיעורים בקטגוריה – קופצים ישר לסימולציות
-        if (!DATABASE[cat][idx]) {
-            generateRandomEvent(cat);
-            return;
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Simulator ∞ (Auto)</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --accent: #38bdf8;
+            --finance: #4ade80;
+            --marketing: #f472b6;
+            --ops: #fbbf24;
+            --hr: #a78bfa;
+            --danger: #ef4444;
         }
 
-        const lesson = DATABASE[cat][idx];
-        showLessonUI(cat, lesson.t, lesson.c, lesson.q, lesson.o, lesson.a);
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding-bottom: 80px;
+        }
 
-    // יצירת אירוע רנדומלי
-    function generateRandomEvent(forcedCat = null) {
-        clearAutoNext();
+        /* דאשבורד עליון */
+        header {
+            background: #020617;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        const template = EVENTS_TEMPLATES[Math.floor(Math.random() * EVENTS_TEMPLATES.length)];
-        const uiCat = forcedCat ? forcedCat : "general";
+        .level-badge {
+            background: var(--accent);
+            color: #0f172a;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
 
-        showEventUI(uiCat, "🔥 אירוע בזמן אמת!", template.text, template.opts, template.outcomes, forcedCat);
-    }
+        .money-badge {
+            color: var(--finance);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
 
-    // הצגת שיעור
-    function showLessonUI(cat, title, content, q, opts, correctIdx) {
-        const area = document.getElementById('lessonArea');
-        area.style.display = 'block';
+        /* רשת הקטגוריות */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
 
-        document.getElementById('lessonTag').innerText = getCatHebrew(cat);
-        document.getElementById('lessonTag').style.backgroundColor = getCatColor(cat);
-        document.getElementById('lessonTitle').innerText = title;
-        document.getElementById('lessonContent').innerText = content;
+        .category-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+        }
 
-        const feedback = document.getElementById('feedbackArea');
-        feedback.style.display = 'none';
-        feedback.className = 'feedback';
+        .category-card:hover { transform: scale(1.02); }
+        
+        .cat-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .cat-title { font-weight: bold; font-size: 1rem; }
+        .progress-mini { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
 
-        const nextBtn = document.getElementById('nextBtn');
-        nextBtn.style.display = 'none';
+        .c-finance { border-color: var(--finance); box-shadow: 0 0 15px rgba(74, 222, 128, 0.1); }
+        .c-marketing { border-color: var(--marketing); box-shadow: 0 0 15px rgba(244, 114, 182, 0.1); }
+        .c-ops { border-color: var(--ops); box-shadow: 0 0 15px rgba(251, 191, 36, 0.1); }
+        .c-hr { border-color: var(--hr); box-shadow: 0 0 15px rgba(167, 139, 250, 0.1); }
 
-        const optsDiv = document.getElementById('optionsArea');
-        optsDiv.innerHTML = "<p style=\"font-weight:bold;\">" + q + "</p>";
+        /* אזור הלמידה */
+        .active-area {
+            background: var(--card);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+            display: none;
+            animation: slideUp 0.3s;
+        }
 
-        opts.forEach((opt, i) => {
-            const btn = document.createElement('div');
-            btn.className = 'btn-option';
-            btn.innerText = opt;
-            btn.onclick = () => checkLessonAnswer(cat, i, correctIdx);
-            optsDiv.appendChild(btn);
-        });
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        area.scrollIntoView({ behavior: "smooth" });
-    }
+        .lesson-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            background: #334155;
+        }
 
-    // בדיקת תשובה בשיעור
-    function checkLessonAnswer(cat, selected, correct) {
-        const feedback = document.getElementById('feedbackArea');
-        feedback.style.display = 'block';
+        h2 { margin-top: 0; color: var(--accent); }
+        .content-text { line-height: 1.6; font-size: 1.1rem; color: #cbd5e1; margin-bottom: 25px; }
 
-        if (selected === correct) {
-            feedback.className = 'feedback f-good';
-            feedback.innerText = "נכון מאוד! +$500";
+        .btn-option {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            border-radius: 10px;
+            text-align: right;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
 
-            player.money += 500;
-            player.progress[cat]++;
+        .btn-option:hover { background: #1e293b; border-color: var(--accent); }
+
+        /* התראות */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+        .f-good { background: rgba(74, 222, 128, 0.2); color: var(--finance); border: 1px solid var(--finance); }
+        .f-bad { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+        .infinite-btn {
+            display: block;
+            width: 90%;
+            margin: 30px auto;
+            padding: 20px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <div style="font-size:0.8rem; color:#94a3b8;">דרגה נוכחית</div>
+            <div class="level-badge" id="rankDisplay">מנכ"ל מתחיל</div>
+        </div>
+        <div class="money-badge" id="moneyDisplay">$10,000</div>
+    </header>
+
+    <div style="padding: 20px 20px 0 20px;">
+        <h3>בחר מחלקה לניהול:</h3>
+    </div>
+
+    <div class="grid-container">
+        <div class="category-card c-finance" onclick="openCategory('finance')">
+            <div class="cat-icon">💰</div>
+            <div class="cat-title">ניהול פיננסי</div>
+            <div class="progress-mini" id="prog-finance">שיעור 1</div>
+        </div>
+        <div class="category-card c-marketing" onclick="openCategory('marketing')">
+            <div class="cat-icon">📢</div>
+            <div class="cat-title">שיווק ומכירות</div>
+            <div class="progress-mini" id="prog-marketing">שיעור 1</div>
+        </div>
+        <div class="category-card c-ops" onclick="openCategory('ops')">
+            <div class="cat-icon">🏭</div>
+            <div class="cat-title">תפעול ואחזקה</div>
+            <div class="progress-mini" id="prog-ops">שיעור 1</div>
+        </div>
+        <div class="category-card c-hr" onclick="openCategory('hr')">
+            <div class="cat-icon">👥</div>
+            <div class="cat-title">ניהול עובדים</div>
+            <div class="progress-mini" id="prog-hr">שיעור 1</div>
+        </div>
+    </div>
+
+    <div class="active-area" id="lessonArea">
+        <div class="lesson-tag" id="lessonTag">קטגוריה</div>
+        <h2 id="lessonTitle">כותרת</h2>
+        <div class="content-text" id="lessonContent">תוכן...</div>
+        <div id="optionsArea"></div>
+        <div class="feedback" id="feedbackArea"></div>
+        <button id="nextBtn" style="display:none; width:100%; padding:15px; background:var(--accent); border:none; color:black; font-weight:bold; border-radius:10px; margin-top:15px; cursor:pointer;" onclick="closeLesson()">סגור</button>
+    </div>
+
+    <button class="infinite-btn" onclick="generateRandomEvent()">🎲 אתגר עסקי (אינסופי)</button>
+    
+    <div style="text-align:center; margin-bottom:20px;">
+        <button onclick="resetGame()" style="background:none; border:1px solid #555; color:#777; padding:5px 10px; border-radius:5px; cursor:pointer;">איפוס משחק</button>
+    </div>
+
+    <script>
+        // --- מסד נתונים: שיעורים מובנים ---
+        const DATABASE = {
+            finance: [
+                { t: "תזרים מזומנים", c: "ההבדל בין רווח לכסף בבנק הוא קריטי. רווח הוא תיאורטי (חשבונית שיצאה), תזרים הוא הכסף שנכנס בפועל. אם יש לך הוצאות היום אבל הכסף נכנס עוד 60 יום, אתה בבעיה.", q: "מה הפתרון לבעיית תזרים?", o: ["לקחת הלוואות ללא כיסוי", "לבקש מקדמות מלקוחות ודחיית תשלום לספקים", "להתעלם"], a: 1 },
+                { t: "דוח רווח והפסד (P&L)", c: "מנכ\"ל חייב לדעת לקרוא דוח רווח והפסד. ההכנסות למעלה, ההוצאות באמצע, הרווח למטה. שים לב להוצאות קבועות (שכירות) מול משתנות (חומר גלם).", q: "מהי הוצאה קבועה?", o: ["קניית סחורה", "שכר דירה וארנונה", "בונוס לעובד מצטיין"], a: 1 },
+                { t: "ROI (החזר השקעה)", c: "לפני כל הוצאה תשאל: מה ה-ROI? אם השקעת 100 שקל בפרסום והכנסת 150, ה-ROI הוא חיובי. אם השקעת במכונה חדשה והיא חוסכת לך זמן עבודה, זה גם ROI.", q: "מתי כדאי להשקיע?", o: ["כשההחזר הצפוי גבוה מהעלות", "כשבא לי להתחדש", "כשכולם משקיעים"], a: 0 }
+            ],
+            marketing: [
+                { t: "מי קהל היעד?", c: "אל תמכור לכולם. תמכור למי שצריך אותך. תגדיר: גיל, מיקום, תחומי עניין. ככל שתהיה ממוקד יותר, השיווק יעלה פחות ויכניס יותר.", q: "למה לפלח שוק?", o: ["כדי להגיע לאנשים הרלוונטיים ביותר", "כדי להפסיד לקוחות", "זה לא חשוב"], a: 0 },
+                { t: "LTV (ערך חיי לקוח)", c: "לקוח הוא לא עסקה חד פעמית. המטרה היא שהוא יחזור שוב ושוב. לקוח שקנה ב-50 שקל אבל חוזר כל חודש במשך שנה, שווה לך 600 שקל.", q: "איך מגדילים LTV?", o: ["מעלים מחיר בלי להודיע", "שומרים על קשר ושירות מעולה לאורך זמן", "מתעלמים ממנו אחרי הקנייה"], a: 1 }
+            ],
+            ops: [
+                { t: "ניהול מלאי", c: "מלאי זה כסף שיושב על המדף. יותר מדי מלאי? הכסף תקוע. פחות מדי? אתה מפספס מכירות. החוכמה היא למצוא את האיזון (Just in Time).", q: "מה הסכנה במלאי עודף?", o: ["שהמדפים יראו מלאים", "בלאי, גניבות וכסף תקוע", "אין סכנה"], a: 1 },
+                { t: "אחזקה מונעת", c: "אל תחכה שהמזגן יתפוצץ ביום הכי חם. אחזקה מונעת עולה כסף עכשיו, אבל חוסכת הון אחר כך על השבתת העסק ותיקוני חירום.", q: "מהי גישת אחזקה מונעת?", o: ["לתקן רק כשנשבר", "לבצע בדיקות תקופתיות כדי למנוע תקלות", "לקנות תמיד חדש"], a: 1 }
+            ],
+            hr: [
+                { t: "גיוס עובדים", c: "אל תגייס את מי שהכי זול, תגייס את מי שהכי מתאים. עובד גרוע עולה לך בנזקים, זמן ניהול ועוגמת נפש יותר מהמשכורת שלו.", q: "מה חשוב בראיון?", o: ["רק השכר שהוא מבקש", "היכולת, האופי וההתאמה לצוות", "איפה הוא גר"], a: 1 },
+                { t: "האצלת סמכויות", c: "אתה לא יכול לעשות הכל. אם אתה עושה עבודה של עובד זוטר, אתה מפסיד כסף כמנכ\"ל. תלמד לסמוך, לתת משימות ולבדוק ביצועים.", q: "למה מנהלים חוששים להאציל?", o: ["פחד שהעובד יעשה טעות", "כי אין להם עבודה", "כי הם עצלנים"], a: 0 }
+            ]
+        };
+
+        // --- מחולל האירועים האינסופי ---
+        const EVENTS_TEMPLATES = [
+            { text: "צינור מים התפוצץ בחנות באמצע היום!", opts: ["סגור את החנות ותקן לבד (הפסד הכנסה)", "הזמן אינסטלטור חירום ($500)", "שים דלי ותמשיך כרגיל"], outcomes: [-1000, -500, -2000] },
+            { text: "לקוח כועס מאיים בתביעה בגלל מוצר פגום.", opts: ["הצע לו פיצוי מלא ומתנה ($100)", "התעלם ממנו", "תאשים את חברת המשלוחים"], outcomes: [-100, -1000, -500] },
+            { text: "המתחרה הוריד מחירים ב-20%. מה תעשה?", opts: ["הורד מחירים גם אתה (פגיעה ברווח)", "צא בקמפיין על איכות המוצר ($300)", "אל תעשה כלום"], outcomes: [-500, -300, -100] },
+            { text: "עובד מרכזי מבקש העלאה או שהוא עוזב.", opts: ["תן לו העלאה ($200 בחודש)", "תן לו ללכת ותגייס חדש", "הצע בונוס חד פעמי ($500)"], outcomes: [-200, -1000, -500] },
+            { text: "יש לך עודף מזומנים של $5,000. מה תעשה?", opts: ["השאר בבנק ליום שחור", "השקע בשיפוץ העסק", "חלק דיבידנד (קח לכיס)"], outcomes: [0, 1000, 5000] }
+        ];
+
+        // --- משתני מערכת ---
+        let player = {
+            money: 10000,
+            rank: "מנכ\"ל מתחיל",
+            progress: { finance: 0, marketing: 0, ops: 0, hr: 0 }
+        };
+
+        // למעבר אוטומטי
+        let autoNextTimeout = null;
+
+        // טעינה משמירה
+        if (localStorage.getItem('ceoSimSave')) {
+            player = JSON.parse(localStorage.getItem('ceoSimSave'));
+        }
+        updateUI();
+
+        function updateUI() {
+            document.getElementById('moneyDisplay').innerText = "$" + player.money.toLocaleString();
+            document.getElementById('rankDisplay').innerText = getRankName();
+
+            document.getElementById('prog-finance').innerText = "שיעור " + (player.progress.finance + 1);
+            document.getElementById('prog-marketing').innerText = "שיעור " + (player.progress.marketing + 1);
+            document.getElementById('prog-ops').innerText = "שיעור " + (player.progress.ops + 1);
+            document.getElementById('prog-hr').innerText = "שיעור " + (player.progress.hr + 1);
+        }
+
+        function getRankName() {
+            let total = player.progress.finance + player.progress.marketing + player.progress.ops + player.progress.hr;
+            if (total > 20) return "מנכ\"ל אימפריה";
+            if (total > 10) return "סמנכ\"ל";
+            if (total > 5) return "מנהל מנוסה";
+            return "מנכ\"ל מתחיל";
+        }
+
+        function clearAutoNext() {
+            if (autoNextTimeout) {
+                clearTimeout(autoNextTimeout);
+                autoNextTimeout = null;
+            }
+        }
+
+        function openCategory(cat) {
+            clearAutoNext();
+            const idx = player.progress[cat];
+            // אם נגמרו השיעורים בקטגוריה – קופצים ישר לסימולציות
+            if (!DATABASE[cat][idx]) {
+                generateRandomEvent(cat);
+                return;
+            }
+            const lesson = DATABASE[cat][idx];
+            showLessonUI(cat, lesson.t, lesson.c, lesson.q, lesson.o, lesson.a);
+        }
+
+        function generateRandomEvent(forcedCat = null) {
+            clearAutoNext();
+            const template = EVENTS_TEMPLATES[Math.floor(Math.random() * EVENTS_TEMPLATES.length)];
+            const uiCat = forcedCat ? forcedCat : "general";
+            showEventUI(uiCat, "🔥 אירוע בזמן אמת!", template.text, template.opts, template.outcomes, forcedCat);
+        }
+
+        function showLessonUI(cat, title, content, q, opts, correctIdx) {
+            const area = document.getElementById('lessonArea');
+            area.style.display = 'block';
+            document.getElementById('lessonTag').innerText = getCatHebrew(cat);
+            document.getElementById('lessonTag').style.backgroundColor = getCatColor(cat);
+            document.getElementById('lessonTitle').innerText = title;
+            document.getElementById('lessonContent').innerText = content;
+
+            const feedback = document.getElementById('feedbackArea');
+            feedback.style.display = 'none';
+            
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.style.display = 'none';
+
+            const optsDiv = document.getElementById('optionsArea');
+            optsDiv.innerHTML = "<p style=\"font-weight:bold;\">" + q + "</p>";
+
+            opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'btn-option';
+                btn.innerText = opt;
+                btn.onclick = () => checkLessonAnswer(cat, i, correctIdx);
+                optsDiv.appendChild(btn);
+            });
+            area.scrollIntoView({ behavior: "smooth" });
+        }
+
+        function checkLessonAnswer(cat, selected, correct) {
+            const feedback = document.getElementById('feedbackArea');
+            feedback.style.display = 'block';
+
+            if (selected === correct) {
+                feedback.className = 'feedback f-good';
+                feedback.innerText = "נכון מאוד! +$500";
+                player.money += 500;
+                player.progress[cat]++;
+                localStorage.setItem('ceoSimSave', JSON.stringify(player));
+                updateUI();
+                document.getElementById('optionsArea').innerHTML = "";
+
+                // מעבר אוטומטי אחרי 3 שניות
+                autoNextTimeout = setTimeout(function () {
+                    const idx = player.progress[cat];
+                    if (DATABASE[cat][idx]) {
+                        openCategory(cat);
+                    } else {
+                        generateRandomEvent(cat);
+                    }
+                }, 3000);
+            } else {
+                feedback.className = 'feedback f-bad';
+                feedback.innerText = "טעות. נסה שוב.";
+            }
+        }
+
+        function showEventUI(cat, title, content, opts, outcomes, forcedCat) {
+            const area = document.getElementById('lessonArea');
+            area.style.display = 'block';
+            document.getElementById('lessonTag').innerText = "סימולציה";
+            document.getElementById('lessonTag').style.background = "linear-gradient(45deg, #6366f1, #8b5cf6)";
+            document.getElementById('lessonTitle').innerText = title;
+            document.getElementById('lessonContent').innerText = content;
+
+            const feedback = document.getElementById('feedbackArea');
+            feedback.style.display = 'none';
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.style.display = 'none';
+
+            const optsDiv = document.getElementById('optionsArea');
+            optsDiv.innerHTML = "";
+
+            opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'btn-option';
+                btn.innerText = opt;
+                btn.onclick = () => resolveEvent(outcomes[i], forcedCat || null);
+                optsDiv.appendChild(btn);
+            });
+            area.scrollIntoView({ behavior: "smooth" });
+        }
+
+        function resolveEvent(outcomeMoney, forcedCat) {
+            clearAutoNext();
+            const feedback = document.getElementById('feedbackArea');
+            document.getElementById('optionsArea').innerHTML = "";
+            feedback.style.display = 'block';
+
+            player.money += outcomeMoney;
             localStorage.setItem('ceoSimSave', JSON.stringify(player));
             updateUI();
 
-            // נועל את האפשרויות
-            document.getElementById('optionsArea').innerHTML = "";
+            if (outcomeMoney > 0) {
+                feedback.className = 'feedback f-good';
+                feedback.innerText = "החלטה טובה! הרווחת $" + outcomeMoney;
+            } else if (outcomeMoney < 0) {
+                feedback.className = 'feedback f-bad';
+                feedback.innerText = "החלטה כואבת... הפסדת $" + Math.abs(outcomeMoney);
+            } else {
+                feedback.className = 'feedback';
+                feedback.style.border = '1px solid #ccc';
+                feedback.innerText = "החלטה נייטרלית. המצב נשאר יציב.";
+            }
 
-            // אחרי 3 שניות – לשיעור הבא / סימולציה
+            // מעבר אוטומטי אחרי 3 שניות
             autoNextTimeout = setTimeout(function () {
-                const idx = player.progress[cat];
-                if (DATABASE[cat][idx]) {
-                    openCategory(cat);
-                } else {
-                    generateRandomEvent(cat);
-                }
+                generateRandomEvent(forcedCat || null);
             }, 3000);
-        } else {
-            feedback.className = 'feedback f-bad';
-            feedback.innerText = "טעות. נסה שוב.";
-        }
-    }
-
-    // הצגת אירוע (סימולציה)
-    function showEventUI(cat, title, content, opts, outcomes, forcedCat) {
-        const area = document.getElementById('lessonArea');
-        area.style.display = 'block';
-
-        document.getElementById('lessonTag').innerText = "סימולציה";
-        document.getElementById('lessonTag').style.background = "linear-gradient(45deg, #6366f1, #8b5cf6)";
-        document.getElementById('lessonTitle').innerText = title;
-        document.getElementById('lessonContent').innerText = content;
-
-        const feedback = document.getElementById('feedbackArea');
-        feedback.style.display = 'none';
-        feedback.className = 'feedback';
-
-        const nextBtn = document.getElementById('nextBtn');
-        nextBtn.style.display = 'none';
-
-        const optsDiv = document.getElementById('optionsArea');
-        optsDiv.innerHTML = "";
-
-        opts.forEach((opt, i) => {
-            const btn = document.createElement('div');
-            btn.className = 'btn-option';
-            btn.innerText = opt;
-            // מעבירים גם את הקטגוריה כדי שנדע להמשיך בשרשרת
-            btn.onclick = () => resolveEvent(outcomes[i], forcedCat || null);
-            optsDiv.appendChild(btn);
-        });
-
-        area.scrollIntoView({ behavior: "smooth" });
-    }
-
-    // טיפול בתוצאה של אירוע
-    function resolveEvent(outcomeMoney, forcedCat) {
-        clearAutoNext();
-
-        const feedback = document.getElementById('feedbackArea');
-        const optsDiv = document.getElementById('optionsArea');
-
-        optsDiv.innerHTML = "";
-        feedback.style.display = 'block';
-
-        player.money += outcomeMoney;
-        localStorage.setItem('ceoSimSave', JSON.stringify(player));
-        updateUI();
-
-        if (outcomeMoney > 0) {
-            feedback.className = 'feedback f-good';
-            feedback.innerText = "החלטה טובה! הרווחת $" + outcomeMoney;
-        } else if (outcomeMoney < 0) {
-            feedback.className = 'feedback f-bad';
-            feedback.innerText = "החלטה כואבת... הפסדת $" + Math.abs(outcomeMoney);
-        } else {
-            feedback.className = 'feedback';
-            feedback.style.border = '1px solid #ccc';
-            feedback.innerText = "החלטה נייטרלית. המצב נשאר יציב.";
         }
 
-        // אחרי 3 שניות – אירוע חדש
-        autoNextTimeout = setTimeout(function () {
-            generateRandomEvent(forcedCat || null);
-        }, 3000);
-    }
+        function closeLesson() {
+            clearAutoNext();
+            document.getElementById('lessonArea').style.display = 'none';
+        }
 
-    function closeLesson() {
-        clearAutoNext();
-        document.getElementById('lessonArea').style.display = 'none';
-    }
+        function resetGame() {
+            if(confirm('לאפס הכל?')) {
+                localStorage.removeItem('ceoSimSave');
+                location.reload();
+            }
+        }
 
-    // עזרים
-    function getCatHebrew(cat) {
-        if (cat == 'finance') return 'פיננסי';
-        if (cat == 'marketing') return 'שיווק';
-        if (cat == 'ops') return 'תפעול';
-        if (cat == 'hr') return 'משאבי אנוש';
-        return 'כללי';
-    }
+        function getCatHebrew(cat) {
+            if (cat == 'finance') return 'פיננסי';
+            if (cat == 'marketing') return 'שיווק';
+            if (cat == 'ops') return 'תפעול';
+            if (cat == 'hr') return 'משאבי אנוש';
+            return 'כללי';
+        }
 
-    function getCatColor(cat) {
-        if (cat == 'finance') return 'var(--finance)';
-        if (cat == 'marketing') return 'var(--marketing)';
-        if (cat == 'ops') return 'var(--ops)';
-        if (cat == 'hr') return 'var(--hr)';
-        return '#ccc';
-    }
-</script>
+        function getCatColor(cat) {
+            if (cat == 'finance') return 'var(--finance)';
+            if (cat == 'marketing') return 'var(--marketing)';
+            if (cat == 'ops') return 'var(--ops)';
+            if (cat == 'hr') return 'var(--hr)';
+            return '#ccc';
+        }
+    </script>
+</body>
+</html>
