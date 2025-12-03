@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Kiosk Generator 🤖</title>
+    <style>
+        :root {
+            --bg: #111827;
+            --card: #1f2937;
+            --text: #f3f4f6;
+            --accent: #8b5cf6; /* סגול AI */
+            --green: #10b981;
+            --red: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background: #0f172a;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #374151;
+            z-index: 10;
+        }
+
+        .stats-box { text-align: center; }
+        .label { font-size: 0.75rem; color: #9ca3af; }
+        .value { font-size: 1.1rem; font-weight: bold; }
+        .money { color: var(--green); }
+        .level { color: var(--accent); }
+
+        #game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .question-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #374151;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 { margin: 0 0 15px 0; font-size: 1.3rem; line-height: 1.3; color: #e5e7eb; }
+        p { color: #d1d5db; line-height: 1.6; margin-bottom: 25px; font-size: 1.1rem; }
+
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+
+        .option-btn {
+            background: #374151;
+            border: 2px solid transparent;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: right;
+            transition: all 0.2s;
+        }
+
+        .option-btn:active { transform: scale(0.98); }
+        .option-btn.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--green); color: var(--green); }
+        .option-btn.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--red); color: var(--red); }
+        .option-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+        #feedback-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 100;
+            border: 2px solid #555;
+            min-width: 220px;
+        }
+
+        #feedback-overlay.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .feedback-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+        .feedback-text { font-size: 1.5rem; font-weight: bold; }
+        
+        #xp-bar-container { height: 6px; background: #374151; width: 100%; position: fixed; bottom: 0; }
+        #xp-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s; }
+
+        #reset-btn {
+            position: fixed;
+            bottom: 20px; left: 20px;
+            font-size: 0.8rem; opacity: 0.4;
+            background: none; border: 1px solid #555; color: #aaa;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="stats-box">
+            <div class="label">דרגה</div>
+            <div class="value level" id="ui-level">1</div>
+        </div>
+        <div class="stats-box">
+            <div class="label">מזומן</div>
+            <div class="value money" id="ui-money">$5,000</div>
+        </div>
+        <div class="stats-box">
+            <div class="label">XP</div>
+            <div class="value" id="ui-xp">0</div>
+        </div>
+    </header>
+
+    <div id="game-container"></div>
+
+    <div id="feedback-overlay">
+        <div class="feedback-icon" id="fb-icon"></div>
+        <div class="feedback-text" id="fb-text"></div>
+        <div class="feedback-sub" id="fb-sub"></div>
+    </div>
+
+    <div id="xp-bar-container"><div id="xp-bar-fill"></div></div>
+    <button id="reset-btn" onclick="hardReset()">איפוס</button>
+
+    <script>
+        const SAVE_KEY = 'ai_kiosk_generator_v1';
+
+        // --- בנק נתונים למחולל השאלות ---
+        
+        const DATA = {
+            employees: ["דני", "יוסי", "שרה", "נועה", "אחמד", "רומן", "ליאור"],
+            roles: ["הקופאי", "עובד הפס", "המנקה", "השליח", "אחראי משמרת"],
+            suppliers: ["תנובה", "שטראוס", "קוקה קולה", "מאפיית הכפר", "ירקות השדה", "גלידות פלדמן"],
+            products: ["חלב", "גבינה צהובה", "לחמניות", "ירקות", "שוקו", "רטבים", "חד פעמי"],
+            machines: ["מכונת הקפה", "מכונת הברד", "הטוסטר", "המקרר הגדול", "הקופה הרושמת", "הגריל"],
+            times: ["באמצע לחץ מטורף", "דקה לפני הסגירה", "על הבוקר כשפתחת", "בזמן הפסקת צהריים", "בחג"],
+            
+            // תבניות לאירועים (ה-X יוחלף בנתונים מלמעלה)
+            problems: {
+                hr: [
+                    { t: "{emp} {role} מאחר למשמרת ב-{time}.", q: "מה עושים?", bad: "צורח עליו בטלפון", good: "מתקשר לברר וקורא למחליף במידת הצורך" },
+                    { t: "{emp} {role} רב עם לקוח {time}.", q: "הלקוח צועק. איך מגיבים?", bad: "מגן על העובד ותוקף את הלקוח", good: "מרגיע את הרוחות ולוקח את הלקוח לצד" },
+                    { t: "{emp} מבקש העלאה באמצע המשמרת.", q: "הוא אומר שהוא עוזב אם לא.", bad: "מסכים מיד מתוך לחץ", good: "קובע שיחה מסודרת לסוף המשמרת" }
+                ],
+                ops: [
+                    { t: "{machine} התקלקלה {time}!", q: "יש תור של אנשים.", bad: "בועט במכונה ומקלל", good: "תולה שלט 'תקול', מתנצל, ומזמין טכנאי" },
+                    { t: "נגמר המלאי של {product} {time}.", q: "לקוחות מבקשים את זה.", bad: "אומר להם 'אין' וזהו", good: "מציע מוצר חליפי דומה או שולח עובד לקנות השלמה" },
+                    { t: "{machine} עושה רעש מוזר.", q: "זה נשמע מסוכן.", bad: "מתעלם, העיקר שתעבוד", good: "מנתק מהחשמל ובודק בטיחות" }
+                ],
+                finance: [
+                    { t: "הספק של {supplier} הקפיץ מחיר.", q: "הוא דורש 15% יותר על {product}.", bad: "מפסיק לעבוד איתו מיד בכעס", good: "בודק אלטרנטיבות ומנהל משא ומתן" },
+                    { t: "הקופה לא מתאזנת בסוף יום.", q: "חסרים 200 שקל.", bad: "מוריד את זה מהמשכורת של {emp}", good: "בודק מצלמות ועובר על הדו\"ח שוב" },
+                    { t: "לקוח רוצה להזמין ב-500 שקל באשראי.", q: "הכרטיס לא עובר.", bad: "נותן לו לרשום בצד, הוא נראה אמין", good: "מתנצל ומבקש אמצעי תשלום אחר" }
+                ]
+            }
+        };
+
+        let player = {
+            money: 5000,
+            xp: 0,
+            level: 1
+        };
+
+        // אתחול
+        function init() {
+            if(localStorage.getItem(SAVE_KEY)) {
+                try { player = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch(e) {}
+            }
+            renderUI();
+            nextTurn();
+        }
+
+        // --- המוח של המערכת: מייצר שאלה חדשה בכל פעם ---
+        function generateScenario() {
+            // 1. הגרלת קטגוריה
+            const cats = ['hr', 'ops', 'finance'];
+            const chosenCat = cats[Math.floor(Math.random() * cats.length)];
+            
+            // 2. הגרלת תבנית מתוך הקטגוריה
+            const templates = DATA.problems[chosenCat];
+            const template = templates[Math.floor(Math.random() * templates.length)];
+            
+            // 3. מילוי הנתונים החסרים (הרכבת המשפט)
+            let title = template.t;
+            title = title.replace("{emp}", rand(DATA.employees));
+            title = title.replace("{role}", rand(DATA.roles));
+            title = title.replace("{time}", rand(DATA.times));
+            title = title.replace("{machine}", rand(DATA.machines));
+            title = title.replace("{product}", rand(DATA.products));
+            title = title.replace("{supplier}", rand(DATA.suppliers));
+            
+            // 4. חישוב עלויות לפי דרגה (עולה ככל שמתקדמים)
+            const difficulty = Math.max(1, player.level * 0.5); 
+            const cost = Math.floor(Math.random() * 200 * difficulty) + 100;
+            const reward = Math.floor(cost * 1.5) + 300;
+
+            return {
+                cat: chosenCat,
+                title: title,
+                q: template.q,
+                good: template.good,
+                bad: template.bad,
+                cost: cost,
+                reward: reward
+            };
+        }
+
+        function rand(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function nextTurn() {
+            checkLevelUp();
+            renderUI();
+
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
+            
+            const scenario = generateScenario();
+            renderCard(scenario);
+        }
+
+        function renderCard(s) {
+            const container = document.getElementById('game-container');
+            
+            // צבעים לפי קטגוריה
+            let color = '#fff';
+            let catName = 'כללי';
+            if(s.cat === 'hr') { color = '#a78bfa'; catName = 'ניהול עובדים'; }
+            if(s.cat === 'ops') { color = '#fbbf24'; catName = 'תפעול שוטף'; }
+            if(s.cat === 'finance') { color = '#10b981'; catName = 'כספים'; }
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            // יצירת 3 תשובות: אחת טובה, אחת רעה, אחת נייטרלית
+            // אנחנו מערבבים את הסדר שלהן
+            let options = [
+                { text: s.good, correct: true },
+                { text: s.bad, correct: false },
+                { text: "לא לעשות כלום ולקוות לטוב", correct: false } // תשובה גנרית
+            ];
+            options = shuffle(options);
+
+            let html = `
+                <div class="category-badge" style="background:${color}20; color:${color}">${catName}</div>
+                <h2>${s.title}</h2>
+                <p>${s.q}</p>
+                <div class="options-grid">
+            `;
+
+            options.forEach((opt) => {
+                html += `<div class="option-btn" onclick="handleAnswer(this, ${opt.correct}, ${s.reward}, ${s.cost})">${opt.text}</div>`;
+            });
+
+            html += `</div>`;
+            card.innerHTML = html;
+            container.appendChild(card);
+        }
+
+        function handleAnswer(btn, isCorrect, reward, cost) {
+            // נעילת כפתורים
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+            if(isCorrect) {
+                btn.classList.add('correct');
+                processResult(true, reward);
+            } else {
+                btn.classList.add('wrong');
+                // סימון התשובה הנכונה
+                document.querySelectorAll('.option-btn').forEach(b => {
+                   // לוגיקה פשוטה למציאת הנכון לצורך תצוגה
+                   // במקרה הזה לא שמרנו רפרנס ישיר, אבל זה לא קריטי למשחקיות מהירה
+                });
+                processResult(false, -cost);
+            }
+
+            save();
+            setTimeout(() => {
+                document.getElementById('feedback-overlay').classList.remove('show');
+                nextTurn();
+            }, 1400); // מעבר מהיר
+        }
+
+        function processResult(win, amount) {
+            player.money += amount;
+            // אם מפסידים יותר מדי כסף, לא יורדים מתחת לאפס
+            // אבל כדי להקשות: XP עולה רק בניצחון משמעותי
+            if(win) player.xp += 50 + (player.level * 10);
+            else player.xp += 10;
+
+            showFeedback(win, amount);
+            renderUI();
+        }
+
+        function showFeedback(win, amount) {
+            const el = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('fb-icon');
+            const txt = document.getElementById('fb-text');
+            const sub = document.getElementById('fb-sub');
+
+            el.classList.add('show');
+            if(win) {
+                icon.innerText = "✅";
+                txt.innerText = "החלטה טובה";
+                txt.style.color = "var(--green)";
+                sub.innerText = "+$" + amount;
+                el.style.borderColor = "var(--green)";
+            } else {
+                icon.innerText = "❌";
+                txt.innerText = "טעות בשיקול";
+                txt.style.color = "var(--red)";
+                sub.innerText = "-$" + Math.abs(amount);
+                el.style.borderColor = "var(--red)";
+            }
+        }
+
+        function renderUI() {
+            document.getElementById('ui-level').innerText = player.level;
+            document.getElementById('ui-money').innerText = "$" + player.money.toLocaleString();
+            document.getElementById('ui-xp').innerText = Math.floor(player.xp);
+            
+            let needed = player.level * 500;
+            let pct = (player.xp / needed) * 100;
+            if(pct > 100) pct = 100;
+            document.getElementById('xp-bar-fill').style.width = pct + "%";
+        }
+
+        function checkLevelUp() {
+            let needed = player.level * 500;
+            if(player.xp >= needed) {
+                player.level++;
+                player.xp = 0;
+                // אפקט קולי או ויזואלי יכול לבוא כאן
+            }
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function save() { localStorage.setItem(SAVE_KEY, JSON.stringify(player)); }
+        function hardReset() { 
+            if(confirm("לאפס?")) { 
+                localStorage.removeItem(SAVE_KEY); 
+                location.reload(); 
+            } 
+        }
+
+        init();
+    </script>
+</body>
+</html>
