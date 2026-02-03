@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack Fixed</title>
+    <title>MoneyStack 9.1 Unlocked</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -106,7 +106,7 @@
                 <button onclick="saveTransaction()" id="saveBtn" class="w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2">רשום הוצאה</button>
             </div>
         </div>
-                    <div id="view-transactions" class="view-section hidden slide-up">
+                <div id="view-transactions" class="view-section hidden slide-up">
             <h2 class="text-xl font-bold mb-4 px-2">יומן תנועות</h2>
             <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm mb-4 space-y-3 sticky top-0 z-30">
                 <div class="relative"><i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-slate-400 text-sm"></i><input type="text" id="searchDesc" onkeyup="renderTransactions()" placeholder="חפש לפי שם..." class="w-full bg-slate-50 dark:bg-slate-900 pr-9 p-2.5 rounded-xl text-sm border-none outline-none focus:ring-2 ring-blue-500"></div>
@@ -162,14 +162,14 @@
         init();
 
         function init() {
+            // ----- קוד פריצה: מבטל נעילה ישנה -----
+            app.pin = null; 
+            document.getElementById('pinOverlay').classList.add('hidden');
+            save(); 
+            // ------------------------------------
+
             if(app.theme === 'dark') document.documentElement.classList.add('dark');
             setInterval(updateClock, 1000); updateClock();
-            
-            // --- תיקון לשחרור נעילה: מוחק את הקוד הסודי בכניסה ---
-            app.pin = null; 
-            save(); 
-            // ---------------------------------------------------
-
             loadProfile(); updatePinStatus(); renderDashboard(); updateDataList();
         }
         function save() { localStorage.setItem('moneyAppV9', JSON.stringify(app)); renderDashboard(); updateDataList(); }
@@ -279,4 +279,3 @@
     </script>
 </body>
 </html>
-
