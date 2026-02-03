@@ -3,273 +3,464 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack Pro</title>
+    <title>MoneyStack Architect</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 900: '#0f172a', 800: '#1e293b', 700: '#334155' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
-        .view-section { display: none; animation: fadeIn 0.3s ease; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: white; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        body { -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .card-pro { border-radius: 20px; transition: transform 0.2s; }
+        .card-pro:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="pb-24">
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-900 dark:text-gray-100 transition-colors duration-300 pb-24">
 
-    <div class="bg-blue-900 text-white p-6 rounded-b-3xl shadow-lg sticky top-0 z-10">
-        <h1 class="text-sm opacity-80 mb-1">היתרה הנוכחית שלך</h1>
-        <div class="text-4xl font-bold flex items-baseline gap-2" dir="ltr">
-            <span class="text-2xl">₪</span>
-            <span id="displayBalance">0</span>
-        </div>
-        <div class="flex gap-4 mt-6">
-            <div class="bg-white/10 p-3 rounded-xl flex-1 backdrop-blur-sm text-center">
-                <div class="text-xs opacity-70">הכנסות</div>
-                <div class="text-lg font-bold text-green-300" id="displayIncome">0</div>
+    <div class="bg-blue-600 dark:bg-blue-900 p-6 pb-12 rounded-b-[40px] shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <div>
+                <h2 class="text-blue-100 text-sm font-medium">הון עצמי כולל</h2>
+                <div class="text-4xl font-bold text-white flex items-baseline gap-1">
+                    <span class="text-2xl">₪</span>
+                    <span id="netWorthDisplay">0</span>
+                </div>
             </div>
-            <div class="bg-white/10 p-3 rounded-xl flex-1 backdrop-blur-sm text-center">
-                <div class="text-xs opacity-70">הוצאות</div>
-                <div class="text-lg font-bold text-red-300" id="displayExpense">0</div>
+            <button onclick="toggleTheme()" class="bg-white/20 p-2 rounded-full text-white hover:bg-white/30 transition">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+
+        <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2 relative z-10">
+            <div class="min-w-[100px] bg-white/10 p-3 rounded-2xl backdrop-blur-sm border border-white/10">
+                <div class="text-xs text-blue-100">עו"ש בנק</div>
+                <div class="font-bold text-white" id="bankDisplay">0</div>
+            </div>
+            <div class="min-w-[100px] bg-white/10 p-3 rounded-2xl backdrop-blur-sm border border-white/10">
+                <div class="text-xs text-blue-100">השקעות</div>
+                <div class="font-bold text-green-300" id="investDisplay">0</div>
+            </div>
+            <div class="min-w-[100px] bg-white/10 p-3 rounded-2xl backdrop-blur-sm border border-white/10">
+                <div class="text-xs text-blue-100">מזומן</div>
+                <div class="font-bold text-yellow-300" id="cashDisplay">0</div>
             </div>
         </div>
     </div>
 
-    <div id="view-home" class="view-section active p-4 max-w-md mx-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="font-bold text-gray-700">תנועות אחרונות</h2>
-            <button onclick="resetData()" class="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">איפוס הכל</button>
+    <div class="px-5 -mt-8 relative z-20 space-y-6">
+
+        <div id="section-dashboard" class="view-section">
+            <div class="bg-white dark:bg-dark-800 p-5 rounded-3xl shadow-lg border border-gray-100 dark:border-dark-700">
+                <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-blue-500"></i> ניתוח הוצאות
+                </h3>
+                <div class="h-48 relative">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
+            <div class="mt-4 bg-white dark:bg-dark-800 p-5 rounded-3xl shadow-lg border border-gray-100 dark:border-dark-700">
+                <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-bullseye text-red-500"></i> היעדים שלי
+                </h3>
+                <div id="goalsContainer" class="space-y-4">
+                    </div>
+                <button onclick="addGoal()" class="mt-3 text-sm text-blue-500 font-medium">+ הוסף יעד חדש</button>
+            </div>
         </div>
-        <div id="transactionsList" class="space-y-3">
-            </div>
-    </div>
 
-    <div id="view-add" class="view-section p-4 max-w-md mx-auto">
-        <h2 class="font-bold text-xl mb-4 text-gray-800">הוספת תנועה</h2>
-        <div class="card p-5">
-            <div class="flex gap-2 mb-4">
-                <button onclick="setType('expense')" id="btn-expense" class="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white transition">הוצאה</button>
-                <button onclick="setType('income')" id="btn-income" class="flex-1 py-3 rounded-xl font-bold bg-gray-100 text-gray-500 transition">הכנסה</button>
+        <div id="section-transactions" class="view-section hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-lg dark:text-white">תנועות אחרונות</h3>
+                <button onclick="resetApp()" class="text-xs text-red-400">איפוס נתונים</button>
             </div>
+            <div id="txList" class="space-y-3 pb-20">
+                </div>
+        </div>
 
-            <input type="text" id="inputDesc" placeholder="על מה יצא הכסף?" class="w-full p-3 border rounded-xl mb-3 bg-gray-50">
-            <input type="number" id="inputAmount" placeholder="סכום (למשל 50)" class="w-full p-3 border rounded-xl mb-3 bg-gray-50">
+        <div id="section-add" class="view-section hidden">
+            <h3 class="font-bold text-xl mb-4 dark:text-white">פעולה חדשה</h3>
             
-            <select id="inputCategory" class="w-full p-3 border rounded-xl mb-4 bg-white">
-                <option value="כללי">קטגוריה: כללי</option>
-                <option value="מזון">מזון וסופר</option>
-                <option value="רכב">רכב ותחבורה</option>
-                <option value="בית">בית וחשבונות</option>
-                <option value="בילויים">בילויים</option>
-                <option value="משכורת">משכורת</option>
-            </select>
+            <div class="flex bg-gray-200 dark:bg-dark-700 p-1 rounded-xl mb-6">
+                <button onclick="setAddMode('manual')" id="tab-manual" class="flex-1 py-2 rounded-lg font-bold bg-white dark:bg-dark-800 shadow-sm transition">ידני</button>
+                <button onclick="setAddMode('import')" id="tab-import" class="flex-1 py-2 rounded-lg font-bold text-gray-500 transition">ייבוא בנק</button>
+            </div>
 
-            <button onclick="saveTransaction()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition">שמור תנועה</button>
+            <div id="form-manual" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setTxType('expense')" id="btn-expense" class="py-3 rounded-xl font-bold bg-red-500 text-white transition ring-2 ring-red-300">הוצאה</button>
+                    <button onclick="setTxType('income')" id="btn-income" class="py-3 rounded-xl font-bold bg-gray-100 text-gray-500 dark:bg-dark-700 transition">הכנסה</button>
+                </div>
+                
+                <input type="number" id="inpAmount" placeholder="סכום (₪)" class="w-full p-4 rounded-xl bg-white dark:bg-dark-800 border-none shadow-sm text-lg focus:ring-2 ring-blue-500 outline-none dark:text-white">
+                <input type="text" id="inpDesc" placeholder="תיאור (למשל: דלק)" class="w-full p-4 rounded-xl bg-white dark:bg-dark-800 border-none shadow-sm outline-none dark:text-white">
+                
+                <select id="inpCat" class="w-full p-4 rounded-xl bg-white dark:bg-dark-800 border-none shadow-sm outline-none dark:text-white">
+                    <option value="כללי">קטגוריה: כללי</option>
+                    <option value="מזון">🍔 אוכל וסופר</option>
+                    <option value="רכב">🚗 רכב ותחבורה</option>
+                    <option value="בית">🏠 חשבונות בית</option>
+                    <option value="בילויים">🍺 בילויים</option>
+                    <option value="השקעות">📈 הפקדה להשקעות</option>
+                </select>
+
+                <button onclick="saveManualTx()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/30 active:scale-95 transition text-lg">שמור</button>
+            </div>
+
+            <div id="form-import" class="hidden space-y-4">
+                <textarea id="importText" class="w-full h-40 p-4 rounded-xl bg-white dark:bg-dark-800 border-none shadow-sm text-sm font-mono dark:text-white" placeholder="הדבק כאן את השורות מהבנק..."></textarea>
+                <button onclick="processImport()" class="w-full bg-gray-800 dark:bg-gray-700 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition">נתח נתונים</button>
+            </div>
         </div>
+
+        <div id="section-assets" class="view-section hidden">
+            <h3 class="font-bold text-xl mb-4 dark:text-white">ניהול נכסים</h3>
+            <div class="space-y-4">
+                <div class="bg-white dark:bg-dark-800 p-4 rounded-2xl shadow-sm flex justify-between items-center">
+                    <div>
+                        <div class="font-bold dark:text-white">מזומן בארנק</div>
+                        <div class="text-xs text-gray-500">עדכון ידני</div>
+                    </div>
+                    <input type="number" id="editCash" onchange="updateAssets()" class="w-24 text-left bg-gray-100 dark:bg-dark-700 p-2 rounded-lg font-bold" placeholder="0">
+                </div>
+                <div class="bg-white dark:bg-dark-800 p-4 rounded-2xl shadow-sm flex justify-between items-center">
+                    <div>
+                        <div class="font-bold dark:text-white">תיק השקעות</div>
+                        <div class="text-xs text-gray-500">שווי נוכחי</div>
+                    </div>
+                    <input type="number" id="editInvest" onchange="updateAssets()" class="w-24 text-left bg-gray-100 dark:bg-dark-700 p-2 rounded-lg font-bold" placeholder="0">
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="view-import" class="view-section p-4 max-w-md mx-auto">
-        <h2 class="font-bold text-xl mb-4 text-gray-800">ייבוא מהבנק</h2>
-        <div class="card p-4">
-            <p class="text-sm text-gray-500 mb-2">העתק את הטקסט מה-Note והדבק כאן:</p>
-            <textarea id="bankInput" class="w-full h-40 p-3 border rounded-xl mb-4 bg-gray-50 text-right" placeholder="לדוגמה: 01/01/2026 | סופר | --- | 100..."></textarea>
-            <button onclick="processBankData()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold">נתח והוסף לרשימה</button>
+    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-800 border-t dark:border-dark-700 p-2 px-6 flex justify-between items-center pb-6 z-50">
+        <button onclick="nav('dashboard')" id="nav-dashboard" class="text-blue-600 flex flex-col items-center">
+            <i class="fa-solid fa-chart-line text-xl mb-1"></i>
+        </button>
+        <button onclick="nav('transactions')" id="nav-transactions" class="text-gray-400 flex flex-col items-center">
+            <i class="fa-solid fa-list text-xl mb-1"></i>
+        </button>
+        <div class="relative -top-5">
+            <button onclick="nav('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-90 transition">
+                <i class="fa-solid fa-plus text-2xl"></i>
+            </button>
         </div>
-    </div>
-
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-around items-end pb-5 shadow-[0_-5px_10px_rgba(0,0,0,0.05)]">
-        <button onclick="switchView('home')" class="nav-btn w-16 text-center text-blue-600" id="nav-home">
-            <i class="fa-solid fa-house text-xl mb-1"></i>
-            <div class="text-[10px] font-bold">ראשי</div>
+        <button onclick="nav('assets')" id="nav-assets" class="text-gray-400 flex flex-col items-center">
+            <i class="fa-solid fa-wallet text-xl mb-1"></i>
         </button>
-        
-        <button onclick="switchView('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center -mt-8 shadow-lg shadow-blue-200 active:scale-90 transition">
-            <i class="fa-solid fa-plus text-2xl"></i>
-        </button>
-        
-        <button onclick="switchView('import')" class="nav-btn w-16 text-center text-gray-400" id="nav-import">
-            <i class="fa-solid fa-file-import text-xl mb-1"></i>
-            <div class="text-[10px] font-bold">ייבוא</div>
+        <button onclick="nav('settings')" class="text-gray-400 flex flex-col items-center">
+            <i class="fa-solid fa-gear text-xl mb-1"></i>
         </button>
     </div>
 
     <script>
-        // ניהול נתונים
-        let transactions = JSON.parse(localStorage.getItem('moneyStackData')) || [];
-        let currentType = 'expense';
+        // --- State Management ---
+        let data = JSON.parse(localStorage.getItem('moneyStackPro')) || {
+            transactions: [],
+            assets: { cash: 0, investments: 0 },
+            goals: [
+                { id: 1, name: "פג'ו 207", target: 15000, current: 3500, icon: "fa-car" },
+                { id: 2, name: "קרן חירום", target: 20000, current: 5000, icon: "fa-shield-heart" }
+            ],
+            theme: 'light'
+        };
 
-        // הפעלה ראשונית
-        updateUI();
+        // --- Init ---
+        let chartInstance = null;
+        let txType = 'expense';
+        
+        // Theme Init
+        if (data.theme === 'dark') document.documentElement.classList.add('dark');
 
-        function updateUI() {
-            // חישובים
-            const income = transactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
-            const expense = transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
-            const balance = income - expense;
+        renderAll();
 
-            // עדכון כותרת
-            document.getElementById('displayBalance').innerText = balance.toLocaleString();
-            document.getElementById('displayIncome').innerText = '+' + income.toLocaleString();
-            document.getElementById('displayExpense').innerText = '-' + expense.toLocaleString();
+        // --- Core Functions ---
+        function saveData() {
+            localStorage.setItem('moneyStackPro', JSON.stringify(data));
+            renderAll();
+        }
 
-            // עדכון רשימה
-            const listEl = document.getElementById('transactionsList');
-            listEl.innerHTML = '';
+        function renderAll() {
+            // 1. Calculate Finances
+            const bankBalance = data.transactions.reduce((sum, t) => sum + t.amount, 0);
+            const totalNetWorth = bankBalance + (data.assets.cash || 0) + (data.assets.investments || 0);
             
-            if (transactions.length === 0) {
-                listEl.innerHTML = '<div class="text-center py-10 text-gray-400">אין נתונים עדיין</div>';
-            } else {
-                transactions.slice().reverse().forEach((tx, index) => {
-                    // תיקון לאינדקס ההפוך
-                    const realIndex = transactions.length - 1 - index;
-                    const isIncome = tx.amount > 0;
-                    
-                    listEl.innerHTML += `
-                        <div class="card p-4 flex justify-between items-center relative group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
-                                    <i class="fa-solid ${isIncome ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-gray-800">${tx.desc}</div>
-                                    <div class="text-xs text-gray-500">${tx.date} • ${tx.category}</div>
-                                </div>
+            // 2. Update Header
+            document.getElementById('netWorthDisplay').innerText = totalNetWorth.toLocaleString();
+            document.getElementById('bankDisplay').innerText = bankBalance.toLocaleString() + ' ₪';
+            document.getElementById('investDisplay').innerText = (data.assets.investments || 0).toLocaleString() + ' ₪';
+            document.getElementById('cashDisplay').innerText = (data.assets.cash || 0).toLocaleString() + ' ₪';
+            
+            // 3. Update Inputs
+            document.getElementById('editCash').value = data.assets.cash || '';
+            document.getElementById('editInvest').value = data.assets.investments || '';
+
+            // 4. Render Transactions
+            const list = document.getElementById('txList');
+            list.innerHTML = '';
+            data.transactions.slice().reverse().forEach((tx, i) => {
+                const isInc = tx.amount > 0;
+                list.innerHTML += `
+                    <div class="bg-white dark:bg-dark-800 p-4 rounded-2xl flex justify-between items-center shadow-sm card-pro">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${isInc ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
+                                <i class="fa-solid ${getIcon(tx.category)}"></i>
                             </div>
-                            <div class="text-right">
-                                <div class="font-bold ${isIncome ? 'text-green-600' : 'text-gray-900'}" dir="ltr">${Math.abs(tx.amount).toLocaleString()} ₪</div>
-                                <button onclick="deleteTx(${realIndex})" class="text-xs text-red-400 mt-1">מחק</button>
+                            <div>
+                                <div class="font-bold dark:text-white">${tx.desc}</div>
+                                <div class="text-xs text-gray-500">${tx.date} • ${tx.category}</div>
                             </div>
                         </div>
-                    `;
-                });
-            }
-        }
-
-        // מעבר בין מסכים
-        function switchView(viewName) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-' + viewName).classList.add('active');
-            
-            // עדכון צבעים בתפריט
-            document.getElementById('nav-home').className = `nav-btn w-16 text-center ${viewName === 'home' ? 'text-blue-600' : 'text-gray-400'}`;
-            document.getElementById('nav-import').className = `nav-btn w-16 text-center ${viewName === 'import' ? 'text-blue-600' : 'text-gray-400'}`;
-        }
-
-        // הוספה ידנית
-        function setType(type) {
-            currentType = type;
-            const btnExp = document.getElementById('btn-expense');
-            const btnInc = document.getElementById('btn-income');
-            
-            if (type === 'expense') {
-                btnExp.className = 'flex-1 py-3 rounded-xl font-bold bg-red-500 text-white transition';
-                btnInc.className = 'flex-1 py-3 rounded-xl font-bold bg-gray-100 text-gray-500 transition';
-            } else {
-                btnExp.className = 'flex-1 py-3 rounded-xl font-bold bg-gray-100 text-gray-500 transition';
-                btnInc.className = 'flex-1 py-3 rounded-xl font-bold bg-green-500 text-white transition';
-            }
-        }
-
-        function saveTransaction() {
-            const desc = document.getElementById('inputDesc').value;
-            const amountRaw = document.getElementById('inputAmount').value;
-            const category = document.getElementById('inputCategory').value;
-
-            if (!desc || !amountRaw) return alert('חסרים פרטים');
-
-            let amount = parseFloat(amountRaw);
-            if (currentType === 'expense') amount = amount * -1;
-
-            transactions.push({
-                desc,
-                amount,
-                category,
-                date: new Date().toLocaleDateString('he-IL')
+                        <div class="text-right">
+                            <div class="font-bold ${isInc ? 'text-green-500' : 'text-gray-800 dark:text-gray-200'}" dir="ltr">
+                                ${Math.abs(tx.amount).toLocaleString()}
+                            </div>
+                            <button onclick="delTx(${data.transactions.length - 1 - i})" class="text-xs text-red-300">מחק</button>
+                        </div>
+                    </div>
+                `;
             });
 
-            saveAndReset();
+            // 5. Render Goals
+            const goalsContainer = document.getElementById('goalsContainer');
+            goalsContainer.innerHTML = '';
+            data.goals.forEach(g => {
+                const percent = Math.min(100, Math.round((g.current / g.target) * 100));
+                goalsContainer.innerHTML += `
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm mb-1 dark:text-gray-300">
+                            <span><i class="fa-solid ${g.icon} mr-1"></i> ${g.name}</span>
+                            <span>${percent}%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 dark:bg-dark-900 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
+                        </div>
+                        <div class="text-xs text-right text-gray-400 mt-1">${g.current.toLocaleString()} / ${g.target.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+
+            // 6. Render Chart
+            renderChart();
         }
 
-        // ייבוא מהבנק
-        function processBankData() {
-            const text = document.getElementById('bankInput').value;
+        // --- Chart Logic ---
+        function renderChart() {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            // Group expenses by category
+            const cats = {};
+            data.transactions.filter(t => t.amount < 0).forEach(t => {
+                cats[t.category] = (cats[t.category] || 0) + Math.abs(t.amount);
+            });
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(cats),
+                    datasets: [{
+                        data: Object.values(cats),
+                        backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: data.theme==='dark'?'#fff':'#333' } } }
+                }
+            });
+        }
+
+        // --- Logic: Add Transaction ---
+        function setTxType(type) {
+            txType = type;
+            const expenseBtn = document.getElementById('btn-expense');
+            const incomeBtn = document.getElementById('btn-income');
+            
+            if (type === 'expense') {
+                expenseBtn.className = 'py-3 rounded-xl font-bold bg-red-500 text-white transition ring-2 ring-red-300 shadow-lg';
+                incomeBtn.className = 'py-3 rounded-xl font-bold bg-gray-100 text-gray-500 dark:bg-dark-700 transition';
+            } else {
+                expenseBtn.className = 'py-3 rounded-xl font-bold bg-gray-100 text-gray-500 dark:bg-dark-700 transition';
+                incomeBtn.className = 'py-3 rounded-xl font-bold bg-green-500 text-white transition ring-2 ring-green-300 shadow-lg';
+            }
+        }
+
+        function saveManualTx() {
+            const amt = parseFloat(document.getElementById('inpAmount').value);
+            const desc = document.getElementById('inpDesc').value;
+            const cat = document.getElementById('inpCat').value;
+            
+            if (!amt || !desc) return alert('חסר סכום או תיאור');
+            
+            const finalAmt = txType === 'expense' ? -amt : amt;
+            
+            data.transactions.push({
+                date: new Date().toLocaleDateString('he-IL'),
+                desc: desc,
+                amount: finalAmt,
+                category: cat
+            });
+            
+            saveData();
+            document.getElementById('inpAmount').value = '';
+            document.getElementById('inpDesc').value = '';
+            alert('נשמר בהצלחה');
+            nav('dashboard');
+        }
+
+        // --- Logic: Import Parser (Auto Categorize) ---
+        function processImport() {
+            const text = document.getElementById('importText').value;
             const lines = text.split('\n');
-            let count = 0;
+            let added = 0;
 
             lines.forEach(line => {
-                // לוגיקה חכמה לזיהוי שורות
                 if (line.match(/\d/) && (line.includes('|') || line.includes('/'))) {
-                    // מנקה ומחלק
                     let parts = line.includes('|') ? line.split('|') : line.split(/\s\s+/);
-                    parts = parts.map(p => p.trim()).filter(p => p !== '');
-
+                    parts = parts.map(p => p.trim());
+                    
                     if (parts.length >= 3) {
-                        // ניסיון לחלץ מספרים
-                        const findNum = (str) => {
-                            if (!str || str === '---') return 0;
-                            return parseFloat(str.replace(/,/g, ''));
-                        };
-
-                        // מניח שהתאריך ראשון והתיאור שני
-                        const date = parts[0].includes('/') ? parts[0] : new Date().toLocaleDateString('he-IL');
-                        const desc = parts[1] || 'ייבוא בנק';
+                        const expense = cleanNum(parts[2]); // Assuming col 3 is expense
+                        const income = cleanNum(parts[3]);  // Assuming col 4 is income
+                        const desc = parts[1] || 'בנק';
+                        const date = parts[0];
                         
-                        // מחפש איפה מסתתרים המספרים
-                        let expense = 0, income = 0;
-                        
-                        // עובר על שאר החלקים ומחפש מספרים
-                        for(let i=2; i<parts.length; i++) {
-                            const val = findNum(parts[i]);
-                            if (val > 0) {
-                                // היוריסטיקה: בדרך כלל הוצאה באה קודם, אבל נבדוק לפי מיקום
-                                // בדוגמה שלך: הוצאה (חובה) היא עמודה 3, הכנסה (זכות) היא 4
-                                if (i === 2) expense = val;
-                                if (i === 3) income = val;
-                            }
-                        }
-
-                        const amount = income > 0 ? income : (expense * -1);
+                        let amount = 0;
+                        if (expense > 0) amount = -expense;
+                        if (income > 0) amount = income;
 
                         if (amount !== 0) {
-                            transactions.push({ date, desc, amount, category: 'בנק' });
-                            count++;
+                            // Auto Categorize Logic
+                            let cat = 'כללי';
+                            if (desc.includes('מקס') || desc.includes('כאל') || desc.includes('ישראכרט')) cat = 'אשראי';
+                            else if (desc.includes('פייבוקס') || desc.includes('ביט')) cat = 'העברות';
+                            else if (desc.includes('אושר עד') || desc.includes('שופרסל')) cat = 'מזון';
+                            else if (desc.includes('דלק') || desc.includes('פנגו')) cat = 'רכב';
+
+                            data.transactions.push({ date, desc, amount, category: cat });
+                            added++;
                         }
                     }
                 }
             });
 
-            if (count > 0) {
-                alert(`נוספו ${count} תנועות!`);
-                document.getElementById('bankInput').value = '';
-                saveAndReset();
+            if (added > 0) {
+                saveData();
+                alert(`נוספו ${added} תנועות!`);
+                document.getElementById('importText').value = '';
+                nav('dashboard');
             } else {
-                alert('לא זוהו נתונים. וודא שהעתקת נכון.');
+                alert('לא זוהו נתונים.');
             }
         }
 
-        // פונקציות עזר
-        function saveAndReset() {
-            localStorage.setItem('moneyStackData', JSON.stringify(transactions));
-            updateUI();
-            switchView('home');
+        // --- Utilities ---
+        function nav(view) {
+            document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
             
-            // איפוס שדות
-            document.getElementById('inputDesc').value = '';
-            document.getElementById('inputAmount').value = '';
-        }
-
-        function deleteTx(index) {
-            if (confirm('למחוק?')) {
-                transactions.splice(index, 1);
-                saveAndReset();
+            const mapping = {
+                'dashboard': 'section-dashboard',
+                'transactions': 'section-transactions',
+                'add': 'section-add',
+                'assets': 'section-assets',
+                'settings': 'section-dashboard' // Placeholder
+            };
+            
+            document.getElementById(mapping[view]).classList.remove('hidden');
+            
+            // Reset nav colors
+            ['dashboard','transactions','assets'].forEach(n => {
+                document.getElementById('nav-'+n).classList.remove('text-blue-600');
+                document.getElementById('nav-'+n).classList.add('text-gray-400');
+            });
+            
+            if(document.getElementById('nav-'+view)) {
+                document.getElementById('nav-'+view).classList.remove('text-gray-400');
+                document.getElementById('nav-'+view).classList.add('text-blue-600');
             }
         }
 
-        function resetData() {
-            if (confirm('בטוח שאתה רוצה למחוק הכל?')) {
-                transactions = [];
-                saveAndReset();
+        function setAddMode(mode) {
+            document.getElementById('form-manual').classList.add('hidden');
+            document.getElementById('form-import').classList.add('hidden');
+            document.getElementById('form-'+mode).classList.remove('hidden');
+            
+            document.getElementById('tab-manual').classList.toggle('bg-white', mode === 'manual');
+            document.getElementById('tab-manual').classList.toggle('text-gray-500', mode !== 'manual');
+            document.getElementById('tab-import').classList.toggle('bg-white', mode === 'import');
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                data.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                data.theme = 'dark';
+            }
+            saveData();
+        }
+
+        function updateAssets() {
+            data.assets.cash = parseFloat(document.getElementById('editCash').value) || 0;
+            data.assets.investments = parseFloat(document.getElementById('editInvest').value) || 0;
+            saveData();
+        }
+
+        function delTx(index) {
+            if(confirm('למחוק?')) {
+                data.transactions.splice(index, 1);
+                saveData();
             }
         }
+
+        function resetApp() {
+            if(confirm('למחוק הכל ולהתחיל מאפס?')) {
+                data.transactions = [];
+                saveData();
+            }
+        }
+
+        function cleanNum(str) {
+            if (!str || str === '---') return 0;
+            return parseFloat(str.replace(/,/g, ''));
+        }
+
+        function getIcon(cat) {
+            const map = {
+                'מזון': 'fa-burger',
+                'רכב': 'fa-car',
+                'בית': 'fa-house',
+                'בילויים': 'fa-beer-mug-empty',
+                'אשראי': 'fa-credit-card',
+                'השקעות': 'fa-chart-line',
+                'כללי': 'fa-bag-shopping'
+            };
+            return map[cat] || 'fa-circle-dollar-to-slot';
+        }
+
     </script>
 </body>
 </html>
