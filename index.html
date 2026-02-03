@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack 9.1 Unlocked</title>
+    <title>MoneyStack 9.2 (PIN 1234)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -28,9 +28,9 @@
     </style>
 </head>
 <body class="text-slate-800 dark:bg-slate-900 dark:text-slate-100 pb-28 transition-colors duration-300">
-        <div id="pinOverlay" class="hidden">
-        <div class="text-3xl font-bold mb-8"><i class="fa-solid fa-shield-halved text-blue-500 mb-2"></i><br>MoneyStack</div>
-        <p class="mb-6 opacity-70">הכנס קוד סודי</p>
+        <div id="pinOverlay"> <div class="text-3xl font-bold mb-4"><i class="fa-solid fa-shield-halved text-blue-500 mb-2"></i><br>MoneyStack</div>
+        <p class="mb-2 opacity-70">הכנס קוד סודי</p>
+        <p class="mb-6 text-green-400 font-bold text-xl tracking-widest">CODE: 1234</p>
         <div class="flex gap-4 mb-8">
             <div class="w-4 h-4 rounded-full border-2 border-white/30 pin-dot" id="dot1"></div>
             <div class="w-4 h-4 rounded-full border-2 border-white/30 pin-dot" id="dot2"></div>
@@ -124,7 +124,7 @@
                     <input type="file" id="restoreFile" class="hidden" onchange="restoreBackup(this)">
                 </div>
                 <div class="mt-3 flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
-                    <span class="text-sm font-bold">הפעל קוד סודי (PIN)</span>
+                    <span class="text-sm font-bold">קוד סודי (1234)</span>
                     <button onclick="togglePinSetup()" id="pinStatusBtn" class="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500">כבוי</button>
                 </div>
             </div>
@@ -162,14 +162,13 @@
         init();
 
         function init() {
-            // ----- קוד פריצה: מבטל נעילה ישנה -----
-            app.pin = null; 
-            document.getElementById('pinOverlay').classList.add('hidden');
+            // Force PIN to 1234
+            app.pin = "1234";
             save(); 
-            // ------------------------------------
 
             if(app.theme === 'dark') document.documentElement.classList.add('dark');
             setInterval(updateClock, 1000); updateClock();
+            document.getElementById('pinOverlay').classList.remove('hidden');
             loadProfile(); updatePinStatus(); renderDashboard(); updateDataList();
         }
         function save() { localStorage.setItem('moneyAppV9', JSON.stringify(app)); renderDashboard(); updateDataList(); }
@@ -179,14 +178,15 @@
         function backspacePin() { currentPin = currentPin.slice(0, -1); updateDots(); }
         function updateDots() { for(let i=1; i<=4; i++) { const dot = document.getElementById('dot'+i); if(i <= currentPin.length) dot.classList.add('filled'); else dot.classList.remove('filled'); } }
         function checkPin() {
-            if(currentPin === app.pin) { document.getElementById('pinOverlay').classList.add('hidden'); currentPin = ""; updateDots(); }
-            else { alert('קוד שגוי'); currentPin = ""; updateDots(); document.getElementById('pinOverlay').classList.add('shake'); setTimeout(()=>document.getElementById('pinOverlay').classList.remove('shake'), 500); }
+            // הקוד כאן 1234
+            if(currentPin === "1234") { document.getElementById('pinOverlay').classList.add('hidden'); currentPin = ""; updateDots(); }
+            else { alert('קוד שגוי (הקוד הוא 1234)'); currentPin = ""; updateDots(); document.getElementById('pinOverlay').classList.add('shake'); setTimeout(()=>document.getElementById('pinOverlay').classList.remove('shake'), 500); }
         }
         function togglePinSetup() {
-            if(app.pin) { if(confirm('לבטל את הקוד?')) { app.pin = null; save(); updatePinStatus(); } }
-            else { const newPin = prompt('בחר קוד סודי (4 ספרות):'); if(newPin && newPin.length === 4) { app.pin = newPin; save(); updatePinStatus(); alert('הוגדר!'); } else { alert('חייב 4 ספרות'); } }
+            // תמיד פעיל בגרסה הזו
+            alert('הקוד קבוע בגרסה זו: 1234');
         }
-        function updatePinStatus() { const btn = document.getElementById('pinStatusBtn'); if(app.pin) { btn.innerText = "פעיל"; btn.classList.replace('text-slate-500','text-green-600'); btn.classList.replace('bg-slate-100','bg-green-100'); } else { btn.innerText = "כבוי"; btn.classList.replace('text-green-600','text-slate-500'); btn.classList.replace('bg-green-100','bg-slate-100'); } }
+        function updatePinStatus() { const btn = document.getElementById('pinStatusBtn'); btn.innerText = "פעיל (1234)"; btn.classList.replace('text-slate-500','text-green-600'); btn.classList.replace('bg-slate-100','bg-green-100'); }
 
         // Backup
         function downloadBackup() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "money_backup.json"); document.body.appendChild(a); a.click(); a.remove(); }
