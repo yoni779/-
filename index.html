@@ -263,8 +263,9 @@
             }
         }
         function checkPin() {
-            if(currentPin === app.pin) {
-                document.getElementById('pinOverlay').classList.add('hidden');
+          // if(currentPin === app.pin) {
+           //
+            document.getElementById('pinOverlay').classList.add('hidden');
                 currentPin = ""; updateDots();
             } else {
                 alert('קוד שגוי');
