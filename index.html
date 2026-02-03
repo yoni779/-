@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>MoneyStack - ניהול תקציב</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-blue-800">הבנק שלי - ניתוח נתונים</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <label class="block mb-2 font-bold text-gray-700">הדבק כאן את נתוני הבנק מה-Note:</label>
+            <textarea id="rawData" class="w-full h-40 p-4 border rounded-md mb-4 text-left" placeholder="הדבק כאן..."></textarea>
+            <button onclick="processData()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">נתח נתונים</button>
+        </div>
+
+        <div id="resultTable" class="hidden bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="w-full text-right border-collapse">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="p-3 border">תאריך</th>
+                        <th class="p-3 border">תיאור</th>
+                        <th class="p-3 border text-red-600">חובה</th>
+                        <th class="p-3 border text-green-600">זכות</th>
+                        <th class="p-3 border font-bold">יתרה</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function processData() {
+            const rawText = document.getElementById('rawData').value;
+            const lines = rawText.split('\n');
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // ניקוי טבלה
+
+            lines.forEach(line => {
+                if (line.includes('/') && !line.includes('תאריך')) {
+                    const parts = line.split('|').map(p => p.trim());
+                    
+                    [span_0](start_span)// מבנה השורה לפי הדוגמה שלך[span_0](end_span)
+                    const date = parts[0];
+                    const desc = parts[1];
+                    const expense = parts[2] !== '---' ? parts[2] : '';
+                    const income = parts[3] !== '---' ? parts[3] : '';
+                    const balance = parts[4] || '';
+
+                    const row = `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 border">${date}</td>
+                            <td class="p-3 border font-medium">${desc}</td>
+                            <td class="p-3 border text-red-500">${expense}</td>
+                            <td class="p-3 border text-green-600">${income}</td>
+                            <td class="p-3 border font-bold">${balance}</td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                }
+            });
+            document.getElementById('resultTable').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
