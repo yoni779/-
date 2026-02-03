@@ -261,18 +261,11 @@
                 const dot = document.getElementById('dot'+i);
                 if(i <= currentPin.length) dot.classList.add('filled'); else dot.classList.remove('filled');
             }
-        }
-        function checkPin() {
-          // if(currentPin === app.pin) {
-           //
+                function checkPin() {
+            // עוקף את הבדיקה ופותח מיד
             document.getElementById('pinOverlay').classList.add('hidden');
-                currentPin = ""; updateDots();
-            } else {
-                alert('קוד שגוי');
-                currentPin = ""; updateDots();
-                document.getElementById('pinOverlay').classList.add('shake');
-                setTimeout(()=>document.getElementById('pinOverlay').classList.remove('shake'), 500);
-            }
+            currentPin = ""; 
+            updateDots();
         }
         function togglePinSetup() {
             if(app.pin) {
