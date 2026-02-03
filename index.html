@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack 13.0 Pro</title>
+    <title>MoneyStack 14.0 Pro</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,13 +26,13 @@
         .budget-track { background-color: #e2e8f0; height: 8px; border-radius: 99px; overflow: hidden; margin-top: 6px; }
         .budget-fill { height: 100%; transition: width 1s ease-in-out; }
         
-        /* New: Progress Bar for Assets */
-        .asset-progress { height: 6px; background: #ecfdf5; border-radius: 4px; overflow: hidden; margin-top: 4px; }
-        .asset-bar { height: 100%; background: #10b981; transition: width 1s; }
+        /* Quick Action Button Style */
+        .quick-btn { transition: transform 0.1s; }
+        .quick-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="text-slate-800 dark:bg-slate-900 dark:text-slate-100 pb-28 transition-colors duration-300">
-       <header class="bg-blue-600 dark:bg-blue-900 text-white p-6 pt-8 rounded-b-[35px] shadow-xl relative overflow-hidden z-10">
+          <header class="bg-blue-600 dark:bg-blue-900 text-white p-6 pt-8 rounded-b-[35px] shadow-xl relative overflow-hidden z-10">
         <div class="flex justify-between items-start mb-4">
             <div class="bg-white/10 px-3 py-1 rounded-full backdrop-blur-md border border-white/10 flex items-center gap-2">
                 <span class="text-xs font-mono tracking-wider" id="liveClock">--:--</span>
@@ -69,17 +69,31 @@
             </button>
         </div>
        </header>
+
         <main class="px-4 -mt-4 relative z-20 space-y-5">
         
         <div id="view-dashboard" class="view-section slide-up">
             <div class="flex gap-3 mb-4 overflow-x-auto pb-1 no-scrollbar">
                 <button onclick="nav('add')" class="flex-none bg-blue-600 text-white px-5 py-3 rounded-full text-xs font-bold shadow-lg shadow-blue-500/30 flex items-center gap-2"><i class="fa-solid fa-plus"></i> הוספה מהירה</button>
                 <button onclick="openDrillDown('budget')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700 text-slate-500"><i class="fa-solid fa-chart-pie"></i> תקציב</button>
-                <button onclick="openDrillDown('credit')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700 text-slate-500"><i class="fa-solid fa-credit-card"></i> כרטיסים</button>
+            </div>
+
+            <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800 mb-4 flex items-center justify-between">
+                <div class="w-1/2">
+                    <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 mb-1">החודש במבט מהיר</h3>
+                    <p class="text-xs text-slate-400 mb-3">הכנסות מול הוצאות</p>
+                    <div class="text-xs space-y-1">
+                        <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div><span id="chartIncText">0 הכנסות</span></div>
+                        <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500"></div><span id="chartExpText">0 הוצאות</span></div>
+                    </div>
+                </div>
+                <div class="w-28 h-28 relative">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
             </div>
 
             <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800 mb-4" id="budgetWidget">
-                <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 mb-3">תמונת מצב חודשית</h3>
+                <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 mb-3">מעקב תקציב</h3>
                 <div id="dashboardBudgets" class="space-y-4"></div>
             </div>
 
@@ -91,9 +105,18 @@
                 <div id="recentTxList" class="space-y-4"></div>
             </div>
         </div>
+                    <div id="view-add" class="view-section hidden slide-up">
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <h2 class="text-sm font-bold text-slate-500">פעולות מהירות (לחיצה אחת)</h2>
+                    <button onclick="nav('settings')" class="text-xs text-blue-500"><i class="fa-solid fa-pen"></i> ערוך</button>
+                </div>
+                <div class="grid grid-cols-4 gap-3" id="quickActionsGrid">
+                    </div>
+            </div>
 
-        <div id="view-add" class="view-section hidden slide-up">
-            <h2 class="text-xl font-bold mb-4 px-2">רישום פעולה</h2>
+            <h2 class="text-xl font-bold mb-4 px-2">רישום ידני</h2>
             <div class="glass-panel p-5 rounded-3xl bg-white dark:bg-slate-800 shadow-xl space-y-4">
                 <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
                     <button onclick="setFormType('expense')" id="btn-exp" class="flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition">הוצאה</button>
@@ -130,7 +153,8 @@
                 <button onclick="saveTransaction()" id="saveBtn" class="w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2">שמור</button>
             </div>
         </div>
-                <div id="view-transactions" class="view-section hidden slide-up">
+
+        <div id="view-transactions" class="view-section hidden slide-up">
             <h2 class="text-xl font-bold mb-4 px-2">יומן תנועות</h2>
             <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm mb-4 space-y-3 sticky top-0 z-30">
                 <div class="relative">
@@ -144,11 +168,35 @@
         <div id="view-settings" class="view-section hidden slide-up">
             <h2 class="text-2xl font-bold mb-6 px-2">הגדרות</h2>
             
+            <div class="mb-6 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">הוספת כפתור פעולה מהירה</h3>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input type="text" id="newQaName" placeholder="שם (קפה)" class="bg-slate-50 dark:bg-slate-900 p-2 rounded text-xs outline-none">
+                    <input type="number" id="newQaAmount" placeholder="סכום" class="bg-slate-50 dark:bg-slate-900 p-2 rounded text-xs outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <select id="newQaCat" class="bg-slate-50 dark:bg-slate-900 p-2 rounded text-xs outline-none"></select>
+                    <select id="newQaIcon" class="bg-slate-50 dark:bg-slate-900 p-2 rounded text-xs outline-none font-awesome">
+                        <option value="fa-mug-hot">&#xf7b6; קפה</option>
+                        <option value="fa-burger">&#xf805; אוכל</option>
+                        <option value="fa-gas-pump">&#xf52f; דלק</option>
+                        <option value="fa-cart-shopping">&#xf07a; קניות</option>
+                        <option value="fa-bus">&#xf207; תחב"צ</option>
+                    </select>
+                </div>
+                <button onclick="addQuickAction()" class="w-full bg-slate-800 text-white py-2 rounded-lg text-xs font-bold">הוסף כפתור</button>
+                <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                    <h4 class="text-xs font-bold mb-2">כפתורים קיימים (לחץ למחיקה)</h4>
+                    <div id="qaListSettings" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+
             <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-900">
                 <h3 class="text-xs font-bold text-blue-500 mb-3 px-1 uppercase tracking-wider">ניהול נתונים</h3>
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="downloadBackup()" class="bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-blue-600 border border-blue-100 dark:border-slate-700"><i class="fa-solid fa-download mb-1 block text-lg"></i> גיבוי</button>
-                    <button onclick="document.getElementById('restoreFile').click()" class="bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-slate-600 border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-upload mb-1 block text-lg"></i> שחזור</button>
+                    <button onclick="downloadCSV()" class="bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-green-600 border border-green-100 dark:border-slate-700"><i class="fa-solid fa-file-excel mb-1 block text-lg"></i> ייצוא ל-Excel</button>
+                    <button onclick="downloadBackup()" class="bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-blue-600 border border-blue-100 dark:border-slate-700"><i class="fa-solid fa-download mb-1 block text-lg"></i> גיבוי מלא</button>
+                    <button onclick="document.getElementById('restoreFile').click()" class="col-span-2 bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-slate-600 border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-upload mb-1 block text-lg"></i> שחזור מגיבוי</button>
                     <input type="file" id="restoreFile" class="hidden" onchange="restoreBackup(this)">
                 </div>
             </div>
@@ -175,14 +223,18 @@
         </div>
         <button onclick="nav('settings')" id="nav-settings" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-gear text-xl mb-1"></i><span class="text-[10px]">הגדרות</span></button>
     </nav>
-        <script>
-        const STORAGE_KEY = 'MoneyStack_Pro_V13'; 
+            <script>
+        const STORAGE_KEY = 'MoneyStack_Pro_V14'; 
 
         const initialData = {
             txs: [],
             cards: [{ id: 'c1', name: 'כרטיס ראשי', limit: 10000, used: 0, day: 10 }],
-            assets: [{ id: 'a1', name: 'חיסכון לדירה', amount: 0, goal: 100000, type: 'saving' }], // Fixed: Added Goal
+            assets: [{ id: 'a1', name: 'חיסכון לדירה', amount: 0, goal: 100000, type: 'saving' }], 
             budgets: {}, 
+            quickActions: [
+                { id: 'qa1', label: 'קפה', amount: 15, cat: 'בילויים', icon: 'fa-mug-hot' },
+                { id: 'qa2', label: 'סופר', amount: 0, cat: 'קניות', icon: 'fa-cart-shopping' } // 0 means ask amount
+            ],
             theme: 'light',
             catsExp: ['מזון', 'רכב', 'בית', 'בילויים', 'קניות', 'חשבונות'],
             catsInc: ['משכורת', 'הפקדה', 'ביט', 'העברה', 'מתנה']
@@ -190,8 +242,10 @@
 
         let app = JSON.parse(localStorage.getItem(STORAGE_KEY)) || initialData;
         if(!app.budgets) app.budgets = {}; 
+        if(!app.quickActions) app.quickActions = initialData.quickActions; // Migration
         
         let formMode = 'expense';
+        let chartInstance = null;
 
         init();
 
@@ -199,18 +253,19 @@
             if(app.theme === 'dark') document.documentElement.classList.add('dark');
             setInterval(updateClock, 1000);
             updateClock();
-            
-            // Set date input to today by default
             document.getElementById('inpDate').valueAsDate = new Date();
-            
             renderDashboard();
             updateDataList(); 
+            renderQuickActions();
+            renderSettingsQA();
         }
 
         function save() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(app));
             renderDashboard();
             updateDataList();
+            renderQuickActions();
+            renderSettingsQA();
         }
 
         // --- Core Logic ---
@@ -225,22 +280,52 @@
             document.getElementById('statCredit').innerText = credit.toLocaleString();
             document.getElementById('statAssets').innerText = assets.toLocaleString();
 
-            // FIXED: Budget Logic with Correct Date Parsing
-            const budgetDiv = document.getElementById('dashboardBudgets');
-            budgetDiv.innerHTML = '';
-            
+            // Monthly Data for Chart
             const now = new Date();
-            // Format YYYY-MM
             const currentMonthISO = now.toISOString().slice(0, 7); 
-            
+            let monthInc = 0;
+            let monthExp = 0;
             const spending = {};
+
             app.txs.forEach(t => {
-                // t.date is now YYYY-MM-DD (ISO)
-                if(t.type === 'expense' && t.date.startsWith(currentMonthISO)) {
-                    spending[t.cat] = (spending[t.cat] || 0) + t.amount;
+                if(t.date.startsWith(currentMonthISO)) {
+                    if(t.type === 'income') monthInc += t.amount;
+                    if(t.type === 'expense') {
+                        monthExp += t.amount;
+                        spending[t.cat] = (spending[t.cat] || 0) + t.amount;
+                    }
                 }
             });
 
+            // Update Chart Texts
+            document.getElementById('chartIncText').innerText = `₪${monthInc.toLocaleString()}`;
+            document.getElementById('chartExpText').innerText = `₪${monthExp.toLocaleString()}`;
+
+            // Render/Update Chart
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            
+            // Avoid empty chart if no data
+            const chartData = (monthInc === 0 && monthExp === 0) ? [1, 0] : [monthExp, Math.max(0, monthInc - monthExp)];
+            const chartColors = (monthInc === 0 && monthExp === 0) ? ['#e2e8f0', '#e2e8f0'] : ['#ef4444', '#10b981'];
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['הוצאות', 'יתרה'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            });
+
+            // Budget Bars
+            const budgetDiv = document.getElementById('dashboardBudgets');
+            budgetDiv.innerHTML = '';
             const activeBudgets = Object.keys(app.budgets);
             let hasAlerts = false;
 
@@ -266,22 +351,22 @@
                 });
             }
             
-            // Show/Hide Alert Dot
             if(hasAlerts) document.getElementById('alertDot').classList.remove('hidden');
             else document.getElementById('alertDot').classList.add('hidden');
 
-            // Recent Txs
+            // Recent List
+            renderRecentList();
+        }
+
+        function renderRecentList() {
             const recentEl = document.getElementById('recentTxList');
             recentEl.innerHTML = '';
             const sorted = [...app.txs].sort((a,b) => b.timestamp - a.timestamp);
-            
             if(sorted.length === 0) recentEl.innerHTML = '<div class="text-center text-slate-300 py-2">אין פעולות עדיין</div>';
 
             sorted.slice(0, 5).forEach(tx => {
                 const isInc = tx.type === 'income';
-                // Convert ISO date to Hebrew display for list
                 const dateDisplay = new Date(tx.date).toLocaleDateString('he-IL');
-                
                 recentEl.innerHTML += `
                     <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
                         <div class="flex items-center gap-3">
@@ -293,285 +378,393 @@
             });
         }
 
-        function checkAlerts() {
-            let msg = "התראות מערכת:\n";
-            let found = false;
-            
-            // Check Budgets
-            const now = new Date().toISOString().slice(0, 7);
-            const spending = {};
-            app.txs.forEach(t => { if(t.type === 'expense' && t.date.startsWith(now)) spending[t.cat] = (spending[t.cat] || 0) + t.amount; });
-            
-            Object.keys(app.budgets).forEach(cat => {
-                if(spending[cat] > app.budgets[cat]) {
-                    msg += `⚠️ חריגה בתקציב ${cat} ב-${(spending[cat]-app.budgets[cat]).toLocaleString()} ₪\n`;
-                    found = true;
-                }
+        // --- Quick Actions Logic ---
+        function renderQuickActions() {
+            const grid = document.getElementById('quickActionsGrid');
+            grid.innerHTML = '';
+            app.quickActions.forEach(qa => {
+                grid.innerHTML += `
+                    <button onclick="execQA('${qa.id}')" class="quick-btn bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2 border border-slate-100 dark:border-slate-700 h-24">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-500 flex items-center justify-center"><i class="fa-solid ${qa.icon}"></i></div>
+                        <span class="text-[10px] font-bold text-center leading-tight">${qa.label}<br><span class="text-slate-400">₪${qa.amount}</span></span>
+                    </button>
+                `;
             });
-            
-            if(!found) msg += "אין התראות חדשות. מצבך מצוין! ✅";
-            alert(msg);
         }
 
-        // --- Transaction Form Logic ---
+        function execQA(id) {
+            const qa = app.quickActions.find(q => q.id === id);
+            if(!qa) return;
+
+            let amount = qa.amount;
+            if(amount === 0) {
+                 const input = prompt(`הכנס סכום עבור ${qa.label}:`);
+                 if(!input) return;
+                 amount = parseFloat(input);
+            }
+
+            const tx = {
+                id: Date.now(),
+                timestamp: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                type: 'expense',
+                amount: amount,
+                desc: qa.label,
+                cat: qa.cat,
+                method: 'cash' // Default to cash/general for quick actions, or add logic
+            };
+            
+            app.txs.push(tx);
+            save();
+            alert(`נרשמה הוצאה: ${qa.label} בסך ₪${amount}`);
+            nav('dashboard');
+        }
+
+        function addQuickAction() {
+            const name = document.getElementById('newQaName').value;
+            const amount = parseFloat(document.getElementById('newQaAmount').value);
+            const cat = document.getElementById('newQaCat').value;
+            const icon = document.getElementById('newQaIcon').value;
+
+            if(!name || isNaN(amount)) { alert('חסרים נתונים'); return; }
+
+            app.quickActions.push({
+                id: 'qa' + Date.now(),
+                label: name,
+                amount: amount,
+                cat: cat,
+                icon: icon
+            });
+            
+            save();
+            document.getElementById('newQaName').value = '';
+            document.getElementById('newQaAmount').value = '';
+            alert('כפתור נוסף בהצלחה!');
+        }
+
+        function deleteQA(id) {
+            if(confirm('למחוק כפתור זה?')) {
+                app.quickActions = app.quickActions.filter(q => q.id !== id);
+                save();
+            }
+        }
+
+        function renderSettingsQA() {
+            // Fill Categories Dropdown
+            const catSelect = document.getElementById('newQaCat');
+            catSelect.innerHTML = app.catsExp.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            // Fill List
+            const list = document.getElementById('qaListSettings');
+            list.innerHTML = '';
+            app.quickActions.forEach(qa => {
+                list.innerHTML += `<button onclick="deleteQA('${qa.id}')" class="bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full text-xs flex items-center gap-2 border border-slate-200">${qa.label} <i class="fa-solid fa-trash text-red-400 hover:text-red-600"></i></button>`;
+            });
+        }
+                        // --- Excel Export ---
+        function downloadCSV() {
+            // BOM for Hebrew support in Excel
+            let csvContent = "\uFEFF"; 
+            csvContent += "תאריך,סוג,תיאור,קטגוריה,אמצעי תשלום,סכום\n";
+            
+            app.txs.forEach(tx => {
+                const row = [
+                    tx.date,
+                    tx.type === 'income' ? 'הכנסה' : 'הוצאה',
+                    `"${tx.desc.replace(/"/g, '""')}"`, // Escape quotes
+                    tx.cat,
+                    tx.method,
+                    tx.amount
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `money_stack_export_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
+        // --- Standard Logic (Same as before) ---
         function setFormType(type) {
             formMode = type;
-            const btnExp = document.getElementById('btn-exp'); const btnInc = document.getElementById('btn-inc'); const saveBtn = document.getElementById('saveBtn'); const methodLabel = document.getElementById('methodLabel');
-            if (type === 'expense') {
+            const btnExp = document.getElementById('btn-exp');
+            const btnInc = document.getElementById('btn-inc');
+            
+            if(type === 'expense') {
                 btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition';
                 btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
-                saveBtn.className = 'w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2'; saveBtn.innerText = 'רשום הוצאה'; methodLabel.innerText = 'מאיפה יורד הכסף?';
+                document.getElementById('saveBtn').className = 'w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2';
+                document.getElementById('methodSelectorDiv').classList.remove('hidden');
             } else {
-                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
                 btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-green-500 transition';
-                saveBtn.className = 'w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition mt-2'; saveBtn.innerText = 'רשום הכנסה'; methodLabel.innerText = 'לאן הכסף נכנס?';
+                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
+                document.getElementById('saveBtn').className = 'w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition mt-2';
+                document.getElementById('methodSelectorDiv').classList.add('hidden');
             }
-            renderFormOptions();
+            updateDataList();
         }
 
-        function renderFormOptions() {
-            const list = document.getElementById('paymentMethodsList');
-            // FIXED: Added Explicit "Cash" and "Bank" options
-            list.innerHTML = `
-                <button onclick="selectMethod(this, 'bank')" class="flex-none px-4 py-2 rounded-xl text-xs bg-slate-800 text-white whitespace-nowrap shadow-md ring-2 ring-slate-800 transition">בנק (עו"ש)</button>
-                <button onclick="selectMethod(this, 'cash')" class="flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm">מזומן</button>
-            `;
+        function updateDataList() {
+            const datalist = document.getElementById('descOptions');
+            const cats = formMode === 'expense' ? app.catsExp : app.catsInc;
             
-            if (formMode === 'expense') {
-                app.cards.forEach(c => list.innerHTML += `<button onclick="selectMethod(this, '${c.id}')" class="flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm">${c.name}</button>`);
-            } else {
-                app.assets.forEach(a => list.innerHTML += `<button onclick="selectMethod(this, 'asset_${a.id}')" class="flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm">${a.name}</button>`);
+            // Unique previous descriptions
+            const history = [...new Set(app.txs.filter(t => t.type === formMode).map(t => t.desc))];
+            datalist.innerHTML = history.map(h => `<option value="${h}">`).join('');
+
+            // Render Category Chips
+            const chipsDiv = document.getElementById('categoryChips');
+            chipsDiv.innerHTML = cats.map(c => 
+                `<button onclick="selectCat('${c}', this)" class="cat-chip px-3 py-2 rounded-xl text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 border border-transparent active:scale-95 transition">${c}</button>`
+            ).join('');
+            
+            // Render Payment Methods
+            if(formMode === 'expense') {
+                 const methodsDiv = document.getElementById('paymentMethodsList');
+                 let html = `<button onclick="selectMethod('bank', this)" class="method-chip px-4 py-2 rounded-xl text-xs bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">עו"ש/מזומן</button>`;
+                 app.cards.forEach(c => {
+                     html += `<button onclick="selectMethod('${c.id}', this)" class="method-chip px-4 py-2 rounded-xl text-xs bg-slate-100 text-slate-500 border border-transparent whitespace-nowrap">${c.name}</button>`;
+                 });
+                 methodsDiv.innerHTML = html;
             }
-            
-            const catDiv = document.getElementById('categoryChips'); catDiv.innerHTML = '';
-            (formMode === 'expense' ? app.catsExp : app.catsInc).forEach((cat, i) => {
-                const cls = i === 0 ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-slate-50 text-slate-500 border-transparent';
-                catDiv.innerHTML += `<button onclick="selectCat(this, '${cat}')" class="cat-chip px-3 py-1.5 rounded-lg text-xs border ${cls}">${cat}</button>`;
-            });
-            document.getElementById('selectedCat').value = (formMode === 'expense' ? app.catsExp : app.catsInc)[0]; document.getElementById('selectedMethod').value = 'bank';
         }
 
-        function selectMethod(btn, id) {
-            document.querySelectorAll('#paymentMethodsList button').forEach(b => b.className = 'flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm');
-            btn.className = 'flex-none px-4 py-2 rounded-xl text-xs bg-slate-800 text-white whitespace-nowrap shadow-md ring-2 ring-slate-800';
-            document.getElementById('selectedMethod').value = id;
-        }
-        function selectCat(btn, cat) {
-            document.querySelectorAll('.cat-chip').forEach(b => b.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-slate-50 text-slate-500 border-transparent');
-            btn.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-blue-100 text-blue-600 border-blue-200';
+        function selectCat(cat, btn) {
             document.getElementById('selectedCat').value = cat;
+            document.querySelectorAll('.cat-chip').forEach(b => {
+                b.classList.remove('bg-blue-500', 'text-white');
+                b.classList.add('bg-slate-100', 'text-slate-500');
+            });
+            btn.classList.remove('bg-slate-100', 'text-slate-500');
+            btn.classList.add('bg-blue-500', 'text-white');
+        }
+
+        function selectMethod(methodId, btn) {
+            document.getElementById('selectedMethod').value = methodId;
+            document.querySelectorAll('.method-chip').forEach(b => {
+                b.classList.remove('bg-blue-100', 'text-blue-600', 'border-blue-200');
+                b.classList.add('bg-slate-100', 'text-slate-500', 'border-transparent');
+            });
+            btn.classList.remove('bg-slate-100', 'text-slate-500', 'border-transparent');
+            btn.classList.add('bg-blue-100', 'text-blue-600', 'border-blue-200');
         }
 
         function saveTransaction() {
             const amount = parseFloat(document.getElementById('inpAmount').value);
             const desc = document.getElementById('inpDesc').value;
+            const date = document.getElementById('inpDate').value; // YYYY-MM-DD
             const cat = document.getElementById('selectedCat').value;
             const method = document.getElementById('selectedMethod').value;
-            const dateInput = document.getElementById('inpDate').value; // YYYY-MM-DD
-            
-            if(!amount || !desc) return alert('נא למלא סכום ותיאור');
-            
-            // Logic for Credit Cards
-            if (formMode === 'expense' && !method.startsWith('bank') && !method.startsWith('cash')) {
+
+            if(!amount || !desc || !date) { alert('נא למלא את כל השדות'); return; }
+
+            const tx = {
+                id: Date.now(),
+                timestamp: Date.now(),
+                date: date,
+                type: formMode,
+                amount: amount,
+                desc: desc,
+                cat: cat,
+                method: formMode === 'expense' ? method : 'bank'
+            };
+
+            // Update Card Usage if credit
+            if(formMode === 'expense' && method !== 'bank') {
                 const card = app.cards.find(c => c.id === method);
-                if (card) { 
-                    if (card.used + amount > card.limit && !confirm('שים לב: אתה חורג מהמסגרת! להמשיך?')) return;
-                    card.used += amount; 
-                }
-            }
-            // Logic for Assets
-            if (formMode === 'income' && method.startsWith('asset_')) {
-                const asset = app.assets.find(a => a.id === method.replace('asset_', ''));
-                if(asset) asset.amount += amount;
+                if(card) card.used += amount;
             }
 
-            app.txs.push({ 
-                id: Date.now(), 
-                type: formMode, 
-                amount, 
-                desc, 
-                cat, 
-                date: dateInput, // Storing strict ISO format for correct budgeting
-                method, 
-                timestamp: Date.now() 
-            });
+            app.txs.push(tx);
+            save();
             
-            save(); 
-            document.getElementById('inpAmount').value = ''; 
-            document.getElementById('inpDesc').value = ''; 
+            // Reset
+            document.getElementById('inpAmount').value = '';
+            document.getElementById('inpDesc').value = '';
             nav('dashboard');
         }
 
-        // --- Drill Down Modals ---
-        function openDrillDown(type) {
-            const modal = document.getElementById('drillDownModal'); const content = document.getElementById('ddContent'); const title = document.getElementById('ddTitle');
-            modal.classList.remove('hidden'); content.innerHTML = '';
+        // --- Navigation ---
+        function nav(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
             
-            if (type === 'budget') {
-                title.innerText = 'ניהול תקציב חודשי';
-                content.innerHTML = `<p class="text-sm text-slate-500 mb-4">הגדר תקרה לכל קטגוריה</p>`;
-                app.catsExp.forEach(cat => {
-                    const currentLimit = app.budgets[cat] || 0;
-                    content.innerHTML += `
-                        <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-xl mb-2 shadow-sm border border-slate-50 dark:border-slate-700">
-                            <span class="font-bold text-sm">${cat}</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-slate-400">₪</span>
-                                <input type="number" value="${currentLimit}" placeholder="0" class="w-20 text-center bg-slate-100 dark:bg-slate-900 rounded-lg p-2 text-sm outline-none font-bold" onchange="setBudget('${cat}', this.value)">
-                            </div>
-                        </div>`;
-                });
-            } else if (type === 'credit') {
-                title.innerText = 'כרטיסי אשראי';
-                content.innerHTML = `<button onclick="addNewCard()" class="w-full py-3 border border-dashed border-blue-300 text-blue-500 bg-blue-50 rounded-xl mb-4 text-sm font-bold">+ הוסף כרטיס חדש</button>`;
-                app.cards.forEach(c => {
-                    const pct = Math.min(100, (c.used/c.limit)*100);
-                    content.innerHTML += `
-                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-3">
-                            <div class="flex justify-between mb-2"><span class="font-bold text-lg">${c.name}</span><span class="text-xs bg-slate-100 px-2 py-1 rounded">חיוב ב-${c.day} לחודש</span></div>
-                            <div class="flex justify-between text-xs mb-1 text-slate-500"><span>נוצל: ${c.used.toLocaleString()}</span><span>נותר: ${(c.limit-c.used).toLocaleString()}</span></div>
-                            <div class="w-full bg-slate-100 h-2 rounded-full mb-3 overflow-hidden"><div class="h-full bg-blue-500" style="width: ${pct}%"></div></div>
-                            <div class="flex gap-2">
-                                <button onclick="updateCardBalance('${c.id}')" class="flex-1 text-xs bg-blue-50 text-blue-600 py-2 rounded-lg font-bold">עדכן ניצול</button>
-                                <button onclick="deleteCard('${c.id}')" class="text-xs text-red-400 px-2">מחק</button>
-                            </div>
-                        </div>`;
-                });
-            } else if (type === 'assets') {
-                // FIXED: Assets with Goals
-                title.innerText = 'נכסים וחסכונות';
-                content.innerHTML = `<button onclick="addNewAsset()" class="w-full py-3 border border-dashed border-emerald-300 text-emerald-500 bg-emerald-50 rounded-xl mb-4 text-sm font-bold">+ הוסף נכס חדש</button>`;
-                app.assets.forEach(a => {
-                    const goal = a.goal || 1;
-                    const pct = Math.min(100, (a.amount / goal) * 100);
-                    
-                    content.innerHTML += `
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm mb-3 border border-slate-50 dark:border-slate-700">
-                        <div class="flex justify-between items-center mb-2">
-                            <div><div class="font-bold">${a.name}</div><div class="text-xs text-slate-500">${a.type==='saving'?'חיסכון':'השקעה'}</div></div>
-                            <div class="text-right">
-                                <div class="font-bold text-lg">${a.amount.toLocaleString()} ₪</div>
-                                <div class="text-[10px] text-slate-400">מתוך ${goal.toLocaleString()}</div>
-                            </div>
-                        </div>
-                        <div class="asset-progress"><div class="asset-bar" style="width: ${pct}%"></div></div>
-                        <div class="flex gap-2 mt-3">
-                            <button onclick="editAsset('${a.id}')" class="flex-1 text-xs bg-emerald-50 text-emerald-600 py-2 rounded font-bold">הפקדה/עדכון</button>
-                            <button onclick="editAssetGoal('${a.id}')" class="text-xs text-slate-400 px-2">שינוי יעד</button>
-                        </div>
-                    </div>`;
-                });
-            } else if (type === 'bank') {
-                title.innerText = 'עו"ש בנק';
-                content.innerHTML = `<div class="p-6 text-center text-slate-400">סיכום המזומן והעו"ש זמין ביומן התנועות המלא.</div>`;
-            }
+            // Icons update
+            document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-blue-600','text-slate-400'));
+            const activeBtn = document.getElementById('nav-' + viewId);
+            if(activeBtn) activeBtn.classList.replace('text-slate-400','text-blue-600');
+
+            if(viewId === 'transactions') renderTransactions();
+            if(viewId === 'dashboard') renderDashboard();
         }
 
-        // --- Helper Functions ---
-        function setBudget(cat, val) { app.budgets[cat] = parseFloat(val); save(); }
-        
-        function updateCardBalance(id) { 
-            const c = app.cards.find(x=>x.id===id); 
-            const val=parseFloat(prompt('מה הסכום שתפוס כרגע בכרטיס?', c.used)); 
-            if(!isNaN(val)) { c.used=val; save(); openDrillDown('credit'); } 
-        }
-        function addNewCard() { 
-            const name=prompt('שם הכרטיס'); 
-            if(name) { app.cards.push({id:'c'+Date.now(), name, limit:parseFloat(prompt('מה המסגרת?')), used:0, day:10}); save(); openDrillDown('credit'); } 
-        }
-        function deleteCard(id) {
-            if(confirm('למחוק כרטיס זה?')) { app.cards = app.cards.filter(c => c.id !== id); save(); openDrillDown('credit'); }
-        }
+        function renderTransactions() {
+            const list = document.getElementById('fullTxList');
+            const search = document.getElementById('searchDesc').value.toLowerCase();
+            list.innerHTML = '';
 
-        function editAsset(id) { 
-            const a = app.assets.find(x=>x.id===id); 
-            const val=parseFloat(prompt('כמה כסף יש שם עכשיו?', a.amount)); 
-            if(!isNaN(val)) { a.amount=val; save(); openDrillDown('assets'); } 
-        }
-        function editAssetGoal(id) {
-            const a = app.assets.find(x=>x.id===id); 
-            const val=parseFloat(prompt('מה היעד שלך לחסכון הזה?', a.goal)); 
-            if(!isNaN(val)) { a.goal=val; save(); openDrillDown('assets'); }
-        }
-        function addNewAsset() { 
-            const name=prompt('שם הנכס/חיסכון'); 
-            if(name) { 
-                const amount = parseFloat(prompt('כמה יש שם כרגע?'));
-                const goal = parseFloat(prompt('מה היעד? (אופציונלי)')) || 0;
-                app.assets.push({id:'a'+Date.now(), name, amount, goal, type:'saving'}); 
-                save(); openDrillDown('assets'); 
-            } 
-        }
-        function closeDrillDown() { document.getElementById('drillDownModal').classList.add('hidden'); renderDashboard(); }
+            const filtered = app.txs.filter(t => t.desc.toLowerCase().includes(search)).sort((a,b) => b.timestamp - a.timestamp);
 
-        // --- System Functions ---
-        function updateDataList() { 
-            const list = document.getElementById('descOptions'); 
-            const uniqueDesc = [...new Set(app.txs.map(t => t.desc))]; 
-            list.innerHTML = uniqueDesc.map(d => `<option value="${d}">`).join(''); 
-        }
-        
-                function renderTransactions() { 
-            const list = document.getElementById('fullTxList'); 
-            list.innerHTML = ''; 
-            // תיקון: הוספת בדיקה שהאלמנט קיים לפני קריאת הערך
-            const searchEl = document.getElementById('searchDesc');
-            const txt = searchEl ? searchEl.value.toLowerCase() : '';
-            
-            const sorted = [...app.txs].filter(t => t.desc.toLowerCase().includes(txt)).sort((a,b)=>b.timestamp-a.timestamp);
-            
-            if(sorted.length === 0) list.innerHTML = '<div class="text-center text-slate-400 mt-10">לא נמצאו תוצאות</div>';
-
-            sorted.forEach(tx => {
+            let lastDate = '';
+            filtered.forEach(tx => {
+                if(tx.date !== lastDate) {
+                    list.innerHTML += `<div class="bg-slate-100 dark:bg-slate-900 text-xs font-bold text-slate-500 px-3 py-1 sticky top-14 z-20">${tx.date}</div>`;
+                    lastDate = tx.date;
+                }
                 const isInc = tx.type === 'income';
-                const dateDisplay = new Date(tx.date).toLocaleDateString('he-IL');
                 list.innerHTML += `
-                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex justify-between mb-2 border-r-4 ${isInc?'border-green-400':'border-red-400'}">
-                        <div><div class="font-bold text-slate-700 dark:text-slate-200">${tx.desc}</div><div class="text-xs text-slate-400">${dateDisplay} • ${tx.cat}</div></div>
-                        <div class="text-right">
-                            <div class="font-bold ${isInc?'text-green-500':'text-slate-800 dark:text-slate-200'}">${Math.abs(tx.amount).toLocaleString()}</div>
-                            <button onclick="if(confirm('למחוק?')){app.txs=app.txs.filter(x=>x.id!==${tx.id});save();renderTransactions();}" class="text-[10px] text-red-300">מחק</button>
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${isInc?'bg-green-100 text-green-600':'bg-red-50 text-red-500'}">
+                                <i class="fa-solid ${isInc?'fa-arrow-down':'fa-arrow-up'} text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm">${tx.desc}</div>
+                                <div class="text-[10px] text-slate-400">${tx.cat} | ${tx.method==='bank'?'מזומן/עו"ש':(app.cards.find(c=>c.id===tx.method)?.name || 'אשראי')}</div>
+                            </div>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold ${isInc?'text-green-500':'text-red-500'}">${Math.abs(tx.amount).toLocaleString()}</div>
+                            <button onclick="deleteTx(${tx.id})" class="text-[10px] text-slate-300 hover:text-red-500 mt-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>`;
             });
         }
 
-        function nav(view) { 
-            document.querySelectorAll('.view-section').forEach(el => { el.classList.add('hidden'); el.classList.remove('slide-up'); }); 
-            document.getElementById('view-'+view).classList.remove('hidden'); 
-            document.getElementById('view-'+view).classList.add('slide-up'); 
-            if(view==='add') setFormType('expense'); 
-            if(view==='transactions') renderTransactions(); 
+        function deleteTx(id) {
+            if(!confirm('למחוק פעולה זו?')) return;
+            const txIndex = app.txs.findIndex(t => t.id === id);
+            if(txIndex > -1) {
+                const tx = app.txs[txIndex];
+                if(tx.type === 'expense' && tx.method !== 'bank') {
+                    const card = app.cards.find(c => c.id === tx.method);
+                    if(card) card.used -= tx.amount;
+                }
+                app.txs.splice(txIndex, 1);
+                save();
+                renderTransactions();
+            }
         }
-        
-        function updateClock() { 
-            const clockEl = document.getElementById('liveClock');
-            if(clockEl) clockEl.innerText = new Date().toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'}); 
+
+        // --- Settings & DrillDown ---
+        function downloadBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "money_stack_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
         }
-        
-        // Backup Logic
-        function downloadBackup() { 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app)); 
-            const a = document.createElement('a'); 
-            a.setAttribute("href", dataStr); 
-            a.setAttribute("download", "moneystack_pro_backup_" + new Date().toISOString().slice(0,10) + ".json"); 
-            document.body.appendChild(a); a.click(); a.remove(); 
+
+        function restoreBackup(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if(data.txs && data.cards) {
+                        app = data;
+                        save();
+                        alert('שוחזר בהצלחה!');
+                        location.reload();
+                    } else { alert('קובץ לא תקין'); }
+                } catch(err) { alert('שגיאה בקריאת הקובץ'); }
+            };
+            reader.readAsText(file);
         }
-        function restoreBackup(input) { 
-            const file = input.files[0]; if(!file) return; 
-            const reader = new FileReader(); 
-            reader.onload = function(e) { 
-                try { 
-                    const loaded = JSON.parse(e.target.result); 
-                    if(confirm('זהירות: שחזור ימחק את הנתונים הנוכחיים. להמשיך?')) { app = loaded; save(); location.reload(); } 
-                } catch(err) { alert('קובץ לא תקין'); } 
-            }; 
-            reader.readAsText(file); 
+
+        function resetData() {
+            if(confirm('בטוח? כל המידע יימחק!')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
         }
-        function resetData() { 
-            if(confirm('פעולה זו תמחק את כל הנתונים לצמיתות! להמשיך?')) { 
-                localStorage.removeItem(STORAGE_KEY); location.reload(); 
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
+        }
+
+        function openDrillDown(type) {
+            document.getElementById('drillDownModal').classList.remove('hidden');
+            const content = document.getElementById('ddContent');
+            const title = document.getElementById('ddTitle');
+            content.innerHTML = '';
+
+            if(type === 'budget') {
+                title.innerText = 'ניהול תקציב';
+                const cats = app.catsExp;
+                cats.forEach(c => {
+                    const currentLimit = app.budgets[c] || 0;
+                    content.innerHTML += `
+                        <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl">
+                            <span class="font-bold">${c}</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" value="${currentLimit}" onchange="updateBudget('${c}', this.value)" class="w-24 bg-slate-100 dark:bg-slate-900 p-2 rounded text-center outline-none">
+                                <span class="text-xs text-slate-400">₪</span>
+                            </div>
+                        </div>`;
+                });
             } 
+            else if(type === 'credit') {
+                title.innerText = 'כרטיסי אשראי';
+                app.cards.forEach(c => {
+                    content.innerHTML += `
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border-l-4 border-blue-500">
+                            <div class="flex justify-between mb-2">
+                                <span class="font-bold text-lg">${c.name}</span>
+                                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">יורד ב-${c.day}</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-2 text-slate-500">
+                                <span>נוצל: ${c.used.toLocaleString()}</span>
+                                <span>מסגרת: ${c.limit.toLocaleString()}</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-blue-500 h-full" style="width: ${(c.used/c.limit)*100}%"></div>
+                            </div>
+                            <button onclick="resetCard('${c.id}')" class="mt-3 text-xs text-red-500 border border-red-200 px-3 py-1 rounded-full">איפוס חודשי (שולם)</button>
+                        </div>`;
+                });
+            }
+            else if(type === 'bank') {
+                title.innerText = 'מצב חשבון';
+                content.innerHTML = '<p class="text-center text-slate-500">כאן יופיעו פרטי חשבון בנק בעתיד...</p>';
+            }
+        }
+
+        function updateBudget(cat, val) {
+            app.budgets[cat] = parseFloat(val);
+            save();
+            renderDashboard(); // Refresh bars
+        }
+
+        function resetCard(id) {
+            if(confirm('לאפס את הניצול בכרטיס זה? (סמן שירד מהחשבון)')) {
+                const card = app.cards.find(c => c.id === id);
+                if(card) {
+                    // Optionally create a transaction for this payment
+                    app.txs.push({
+                        id: Date.now(), timestamp: Date.now(), date: new Date().toISOString().split('T')[0],
+                        type: 'expense', amount: card.used, desc: `חיוב כרטיס ${card.name}`, cat: 'חשבונות', method: 'bank'
+                    });
+                    card.used = 0;
+                    save();
+                    openDrillDown('credit');
+                    renderDashboard();
+                }
+            }
+        }
+
+        function closeDrillDown() {
+            document.getElementById('drillDownModal').classList.add('hidden');
         }
     </script>
 </body>
