@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack 9.0</title>
-    
+    <title>MoneyStack Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
-
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Rubik', 'sans-serif'] }, colors: { primary: '#3b82f6', secondary: '#64748b' } } }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Rubik', 'sans-serif'] }, colors: { primary: '#3b82f6', secondary: '#64748b' } } } }
     </script>
     <style>
         body { -webkit-tap-highlight-color: transparent; background-color: #f1f5f9; }
@@ -22,12 +17,9 @@
         .dark .glass-panel { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(51, 65, 85, 0.8); }
         .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .no-scrollbar::-webkit-scrollbar { display: none; } 
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .budget-track { background-color: #e2e8f0; height: 10px; border-radius: 99px; overflow: hidden; }
         .budget-fill { height: 100%; transition: width 1s ease-in-out; }
-        
-        /* PIN Styles */
         #pinOverlay { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s; }
         .pin-dot { w-4 h-4 rounded-full border-2 border-white/50 transition: all 0.2s; }
         .pin-dot.filled { background: white; border-color: white; transform: scale(1.2); }
@@ -73,37 +65,22 @@
              <h1 class="text-4xl font-bold tracking-tight">₪<span id="totalNetWorth">0</span></h1>
         </div>
         <div class="grid grid-cols-3 gap-3">
-            <button onclick="openDrillDown('bank')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition">
-                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-building-columns text-sm"></i></div>
-                <p class="text-[10px] text-blue-100 mb-0.5">עו"ש</p>
-                <p class="font-bold text-sm" id="statBank">0</p>
-            </button>
-            <button onclick="openDrillDown('credit')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition">
-                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-credit-card text-sm"></i></div>
-                <p class="text-[10px] text-blue-100 mb-0.5">אשראי</p>
-                <p class="font-bold text-sm text-red-200" id="statCredit">0</p>
-            </button>
-             <button onclick="openDrillDown('assets')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition">
-                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-piggy-bank text-sm"></i></div>
-                <p class="text-[10px] text-blue-100 mb-0.5">נכסים</p>
-                <p class="font-bold text-sm text-emerald-200" id="statAssets">0</p>
-            </button>
+            <button onclick="openDrillDown('bank')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition"><div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-building-columns text-sm"></i></div><p class="text-[10px] text-blue-100 mb-0.5">עו"ש</p><p class="font-bold text-sm" id="statBank">0</p></button>
+            <button onclick="openDrillDown('credit')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition"><div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-credit-card text-sm"></i></div><p class="text-[10px] text-blue-100 mb-0.5">אשראי</p><p class="font-bold text-sm text-red-200" id="statCredit">0</p></button>
+            <button onclick="openDrillDown('assets')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition"><div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-piggy-bank text-sm"></i></div><p class="text-[10px] text-blue-100 mb-0.5">נכסים</p><p class="font-bold text-sm text-emerald-200" id="statAssets">0</p></button>
         </div>
     </header>
         <main class="px-4 -mt-4 relative z-20 space-y-5">
-        
         <div id="view-dashboard" class="view-section slide-up">
             <div class="flex gap-3 mb-4 overflow-x-auto pb-1 no-scrollbar">
                 <button onclick="nav('add')" class="flex-none bg-blue-600 text-white px-5 py-3 rounded-full text-xs font-bold shadow-lg shadow-blue-500/30 flex items-center gap-2"><i class="fa-solid fa-plus"></i> הוספה</button>
                 <button onclick="openDrillDown('budget')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700 text-slate-500"><i class="fa-solid fa-chart-pie"></i> תקציב</button>
                 <button onclick="openDrillDown('credit')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700 text-slate-500"><i class="fa-solid fa-credit-card"></i> כרטיסים</button>
             </div>
-
             <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800 mb-4" id="budgetWidget">
                 <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 mb-3">מצב תקציב חודשי</h3>
                 <div id="dashboardBudgets" class="space-y-3"></div>
             </div>
-
             <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200">פעולות אחרונות</h3>
@@ -121,43 +98,24 @@
                     <button onclick="setFormType('income')" id="btn-inc" class="flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition">הכנסה</button>
                 </div>
                 <div class="space-y-4">
-                    <div class="relative">
-                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">סכום (₪)</label>
-                        <input type="number" id="inpAmount" class="w-full text-3xl font-bold bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl p-4 outline-none focus:border-blue-500 transition text-center" placeholder="0.00">
-                    </div>
-                    <div class="relative">
-                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">תיאור</label>
-                        <input type="text" id="inpDesc" list="descOptions" class="w-full bg-slate-50 dark:bg-slate-900 border border-transparent focus:bg-white focus:border-blue-500 rounded-xl p-3 outline-none transition text-sm" placeholder="התחל להקליד...">
-                        <datalist id="descOptions"></datalist>
-                    </div>
+                    <div class="relative"><label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">סכום (₪)</label><input type="number" id="inpAmount" class="w-full text-3xl font-bold bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl p-4 outline-none focus:border-blue-500 transition text-center" placeholder="0.00"></div>
+                    <div class="relative"><label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">תיאור</label><input type="text" id="inpDesc" list="descOptions" class="w-full bg-slate-50 dark:bg-slate-900 border border-transparent focus:bg-white focus:border-blue-500 rounded-xl p-3 outline-none transition text-sm" placeholder="התחל להקליד..."><datalist id="descOptions"></datalist></div>
                 </div>
-                <div id="methodSelectorDiv">
-                    <label class="text-xs font-bold text-slate-400 mb-2 block" id="methodLabel">מקור הכסף</label>
-                    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="paymentMethodsList"></div>
-                    <input type="hidden" id="selectedMethod" value="bank">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-400 mb-2 block">קטגוריה</label>
-                    <div class="flex flex-wrap gap-2" id="categoryChips"></div>
-                    <input type="hidden" id="selectedCat" value="כללי">
-                </div>
+                <div id="methodSelectorDiv"><label class="text-xs font-bold text-slate-400 mb-2 block" id="methodLabel">מקור הכסף</label><div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="paymentMethodsList"></div><input type="hidden" id="selectedMethod" value="bank"></div>
+                <div><label class="text-xs font-bold text-slate-400 mb-2 block">קטגוריה</label><div class="flex flex-wrap gap-2" id="categoryChips"></div><input type="hidden" id="selectedCat" value="כללי"></div>
                 <button onclick="saveTransaction()" id="saveBtn" class="w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2">רשום הוצאה</button>
             </div>
         </div>
                 <div id="view-transactions" class="view-section hidden slide-up">
             <h2 class="text-xl font-bold mb-4 px-2">יומן תנועות</h2>
             <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm mb-4 space-y-3 sticky top-0 z-30">
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-slate-400 text-sm"></i>
-                    <input type="text" id="searchDesc" onkeyup="renderTransactions()" placeholder="חפש לפי שם..." class="w-full bg-slate-50 dark:bg-slate-900 pr-9 p-2.5 rounded-xl text-sm border-none outline-none focus:ring-2 ring-blue-500">
-                </div>
+                <div class="relative"><i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-slate-400 text-sm"></i><input type="text" id="searchDesc" onkeyup="renderTransactions()" placeholder="חפש לפי שם..." class="w-full bg-slate-50 dark:bg-slate-900 pr-9 p-2.5 rounded-xl text-sm border-none outline-none focus:ring-2 ring-blue-500"></div>
             </div>
             <div id="fullTxList" class="space-y-2 pb-20"></div>
         </div>
 
         <div id="view-settings" class="view-section hidden slide-up">
             <h2 class="text-2xl font-bold mb-6 px-2">הגדרות</h2>
-            
             <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-900">
                 <h3 class="text-xs font-bold text-blue-500 mb-3 px-1 uppercase tracking-wider">גיבוי ואבטחה</h3>
                 <div class="grid grid-cols-2 gap-3">
@@ -170,21 +128,14 @@
                     <button onclick="togglePinSetup()" id="pinStatusBtn" class="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500">כבוי</button>
                 </div>
             </div>
-
             <div class="mb-6">
                 <h3 class="text-xs font-bold text-slate-400 mb-3 px-2 uppercase tracking-wider">פרופיל אישי</h3>
                 <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 space-y-3">
                     <input type="text" id="set-name" class="w-full bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none" placeholder="שם מלא" onchange="saveProfile()">
-                    <div class="flex gap-3">
-                        <input type="text" id="set-branch" class="flex-1 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none" placeholder="בנק/סניף" onchange="saveProfile()">
-                        <input type="text" id="set-account" class="flex-1 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none" placeholder="חשבון" onchange="saveProfile()">
-                    </div>
+                    <div class="flex gap-3"><input type="text" id="set-branch" class="flex-1 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none" placeholder="בנק/סניף" onchange="saveProfile()"><input type="text" id="set-account" class="flex-1 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none" placeholder="חשבון" onchange="saveProfile()"></div>
                 </div>
             </div>
-
-            <div class="mb-6">
-                <button onclick="resetData()" class="w-full p-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> איפוס נתונים</button>
-            </div>
+            <div class="mb-6"><button onclick="resetData()" class="w-full p-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> איפוס נתונים</button></div>
         </div>
 
         <div id="drillDownModal" class="hidden fixed inset-0 bg-slate-100 dark:bg-slate-900 z-50 p-4 overflow-y-auto pb-20">
@@ -199,16 +150,11 @@
     <nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t dark:border-slate-800 p-2 pb-6 flex justify-around items-end z-40">
         <button onclick="nav('dashboard')" id="nav-dashboard" class="text-blue-600 flex flex-col items-center w-16"><i class="fa-solid fa-house text-xl mb-1"></i><span class="text-[10px]">בית</span></button>
         <button onclick="nav('transactions')" id="nav-transactions" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-list-ul text-xl mb-1"></i><span class="text-[10px]">יומן</span></button>
-        <div class="relative -top-6">
-            <button onclick="nav('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-90 transition transform hover:-translate-y-1"><i class="fa-solid fa-plus text-2xl"></i></button>
-        </div>
+        <div class="relative -top-6"><button onclick="nav('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-90 transition transform hover:-translate-y-1"><i class="fa-solid fa-plus text-2xl"></i></button></div>
         <button onclick="nav('settings')" id="nav-settings" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-gear text-xl mb-1"></i><span class="text-[10px]">הגדרות</span></button>
     </nav>
         <script>
-        const initialData = {
-            txs: [], cards: [{ id: 'c1', name: 'מקס', limit: 20000, used: 0, day: 10 }], assets: [{ id: 'a1', name: 'חיסכון נזיל', amount: 0, type: 'saving' }], budgets: {}, profile: { name: 'אורח', account: '', branch: '' }, pin: null, theme: 'light', catsExp: ['מזון', 'רכב', 'בית', 'בילויים', 'קניות', 'חשבונות'], catsInc: ['משכורת', 'הפקדה', 'ביט', 'העברה', 'מתנה']
-        };
-
+        const initialData = { txs: [], cards: [{ id: 'c1', name: 'מקס', limit: 20000, used: 0, day: 10 }], assets: [{ id: 'a1', name: 'חיסכון נזיל', amount: 0, type: 'saving' }], budgets: {}, profile: { name: 'אורח', account: '', branch: '' }, pin: null, theme: 'light', catsExp: ['מזון', 'רכב', 'בית', 'בילויים', 'קניות', 'חשבונות'], catsInc: ['משכורת', 'הפקדה', 'ביט', 'העברה', 'מתנה'] };
         let app = JSON.parse(localStorage.getItem('moneyAppV9')) || JSON.parse(localStorage.getItem('moneyAppV8')) || initialData;
         if(!app.budgets) app.budgets = {}; 
         let formMode = 'expense', currentPin = "";
@@ -218,7 +164,12 @@
         function init() {
             if(app.theme === 'dark') document.documentElement.classList.add('dark');
             setInterval(updateClock, 1000); updateClock();
-            if(app.pin) document.getElementById('pinOverlay').classList.remove('hidden');
+            
+            // --- תיקון לשחרור נעילה: מוחק את הקוד הסודי בכניסה ---
+            app.pin = null; 
+            save(); 
+            // ---------------------------------------------------
+
             loadProfile(); updatePinStatus(); renderDashboard(); updateDataList();
         }
         function save() { localStorage.setItem('moneyAppV9', JSON.stringify(app)); renderDashboard(); updateDataList(); }
@@ -251,7 +202,6 @@
             document.getElementById('statCredit').innerText = credit.toLocaleString();
             document.getElementById('statAssets').innerText = assets.toLocaleString();
             
-            // Budget
             const budgetDiv = document.getElementById('dashboardBudgets'); budgetDiv.innerHTML = '';
             const currentMonth = new Date().toISOString().slice(0, 7);
             const spending = {};
@@ -260,7 +210,6 @@
             if(activeBudgets.length === 0) budgetDiv.innerHTML = `<button onclick="openDrillDown('budget')" class="text-xs text-blue-500 w-full text-center py-2 border border-dashed border-blue-200 rounded-xl">הגדר תקציב +</button>`;
             else activeBudgets.forEach(cat => { const limit = app.budgets[cat]; const used = spending[cat] || 0; const pct = Math.min(100, (used / limit) * 100); budgetDiv.innerHTML += `<div class="flex justify-between text-xs mb-1"><span class="font-bold">${cat}</span><span>${used.toLocaleString()} / ${limit.toLocaleString()}</span></div><div class="budget-track"><div class="budget-fill bg-blue-500" style="width: ${pct}%"></div></div>`; });
 
-            // Recent
             const recentEl = document.getElementById('recentTxList'); recentEl.innerHTML = '';
             app.txs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(tx => {
                 const isInc = tx.type === 'income';
@@ -304,12 +253,18 @@
                 app.catsExp.forEach(cat => { const currentLimit = app.budgets[cat] || 0; content.innerHTML += `<div class="flex justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-xl mb-2 shadow-sm"><span class="font-bold text-sm">${cat}</span><input type="number" value="${currentLimit}" placeholder="0" class="w-24 text-center bg-slate-50 dark:bg-slate-900 rounded-lg p-2 text-sm" onchange="app.budgets['${cat}']=parseFloat(this.value);save();"></div>`; });
             } else if (type === 'credit') {
                 title.innerText = 'כרטיסים'; content.innerHTML = `<button onclick="const n=prompt('שם');if(n){app.cards.push({id:'c'+Date.now(),name:n,limit:parseFloat(prompt('מסגרת')),used:0,day:10});save();openDrillDown('credit');}" class="w-full py-3 border border-dashed border-slate-300 text-slate-400 rounded-xl mb-4">+ הוסף</button>`;
-                app.cards.forEach(c => { const pct = Math.min(100, (c.used/c.limit)*100); content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-3"><div class="flex justify-between mb-2"><span class="font-bold">${c.name}</span><span class="text-xs bg-slate-100 px-2 py-1 rounded">חיוב: ${c.day}</span></div><div class="flex justify-between text-xs mb-1 text-slate-500"><span>נוצל: ${c.used.toLocaleString()}</span><span>נותר: ${(c.limit-c.used).toLocaleString()}</span></div><div class="credit-bar-bg mb-3"><div class="credit-bar-fill bg-blue-500" style="width: ${pct}%"></div></div><div class="flex gap-2"><button onclick="const v=parseFloat(prompt('כמה תפוס?',${c.used}));if(!isNaN(v)){app.cards.find(x=>x.id=='${c.id}').used=v;save();openDrillDown('credit');}" class="flex-1 text-xs bg-blue-50 text-blue-600 py-2 rounded font-bold">עדכון יתרה מהיר</button></div></div>`; });
+                app.cards.forEach(c => { const pct = Math.min(100, (c.used/c.limit)*100); content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-3"><div class="flex justify-between mb-2"><span class="font-bold">${c.name}</span><span class="text-xs bg-slate-100 px-2 py-1 rounded">חיוב: ${c.day}</span></div><div class="flex justify-between text-xs mb-1 text-slate-500"><span>נוצל: ${c.used.toLocaleString()}</span><span>נותר: ${(c.limit-c.used).toLocaleString()}</span></div><div class="credit-bar-bg mb-3"><div class="credit-bar-fill bg-blue-500" style="width: ${pct}%"></div></div><div class="flex gap-2"><button onclick="updateCardBalance('${c.id}')" class="flex-1 text-xs bg-blue-50 text-blue-600 py-2 rounded font-bold">עדכון יתרה מהיר</button></div></div>`; });
             } else if (type === 'assets') {
-                title.innerText = 'נכסים'; content.innerHTML = `<button onclick="const n=prompt('שם');if(n){app.assets.push({id:'a'+Date.now(),name:n,amount:parseFloat(prompt('סכום')),type:'saving'});save();openDrillDown('assets');}" class="w-full py-3 border border-dashed border-slate-300 text-slate-400 rounded-xl mb-4">+ הוסף</button>`;
-                app.assets.forEach(a => { content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex justify-between items-center mb-2"><div><div class="font-bold">${a.name}</div><div class="text-xs text-slate-500">${a.type==='saving'?'חיסכון':'השקעה'}</div></div><div class="text-right"><div class="font-bold">${a.amount.toLocaleString()} ₪</div><button onclick="const v=parseFloat(prompt('שווי?',${a.amount}));if(!isNaN(v)){app.assets.find(x=>x.id=='${a.id}').amount=v;save();openDrillDown('assets');}" class="text-[10px] text-blue-500">עדכון שווי</button></div></div>`; });
+                title.innerText = 'נכסים'; content.innerHTML = `<button onclick="addNewAsset()" class="w-full py-3 border border-dashed border-slate-300 text-slate-400 rounded-xl mb-4">+ הוסף</button>`;
+                app.assets.forEach(a => { content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex justify-between items-center mb-2"><div><div class="font-bold">${a.name}</div><div class="text-xs text-slate-500">${a.type==='saving'?'חיסכון':'השקעה'}</div></div><div class="text-right"><div class="font-bold">${a.amount.toLocaleString()} ₪</div><button onclick="editAsset('${a.id}')" class="text-[10px] text-blue-500">עדכון שווי</button></div></div>`; });
             } else if (type === 'bank') { title.innerText = 'עו"ש בנק'; content.innerHTML = `<div class="p-4 text-center text-slate-500">לפירוט מלא עבור ליומן התנועות</div>`; }
         }
+
+        function setBudget(cat, val) { app.budgets[cat] = parseFloat(val); save(); }
+        function updateCardBalance(id) { const c = app.cards.find(x=>x.id===id); const val=parseFloat(prompt('כמה תפוס כרגע?', c.used)); if(!isNaN(val)) { c.used=val; save(); openDrillDown('credit'); } }
+        function addNewCard() { const name=prompt('שם'); if(name) { app.cards.push({id:'c'+Date.now(), name, limit:parseFloat(prompt('מסגרת')), used:0, day:10}); save(); openDrillDown('credit'); } }
+        function editAsset(id) { const a = app.assets.find(x=>x.id===id); const val=parseFloat(prompt('שווי עדכני', a.amount)); if(!isNaN(val)) { a.amount=val; save(); openDrillDown('assets'); } }
+        function addNewAsset() { const name=prompt('שם'); if(name) { app.assets.push({id:'a'+Date.now(), name, amount:parseFloat(prompt('סכום')), type:'saving'}); save(); openDrillDown('assets'); } }
         function closeDrillDown() { document.getElementById('drillDownModal').classList.add('hidden'); renderDashboard(); }
 
         // General
