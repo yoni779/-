@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack 11.0</title>
+    <title>MoneyStack Pro 12.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,278 +20,485 @@
         body { -webkit-tap-highlight-color: transparent; background-color: #f8fafc; touch-action: manipulation; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); }
         .dark .glass-panel { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(51, 65, 85, 0.8); }
+        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .no-scrollbar::-webkit-scrollbar { display: none; } 
+        .budget-track { background-color: #e2e8f0; height: 8px; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+        .budget-fill { height: 100%; transition: width 1s ease-in-out; }
     </style>
 </head>
-<body class="text-slate-800 dark:bg-slate-900 dark:text-slate-100 pb-24 transition-colors duration-300">
-
-    <header class="bg-blue-600 dark:bg-blue-900 text-white p-6 pt-8 rounded-b-[35px] shadow-xl mb-6 sticky top-0 z-10">
-        <div class="flex justify-between items-center mb-4">
-            <div class="bg-white/10 px-3 py-1 rounded-full text-xs font-mono" id="liveClock">--:--</div>
-            <button onclick="nav('settings')" class="bg-white/10 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-gear"></i></button>
+<body class="text-slate-800 dark:bg-slate-900 dark:text-slate-100 pb-28 transition-colors duration-300">
+        <header class="bg-blue-600 dark:bg-blue-900 text-white p-6 pt-8 rounded-b-[35px] shadow-xl relative overflow-hidden z-10">
+        <div class="flex justify-between items-start mb-4">
+            <div class="bg-white/10 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+                <span class="text-xs font-mono tracking-wider" id="liveClock">--:--</span>
+            </div>
+            <button onclick="nav('settings')" class="bg-white/10 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md"><i class="fa-solid fa-gear text-xs"></i></button>
         </div>
-        <div class="text-center">
-             <p class="text-blue-100 text-xs mb-1">הון עצמי</p>
-             <h1 class="text-4xl font-bold" dir="ltr">₪ <span id="totalNetWorth">0</span></h1>
-        </div>
-    </header>
-
-    <main class="px-4 space-y-4">
         
-        <div id="view-dashboard" class="view-section">
+        <div class="text-center mb-6">
+             <p class="text-blue-100 text-sm mb-1">שווי נקי כולל</p>
+             <h1 class="text-4xl font-bold tracking-tight">₪<span id="totalNetWorth">0</span></h1>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+            <button onclick="openDrillDown('bank')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition">
+                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-building-columns text-sm"></i></div>
+                <p class="text-[10px] text-blue-100 mb-0.5">עו"ש</p>
+                <p class="font-bold text-sm" id="statBank">0</p>
+            </button>
+            <button onclick="openDrillDown('credit')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition">
+                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-credit-card text-sm"></i></div>
+                <p class="text-[10px] text-blue-100 mb-0.5">אשראי</p>
+                <p class="font-bold text-sm text-red-200" id="statCredit">0</p>
+            </button>
+             <button onclick="openDrillDown('assets')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition">
+                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-piggy-bank text-sm"></i></div>
+                <p class="text-[10px] text-blue-100 mb-0.5">נכסים</p>
+                <p class="font-bold text-sm text-emerald-200" id="statAssets">0</p>
+            </button>
+        </div>
+        </header>
+            <main class="px-4 -mt-4 relative z-20 space-y-5">
+        
+        <div id="view-dashboard" class="view-section slide-up">
             <div class="flex gap-3 mb-4 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="nav('add')" class="flex-none bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2"><i class="fa-solid fa-plus"></i> הוספה</button>
-                <button onclick="nav('transactions')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-xl font-bold shadow-sm text-slate-500"><i class="fa-solid fa-list"></i> יומן</button>
+                <button onclick="nav('add')" class="flex-none bg-blue-600 text-white px-5 py-3 rounded-full text-xs font-bold shadow-lg shadow-blue-500/30 flex items-center gap-2"><i class="fa-solid fa-plus"></i> הוספה</button>
+                <button onclick="openDrillDown('budget')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700 text-slate-500"><i class="fa-solid fa-chart-pie"></i> תקציב</button>
+                <button onclick="openDrillDown('credit')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700 text-slate-500"><i class="fa-solid fa-credit-card"></i> כרטיסים</button>
             </div>
 
-            <div class="glass-panel p-4 rounded-2xl shadow-sm bg-white dark:bg-slate-800">
-                <h3 class="font-bold text-sm mb-3 text-slate-500">פעולות אחרונות</h3>
-                <div id="recentTxList" class="space-y-3"></div>
+            <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800 mb-4" id="budgetWidget">
+                <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 mb-3">מצב תקציב (החודש)</h3>
+                <div id="dashboardBudgets" class="space-y-3"></div>
+            </div>
+
+            <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200">פעולות אחרונות</h3>
+                    <button onclick="nav('transactions')" class="text-xs text-blue-500 font-medium">הכל</button>
+                </div>
+                <div id="recentTxList" class="space-y-4"></div>
             </div>
         </div>
 
-        <div id="view-add" class="view-section hidden">
+        <div id="view-add" class="view-section hidden slide-up">
             <h2 class="text-xl font-bold mb-4 px-2">תנועה חדשה</h2>
-            <div class="glass-panel p-5 rounded-2xl bg-white dark:bg-slate-800 shadow-xl space-y-4">
+            <div class="glass-panel p-5 rounded-3xl bg-white dark:bg-slate-800 shadow-xl space-y-4">
                 <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
-                    <button onclick="setType('expense')" id="btn-exp" class="flex-1 py-3 rounded-lg font-bold text-sm transition bg-white shadow text-red-500">הוצאה</button>
-                    <button onclick="setType('income')" id="btn-inc" class="flex-1 py-3 rounded-lg font-bold text-sm transition text-slate-400">הכנסה</button>
+                    <button onclick="setFormType('expense')" id="btn-exp" class="flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition">הוצאה</button>
+                    <button onclick="setFormType('income')" id="btn-inc" class="flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition">הכנסה</button>
                 </div>
-
-                <div class="relative">
-                    <label class="text-[10px] text-slate-400 absolute top-0 right-0">סכום</label>
-                    <input type="number" id="inpAmount" class="w-full text-4xl font-bold bg-transparent border-b border-slate-200 p-2 text-center outline-none mt-2" placeholder="0">
+                <div class="space-y-4">
+                    <div class="relative">
+                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">סכום</label>
+                        <input type="number" id="inpAmount" class="w-full text-3xl font-bold bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl p-4 outline-none focus:border-blue-500 transition text-center" placeholder="0.00">
+                    </div>
+                    <div class="relative">
+                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">תיאור</label>
+                        <input type="text" id="inpDesc" list="descOptions" class="w-full bg-slate-50 dark:bg-slate-900 border border-transparent focus:bg-white focus:border-blue-500 rounded-xl p-3 outline-none transition text-sm" placeholder="מה קנית?">
+                        <datalist id="descOptions"></datalist> </div>
                 </div>
                 
-                <input type="text" id="inpDesc" class="w-full bg-slate-50 dark:bg-slate-900 p-4 rounded-xl text-sm outline-none" placeholder="תיאור (למשל: סופר, דלק)">
+                <div id="methodSelectorDiv">
+                    <label class="text-xs font-bold text-slate-400 mb-2 block" id="methodLabel">מקור הכסף</label>
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="paymentMethodsList"></div>
+                    <input type="hidden" id="selectedMethod" value="bank">
+                </div>
                 
                 <div>
-                    <label class="text-xs font-bold text-slate-400 mb-2 block">קטגוריה מהירה</label>
-                    <div class="flex flex-wrap gap-2" id="catChips"></div>
+                    <label class="text-xs font-bold text-slate-400 mb-2 block">קטגוריה</label>
+                    <div class="flex flex-wrap gap-2" id="categoryChips"></div>
+                    <input type="hidden" id="selectedCat" value="כללי">
                 </div>
-                
-                <button onclick="saveTx()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg mt-4 active:scale-95 transition">שמור תנועה</button>
+                <button onclick="saveTransaction()" id="saveBtn" class="w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2">שמור הוצאה</button>
             </div>
         </div>
-
-        <div id="view-transactions" class="view-section hidden">
-            <h2 class="text-xl font-bold mb-4 px-2">יומן מלא</h2>
-            <input type="text" id="search" onkeyup="renderTx()" placeholder="חפש תנועה..." class="w-full bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm mb-4 outline-none border border-slate-100">
+                <div id="view-transactions" class="view-section hidden slide-up">
+            <h2 class="text-xl font-bold mb-4 px-2">יומן תנועות</h2>
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm mb-4 space-y-3 sticky top-0 z-30">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchDesc" onkeyup="renderTransactions()" placeholder="חפש לפי שם..." class="w-full bg-slate-50 dark:bg-slate-900 pr-9 p-2.5 rounded-xl text-sm border-none outline-none focus:ring-2 ring-blue-500">
+                </div>
+            </div>
             <div id="fullTxList" class="space-y-2 pb-20"></div>
         </div>
 
-        <div id="view-settings" class="view-section hidden">
+        <div id="view-settings" class="view-section hidden slide-up">
             <h2 class="text-2xl font-bold mb-6 px-2">הגדרות</h2>
             
-            <div class="glass-panel p-4 rounded-2xl bg-white dark:bg-slate-800 mb-4 space-y-4">
-                <div class="text-xs font-bold text-slate-400">גיבוי נתונים</div>
-                <button onclick="downloadData()" class="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold border border-blue-100 flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> שמור קובץ גיבוי</button>
-                <button onclick="document.getElementById('fileIn').click()" class="w-full py-3 bg-slate-50 text-slate-600 rounded-xl font-bold border border-slate-200 flex items-center justify-center gap-2"><i class="fa-solid fa-upload"></i> טען קובץ גיבוי</button>
-                <input type="file" id="fileIn" class="hidden" onchange="restoreData(this)">
+            <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-900">
+                <h3 class="text-xs font-bold text-blue-500 mb-3 px-1 uppercase tracking-wider">גיבוי ושחזור (חובה!)</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="downloadBackup()" class="bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-blue-600 border border-blue-100 dark:border-slate-700"><i class="fa-solid fa-download mb-1 block text-lg"></i> שמור קובץ</button>
+                    <button onclick="document.getElementById('restoreFile').click()" class="bg-white dark:bg-slate-800 py-3 rounded-xl shadow-sm text-sm font-bold text-slate-600 border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-upload mb-1 block text-lg"></i> טען קובץ</button>
+                    <input type="file" id="restoreFile" class="hidden" onchange="restoreBackup(this)">
+                </div>
             </div>
 
-            <button onclick="resetAll()" class="w-full p-4 bg-red-50 text-red-500 rounded-xl font-bold border border-red-100 flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> איפוס הכל (מחיקה)</button>
+            <div class="mb-6">
+                <h3 class="text-xs font-bold text-slate-400 mb-3 px-2 uppercase tracking-wider">כללי</h3>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span>מצב לילה 🌙</span>
+                        <button onclick="toggleTheme()" class="bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full text-xs">שנה</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <button onclick="resetData()" class="w-full p-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> איפוס כל הנתונים</button>
+            </div>
         </div>
 
+        <div id="drillDownModal" class="hidden fixed inset-0 bg-slate-100 dark:bg-slate-900 z-50 p-4 overflow-y-auto pb-20">
+            <div class="flex justify-between items-center mb-6 sticky top-0 bg-slate-100 dark:bg-slate-900 py-2 z-10">
+                <h2 class="text-2xl font-bold" id="ddTitle">כותרת</h2>
+                <button onclick="closeDrillDown()" class="w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="ddContent" class="space-y-4"></div>
+        </div>
     </main>
 
-    <nav class="fixed bottom-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t dark:border-slate-800 p-2 flex justify-around pb-6 z-50">
-        <button onclick="nav('dashboard')" class="text-blue-600 flex flex-col items-center w-16"><i class="fa-solid fa-house text-xl"></i><span class="text-[10px]">בית</span></button>
-        <button onclick="nav('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center -mt-8 shadow-lg shadow-blue-500/30"><i class="fa-solid fa-plus text-2xl"></i></button>
-        <button onclick="nav('settings')" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-gear text-xl"></i><span class="text-[10px]">הגדרות</span></button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t dark:border-slate-800 p-2 pb-6 flex justify-around items-end z-40">
+        <button onclick="nav('dashboard')" id="nav-dashboard" class="text-blue-600 flex flex-col items-center w-16"><i class="fa-solid fa-house text-xl mb-1"></i><span class="text-[10px]">בית</span></button>
+        <button onclick="nav('transactions')" id="nav-transactions" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-list-ul text-xl mb-1"></i><span class="text-[10px]">יומן</span></button>
+        <div class="relative -top-6">
+            <button onclick="nav('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-90 transition transform hover:-translate-y-1"><i class="fa-solid fa-plus text-2xl"></i></button>
+        </div>
+        <button onclick="nav('settings')" id="nav-settings" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-gear text-xl mb-1"></i><span class="text-[10px]">הגדרות</span></button>
     </nav>
+        <script>
+        // שימוש במפתח זיכרון חדש כדי לא להתנגש עם הבעיות הישנות
+        const STORAGE_KEY = 'MoneyStack_Pro_V12'; 
 
-    <script>
-        // שם חדש לזיכרון - מבטיח התחלה נקייה
-        const STORAGE_KEY = 'MoneyStack_Fresh_V11'; 
-
-        // נתונים התחלתיים
-        const initial = { 
-            txs: [], 
-            theme: 'light', 
-            cats: ['מזון','רכב','בית','בילויים','קניות','חשבונות'] 
+        const initialData = {
+            txs: [],
+            cards: [{ id: 'c1', name: 'כרטיס ראשי', limit: 10000, used: 0, day: 10 }], // ברירת מחדל
+            assets: [{ id: 'a1', name: 'חיסכון', amount: 0, type: 'saving' }], // ברירת מחדל
+            budgets: {}, 
+            theme: 'light',
+            catsExp: ['מזון', 'רכב', 'בית', 'בילויים', 'קניות', 'חשבונות'],
+            catsInc: ['משכורת', 'הפקדה', 'ביט', 'העברה', 'מתנה']
         };
 
-        // טעינת נתונים
-        let app = JSON.parse(localStorage.getItem(STORAGE_KEY)) || initial;
-        let type = 'expense';
+        let app = JSON.parse(localStorage.getItem(STORAGE_KEY)) || initialData;
+        if(!app.budgets) app.budgets = {}; 
+        
+        let formMode = 'expense';
 
-        // הפעלה ראשונית
         init();
 
         function init() {
             if(app.theme === 'dark') document.documentElement.classList.add('dark');
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('liveClock').innerText = now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
-            }, 1000);
-            render();
+            setInterval(updateClock, 1000);
+            updateClock();
+            renderDashboard();
+            updateDataList(); 
         }
 
         function save() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(app));
-            render();
+            renderDashboard();
+            updateDataList();
         }
 
-        function render() {
+        // --- Core Logic ---
+        function renderDashboard() {
             // חישובים
-            const income = app.txs.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
-            const expense = app.txs.filter(t=>t.amount<0).reduce((s,t)=>s-t.amount,0);
+            const bank = app.txs.reduce((s, t) => t.method==='bank' ? s+(t.type==='income'?t.amount:-t.amount) : s, 0);
+            const credit = app.cards.reduce((s, c) => s + c.used, 0);
+            const assets = app.assets.reduce((s, a) => s + a.amount, 0);
             
-            // עדכון כותרת
-            document.getElementById('totalNetWorth').innerText = (income - expense).toLocaleString();
+            document.getElementById('totalNetWorth').innerText = (bank + assets - credit).toLocaleString();
+            document.getElementById('statBank').innerText = bank.toLocaleString();
+            document.getElementById('statCredit').innerText = credit.toLocaleString();
+            document.getElementById('statAssets').innerText = assets.toLocaleString();
 
-            // רשימה אחרונה
-            const list = document.getElementById('recentTxList');
-            list.innerHTML = '';
+            // תקציבים (ברים צבעוניים)
+            const budgetDiv = document.getElementById('dashboardBudgets');
+            budgetDiv.innerHTML = '';
             
-            // מיון לפי זמן (החדש ביותר למעלה)
-            const sorted = [...app.txs].sort((a,b) => b.id - a.id);
-            
-            if (sorted.length === 0) {
-                list.innerHTML = '<div class="text-center text-slate-300 py-4">אין עדיין תנועות...</div>';
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const spending = {};
+            app.txs.forEach(t => {
+                if(t.type === 'expense' && t.date.startsWith(currentMonth)) {
+                    spending[t.cat] = (spending[t.cat] || 0) + t.amount;
+                }
+            });
+
+            const activeBudgets = Object.keys(app.budgets);
+            if(activeBudgets.length === 0) {
+                budgetDiv.innerHTML = `<button onclick="openDrillDown('budget')" class="text-xs text-blue-500 w-full text-center py-3 border border-dashed border-blue-200 rounded-xl bg-blue-50">לחץ להגדרת תקציב ראשון +</button>`;
             } else {
-                sorted.slice(0, 5).forEach(tx => {
-                    list.innerHTML += `
-                        <div class="flex justify-between items-center py-3 border-b border-slate-50 dark:border-slate-800 last:border-0">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center ${tx.amount>0?'bg-green-100 text-green-600':'bg-red-50 text-red-500'}">
-                                    <i class="fa-solid ${tx.amount>0?'fa-arrow-down':'fa-arrow-up'} text-xs"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-sm">${tx.desc}</div>
-                                    <div class="text-[10px] text-slate-400">${tx.date}</div>
-                                </div>
+                activeBudgets.forEach(cat => {
+                    const limit = app.budgets[cat];
+                    const used = spending[cat] || 0;
+                    const pct = Math.min(100, (used / limit) * 100);
+                    let color = 'bg-blue-500';
+                    if(pct > 80) color = 'bg-orange-500';
+                    if(pct >= 100) color = 'bg-red-500';
+                    
+                    budgetDiv.innerHTML += `
+                        <div class="mb-3">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-bold">${cat}</span>
+                                <span class="${pct>=100?'text-red-500 font-bold':''}">${used.toLocaleString()} / ${limit.toLocaleString()}</span>
                             </div>
-                            <span class="font-bold ${tx.amount>0?'text-green-500':''}">${Math.abs(tx.amount).toLocaleString()}</span>
+                            <div class="budget-track"><div class="budget-fill ${color}" style="width: ${pct}%"></div></div>
                         </div>`;
                 });
             }
-            
-            // קטגוריות
-            const chips = document.getElementById('catChips');
-            chips.innerHTML = '';
-            app.cats.forEach(c => {
-                chips.innerHTML += `<button onclick="document.getElementById('inpDesc').value='${c}'; pulse(this)" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-bold active:bg-blue-100 transition">${c}</button>`;
-            });
-        }
 
-        function saveTx() {
-            const amt = parseFloat(document.getElementById('inpAmount').value);
-            const desc = document.getElementById('inpDesc').value;
+            // רשימה אחרונה
+            const recentEl = document.getElementById('recentTxList');
+            recentEl.innerHTML = '';
+            const sorted = [...app.txs].sort((a,b) => b.timestamp - a.timestamp);
             
-            if(!amt || !desc) {
-                alert('נא למלא סכום ותיאור');
-                return;
-            }
-            
-            app.txs.push({
-                id: Date.now(),
-                date: new Date().toLocaleDateString('he-IL'),
-                amount: type === 'expense' ? -amt : amt,
-                desc: desc,
-                cat: 'כללי'
-            });
-            
-            document.getElementById('inpAmount').value = '';
-            document.getElementById('inpDesc').value = '';
-            nav('dashboard');
-            save();
-        }
+            if(sorted.length === 0) recentEl.innerHTML = '<div class="text-center text-slate-300 py-2">אין פעולות עדיין</div>';
 
-        function setType(t) {
-            type = t;
-            const btnExp = document.getElementById('btn-exp');
-            const btnInc = document.getElementById('btn-inc');
-            
-            if (t === 'expense') {
-                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm transition bg-white shadow text-red-500';
-                btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm transition text-slate-400';
-            } else {
-                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm transition text-slate-400';
-                btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm transition bg-white shadow text-green-500';
-            }
-        }
-
-        function nav(view) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById('view-'+view).classList.remove('hidden');
-            if(view === 'transactions') renderFullList();
-        }
-
-        function renderFullList() {
-            const list = document.getElementById('fullTxList');
-            const term = document.getElementById('search').value;
-            list.innerHTML = '';
-            
-            const filtered = app.txs.filter(t => t.desc.includes(term)).sort((a,b)=>b.id-a.id);
-            
-            if(filtered.length === 0) {
-                list.innerHTML = '<div class="text-center text-slate-300 mt-10">לא נמצאו תנועות</div>';
-                return;
-            }
-
-            filtered.forEach(tx => {
-                 list.innerHTML += `
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm flex justify-between items-center mb-2 border border-slate-50 dark:border-slate-700">
-                        <div>
-                            <div class="font-bold">${tx.desc}</div>
-                            <div class="text-xs text-slate-400">${tx.date}</div>
+            sorted.slice(0, 5).forEach(tx => {
+                const isInc = tx.type === 'income';
+                recentEl.innerHTML += `
+                    <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
+                        <div class="flex items-center gap-3">
+                             <div class="w-9 h-9 rounded-full flex items-center justify-center ${isInc ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'}"><i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-bag-shopping'} text-xs"></i></div>
+                            <div><div class="font-bold text-sm">${tx.desc}</div><div class="text-[10px] text-slate-400">${tx.date}</div></div>
                         </div>
+                        <span class="font-bold text-sm ${isInc ? 'text-green-500' : ''}">${Math.abs(tx.amount).toLocaleString()}</span>
+                    </div>`;
+            });
+        }
+
+        // --- Transaction Form Logic ---
+        function setFormType(type) {
+            formMode = type;
+            const btnExp = document.getElementById('btn-exp'); const btnInc = document.getElementById('btn-inc'); const saveBtn = document.getElementById('saveBtn'); const methodLabel = document.getElementById('methodLabel');
+            if (type === 'expense') {
+                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition';
+                btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
+                saveBtn.className = 'w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2'; saveBtn.innerText = 'רשום הוצאה'; methodLabel.innerText = 'מאיפה יורד הכסף?';
+            } else {
+                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
+                btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-green-500 transition';
+                saveBtn.className = 'w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition mt-2'; saveBtn.innerText = 'רשום הכנסה'; methodLabel.innerText = 'לאן הכסף נכנס?';
+            }
+            renderFormOptions();
+        }
+
+        function renderFormOptions() {
+            const list = document.getElementById('paymentMethodsList');
+            list.innerHTML = `<button onclick="selectMethod(this, 'bank')" class="flex-none px-4 py-2 rounded-xl text-xs bg-slate-800 text-white whitespace-nowrap shadow-md ring-2 ring-slate-800 transition">עו"ש בנק</button>`;
+            
+            if (formMode === 'expense') {
+                app.cards.forEach(c => list.innerHTML += `<button onclick="selectMethod(this, '${c.id}')" class="flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm">${c.name}</button>`);
+            } else {
+                app.assets.forEach(a => list.innerHTML += `<button onclick="selectMethod(this, 'asset_${a.id}')" class="flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm">${a.name}</button>`);
+            }
+            
+            const catDiv = document.getElementById('categoryChips'); catDiv.innerHTML = '';
+            (formMode === 'expense' ? app.catsExp : app.catsInc).forEach((cat, i) => {
+                const cls = i === 0 ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-slate-50 text-slate-500 border-transparent';
+                catDiv.innerHTML += `<button onclick="selectCat(this, '${cat}')" class="cat-chip px-3 py-1.5 rounded-lg text-xs border ${cls}">${cat}</button>`;
+            });
+            document.getElementById('selectedCat').value = (formMode === 'expense' ? app.catsExp : app.catsInc)[0]; document.getElementById('selectedMethod').value = 'bank';
+        }
+
+        function selectMethod(btn, id) {
+            document.querySelectorAll('#paymentMethodsList button').forEach(b => b.className = 'flex-none px-4 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-600 whitespace-nowrap shadow-sm');
+            btn.className = 'flex-none px-4 py-2 rounded-xl text-xs bg-slate-800 text-white whitespace-nowrap shadow-md ring-2 ring-slate-800';
+            document.getElementById('selectedMethod').value = id;
+        }
+        function selectCat(btn, cat) {
+            document.querySelectorAll('.cat-chip').forEach(b => b.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-slate-50 text-slate-500 border-transparent');
+            btn.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-blue-100 text-blue-600 border-blue-200';
+            document.getElementById('selectedCat').value = cat;
+        }
+
+        function saveTransaction() {
+            const amount = parseFloat(document.getElementById('inpAmount').value);
+            const desc = document.getElementById('inpDesc').value;
+            const cat = document.getElementById('selectedCat').value;
+            const method = document.getElementById('selectedMethod').value;
+            
+            if(!amount || !desc) return alert('נא למלא סכום ותיאור');
+            
+            // לוגיקה לכרטיסי אשראי
+            if (formMode === 'expense' && !method.startsWith('bank')) {
+                const card = app.cards.find(c => c.id === method);
+                if (card) { 
+                    if (card.used + amount > card.limit && !confirm('שים לב: אתה חורג מהמסגרת! להמשיך?')) return;
+                    card.used += amount; 
+                }
+            }
+            // לוגיקה לנכסים
+            if (formMode === 'income' && method.startsWith('asset_')) {
+                const asset = app.assets.find(a => a.id === method.replace('asset_', ''));
+                if(asset) asset.amount += amount;
+            }
+
+            app.txs.push({ 
+                id: Date.now(), 
+                type: formMode, 
+                amount, 
+                desc, 
+                cat, 
+                date: new Date().toLocaleDateString('he-IL'), 
+                method, 
+                timestamp: Date.now() 
+            });
+            
+            save(); 
+            document.getElementById('inpAmount').value = ''; 
+            document.getElementById('inpDesc').value = ''; 
+            nav('dashboard');
+        }
+
+        // --- Drill Down Modals (ניהול מתקדם) ---
+        function openDrillDown(type) {
+            const modal = document.getElementById('drillDownModal'); const content = document.getElementById('ddContent'); const title = document.getElementById('ddTitle');
+            modal.classList.remove('hidden'); content.innerHTML = '';
+            
+            if (type === 'budget') {
+                title.innerText = 'ניהול תקציב חודשי';
+                content.innerHTML = `<p class="text-sm text-slate-500 mb-4">הגדר תקרה לכל קטגוריה כדי לקבל התראות</p>`;
+                app.catsExp.forEach(cat => {
+                    const currentLimit = app.budgets[cat] || 0;
+                    content.innerHTML += `
+                        <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-xl mb-2 shadow-sm border border-slate-50 dark:border-slate-700">
+                            <span class="font-bold text-sm">${cat}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-400">₪</span>
+                                <input type="number" value="${currentLimit}" placeholder="0" class="w-20 text-center bg-slate-100 dark:bg-slate-900 rounded-lg p-2 text-sm outline-none font-bold" onchange="setBudget('${cat}', this.value)">
+                            </div>
+                        </div>`;
+                });
+            } else if (type === 'credit') {
+                title.innerText = 'ניהול כרטיסי אשראי';
+                content.innerHTML = `<button onclick="addNewCard()" class="w-full py-3 border border-dashed border-blue-300 text-blue-500 bg-blue-50 rounded-xl mb-4 text-sm font-bold">+ הוסף כרטיס חדש</button>`;
+                app.cards.forEach(c => {
+                    const pct = Math.min(100, (c.used/c.limit)*100);
+                    content.innerHTML += `
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-3">
+                            <div class="flex justify-between mb-2"><span class="font-bold text-lg">${c.name}</span><span class="text-xs bg-slate-100 px-2 py-1 rounded">יורד ב-${c.day} לחודש</span></div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-500"><span>נוצל: ${c.used.toLocaleString()}</span><span>נותר: ${(c.limit-c.used).toLocaleString()}</span></div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full mb-3 overflow-hidden"><div class="h-full bg-blue-500" style="width: ${pct}%"></div></div>
+                            <div class="flex gap-2">
+                                <button onclick="updateCardBalance('${c.id}')" class="flex-1 text-xs bg-blue-50 text-blue-600 py-2 rounded-lg font-bold">עדכן ניצול ידני</button>
+                                <button onclick="deleteCard('${c.id}')" class="text-xs text-red-400 px-2">מחק</button>
+                            </div>
+                        </div>`;
+                });
+            } else if (type === 'assets') {
+                title.innerText = 'נכסים וחסכונות';
+                content.innerHTML = `<button onclick="addNewAsset()" class="w-full py-3 border border-dashed border-emerald-300 text-emerald-500 bg-emerald-50 rounded-xl mb-4 text-sm font-bold">+ הוסף נכס חדש</button>`;
+                app.assets.forEach(a => {
+                    content.innerHTML += `
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex justify-between items-center mb-2 border border-slate-50 dark:border-slate-700">
+                        <div><div class="font-bold">${a.name}</div><div class="text-xs text-slate-500">${a.type==='saving'?'חיסכון':'השקעה'}</div></div>
                         <div class="text-right">
-                            <div class="font-bold ${tx.amount>0?'text-green-500':''}">${Math.abs(tx.amount).toLocaleString()} ₪</div>
-                            <button onclick="deleteTx(${tx.id})" class="text-[10px] text-red-400 mt-1">מחק</button>
+                            <div class="font-bold text-lg">${a.amount.toLocaleString()} ₪</div>
+                            <button onclick="editAsset('${a.id}')" class="text-xs text-blue-500 font-medium">עדכון שווי</button>
+                        </div>
+                    </div>`;
+                });
+            } else if (type === 'bank') {
+                title.innerText = 'עו"ש בנק';
+                content.innerHTML = `<div class="p-6 text-center text-slate-400">כאן מוצג הסיכום של כל הפעולות שבוצעו במזומן או בהעברה בנקאית.<br><br>לפירוט מלא, עבור ל"יומן תנועות".</div>`;
+            }
+        }
+
+        // --- Helper Functions ---
+        function setBudget(cat, val) { app.budgets[cat] = parseFloat(val); save(); }
+        
+        function updateCardBalance(id) { 
+            const c = app.cards.find(x=>x.id===id); 
+            const val=parseFloat(prompt('מה הסכום שתפוס כרגע בכרטיס?', c.used)); 
+            if(!isNaN(val)) { c.used=val; save(); openDrillDown('credit'); } 
+        }
+        function addNewCard() { 
+            const name=prompt('שם הכרטיס (למשל: ויזה כאל)'); 
+            if(name) { app.cards.push({id:'c'+Date.now(), name, limit:parseFloat(prompt('מה המסגרת? (למשל 20000)')), used:0, day:10}); save(); openDrillDown('credit'); } 
+        }
+        function deleteCard(id) {
+            if(confirm('למחוק כרטיס זה?')) { app.cards = app.cards.filter(c => c.id !== id); save(); openDrillDown('credit'); }
+        }
+
+        function editAsset(id) { 
+            const a = app.assets.find(x=>x.id===id); 
+            const val=parseFloat(prompt('שווי מעודכן:', a.amount)); 
+            if(!isNaN(val)) { a.amount=val; save(); openDrillDown('assets'); } 
+        }
+        function addNewAsset() { 
+            const name=prompt('שם הנכס/חיסכון'); 
+            if(name) { app.assets.push({id:'a'+Date.now(), name, amount:parseFloat(prompt('כמה יש שם כרגע?')), type:'saving'}); save(); openDrillDown('assets'); } 
+        }
+        function closeDrillDown() { document.getElementById('drillDownModal').classList.add('hidden'); renderDashboard(); }
+
+        // --- System Functions ---
+        function updateDataList() { 
+            const list = document.getElementById('descOptions'); 
+            const uniqueDesc = [...new Set(app.txs.map(t => t.desc))]; 
+            list.innerHTML = uniqueDesc.map(d => `<option value="${d}">`).join(''); 
+        }
+        
+        function renderTransactions() { 
+            const list = document.getElementById('fullTxList'); 
+            list.innerHTML = ''; 
+            const txt = document.getElementById('searchDesc').value.toLowerCase(); 
+            const sorted = [...app.txs].filter(t => t.desc.toLowerCase().includes(txt)).sort((a,b)=>b.timestamp-a.timestamp);
+            
+            if(sorted.length === 0) list.innerHTML = '<div class="text-center text-slate-400 mt-10">לא נמצאו תוצאות</div>';
+
+            sorted.forEach(tx => {
+                const isInc = tx.type === 'income';
+                list.innerHTML += `
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex justify-between mb-2 border-r-4 ${isInc?'border-green-400':'border-red-400'}">
+                        <div><div class="font-bold text-slate-700 dark:text-slate-200">${tx.desc}</div><div class="text-xs text-slate-400">${tx.date} • ${tx.cat}</div></div>
+                        <div class="text-right">
+                            <div class="font-bold ${isInc?'text-green-500':'text-slate-800 dark:text-slate-200'}">${Math.abs(tx.amount).toLocaleString()}</div>
+                            <button onclick="if(confirm('למחוק?')){app.txs=app.txs.filter(x=>x.id!==${tx.id});save();renderTransactions();}" class="text-[10px] text-red-300">מחק</button>
                         </div>
                     </div>`;
             });
         }
-        
-        function renderTx() { renderFullList(); }
 
-        function deleteTx(id) {
-            if(confirm('למחוק את השורה?')) {
-                app.txs = app.txs.filter(t => t.id !== id);
-                save();
-                renderFullList();
-            }
-        }
-
-        function downloadData() {
-            const a = document.createElement('a');
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app));
-            a.download = "money_backup_" + new Date().toISOString().slice(0,10) + ".json";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+        function nav(view) { 
+            document.querySelectorAll('.view-section').forEach(el => { el.classList.add('hidden'); el.classList.remove('slide-up'); }); 
+            document.getElementById('view-'+view).classList.remove('hidden'); 
+            document.getElementById('view-'+view).classList.add('slide-up'); 
+            if(view==='add') setFormType('expense'); 
+            if(view==='transactions') renderTransactions(); 
         }
         
-        function restoreData(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                try {
-                    app = JSON.parse(e.target.result);
-                    save();
-                    alert('הנתונים שוחזרו בהצלחה!');
-                    location.reload();
-                } catch(err) {
-                    alert('קובץ לא תקין');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function resetAll() {
-            if(confirm('בטוח? זה ימחק את כל הנתונים באפליקציה.')) {
-                localStorage.removeItem(STORAGE_KEY);
-                location.reload();
-            }
-        }
+        function updateClock() { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'}); }
+        function toggleTheme() { app.theme = app.theme==='dark'?'light':'dark'; document.documentElement.classList.toggle('dark'); save(); }
         
-        function pulse(el) {
-            el.classList.add('scale-95');
-            setTimeout(()=>el.classList.remove('scale-95'), 100);
+        // Backup Logic
+        function downloadBackup() { 
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app)); 
+            const a = document.createElement('a'); 
+            a.setAttribute("href", dataStr); 
+            a.setAttribute("download", "moneystack_backup_" + new Date().toISOString().slice(0,10) + ".json"); 
+            document.body.appendChild(a); a.click(); a.remove(); 
+        }
+        function restoreBackup(input) { 
+            const file = input.files[0]; if(!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                try { 
+                    const loaded = JSON.parse(e.target.result); 
+                    if(confirm('זהירות: שחזור ימחק את הנתונים הנוכחיים. להמשיך?')) { app = loaded; save(); location.reload(); } 
+                } catch(err) { alert('קובץ לא תקין'); } 
+            }; 
+            reader.readAsText(file); 
+        }
+        function resetData() { 
+                   if(confirm('פעולה זו תמחק את כל הנתונים לצמיתות! להמשיך?')) { 
+                localStorage.removeItem(STORAGE_KEY); 
+                location.reload(); 
+            } 
         }
     </script>
 </body>
