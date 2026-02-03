@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoneyStack Elite 7.0</title>
+    <title>MoneyStack Master 8.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,83 +13,128 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Rubik', 'sans-serif'] }, colors: { primary: '#3b82f6', secondary: '#64748b' } } }
+            theme: { extend: { fontFamily: { sans: ['Rubik', 'sans-serif'] }, colors: { primary: '#3b82f6', secondary: '#64748b', success: '#10b981', danger: '#ef4444' } } }
         }
     </script>
     <style>
-        body { -webkit-tap-highlight-color: transparent; background-color: #f8fafc; }
+        body { -webkit-tap-highlight-color: transparent; background-color: #f1f5f9; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); }
         .dark .glass-panel { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(51, 65, 85, 0.8); }
         .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .credit-bar-bg { background: #e2e8f0; height: 6px; border-radius: 99px; overflow: hidden; }
+        .credit-bar-bg { background: #e2e8f0; height: 8px; border-radius: 99px; overflow: hidden; }
         .credit-bar-fill { height: 100%; transition: width 1s ease-in-out; }
         .no-scrollbar::-webkit-scrollbar { display: none; } 
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .bell-shake { animation: shake 2s infinite; }
-        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); } 20%, 40%, 60%, 80% { transform: rotate(10deg); } }
+        .setting-item { @apply flex justify-between items-center p-4 bg-white dark:bg-slate-800 rounded-xl mb-3 shadow-sm border border-slate-100 dark:border-slate-700 active:scale-[0.98] transition; }
     </style>
 </head>
 <body class="text-slate-800 dark:bg-slate-900 dark:text-slate-100 pb-28 transition-colors duration-300">
 
-    <header class="bg-blue-600 dark:bg-blue-900 text-white p-6 pt-8 rounded-b-[30px] shadow-xl relative overflow-hidden z-10">
-        <div class="flex justify-between items-start mb-2">
-            <div>
-                <h1 class="text-lg font-bold" id="headerName">שלום אורח</h1>
-                <p class="text-[10px] opacity-80" id="headerDetails">הגדר חשבון בהגדרות</p>
+    <header class="bg-blue-600 dark:bg-blue-900 text-white p-6 pt-8 rounded-b-[35px] shadow-2xl relative overflow-hidden z-10">
+        <div class="flex justify-between items-start mb-4">
+            <div class="bg-white/10 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+                <span class="text-xs font-mono tracking-wider" id="liveClock">--:--</span>
             </div>
-            <div class="flex gap-3">
-                 <button onclick="nav('reminders')" class="relative">
-                    <i class="fa-solid fa-bell text-xl" id="bellIcon"></i>
-                    <span id="badgeCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
-                </button>
-                <button onclick="toggleTheme()" class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-moon text-xs"></i></button>
-            </div>
+            <button onclick="nav('settings')" class="bg-white/10 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md"><i class="fa-solid fa-gear text-xs"></i></button>
         </div>
 
-        <div class="mb-4">
-             <div class="text-[10px] opacity-80 font-mono mb-1" id="liveClock">--:--</div>
-             <h2 class="text-3xl font-bold tracking-tight">₪<span id="totalNetWorth">0</span></h2>
-             <p class="text-xs text-blue-100">הון עצמי כולל</p>
+        <div class="text-center mb-6">
+             <p class="text-blue-100 text-sm mb-1">שווי נקי מוערך</p>
+             <h1 class="text-4xl font-bold tracking-tight">₪<span id="totalNetWorth">0</span></h1>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 mt-4">
-            <button onclick="openDrillDown('bank')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-2 rounded-xl border border-white/10 text-center transition">
-                <i class="fa-solid fa-building-columns text-blue-200 mb-1 text-xs"></i>
-                <p class="text-[10px] text-blue-100">עו"ש בנק</p>
+        <div class="grid grid-cols-3 gap-3">
+            <button onclick="openDrillDown('bank')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition group">
+                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-building-columns text-sm"></i></div>
+                <p class="text-[10px] text-blue-100 mb-0.5">עו"ש</p>
                 <p class="font-bold text-sm" id="statBank">0</p>
             </button>
-            <button onclick="openDrillDown('credit')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-2 rounded-xl border border-white/10 text-center transition">
-                <i class="fa-solid fa-credit-card text-red-200 mb-1 text-xs"></i>
-                <p class="text-[10px] text-blue-100">ניצול אשראי</p>
-                <p class="font-bold text-sm text-red-100" id="statCredit">0</p>
+            <button onclick="openDrillDown('credit')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition group">
+                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-credit-card text-sm"></i></div>
+                <p class="text-[10px] text-blue-100 mb-0.5">אשראי</p>
+                <p class="font-bold text-sm text-red-200" id="statCredit">0</p>
             </button>
-             <button onclick="openDrillDown('assets')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-2 rounded-xl border border-white/10 text-center transition">
-                <i class="fa-solid fa-chart-line text-emerald-200 mb-1 text-xs"></i>
-                <p class="text-[10px] text-blue-100">השקעות/חיסכון</p>
-                <p class="font-bold text-sm text-emerald-100" id="statAssets">0</p>
+             <button onclick="openDrillDown('assets')" class="bg-white/10 active:bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-center transition group">
+                <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition"><i class="fa-solid fa-piggy-bank text-sm"></i></div>
+                <p class="text-[10px] text-blue-100 mb-0.5">חסכונות והשקעות</p>
+                <p class="font-bold text-sm text-emerald-200" id="statAssets">0</p>
             </button>
         </div>
     </header>
         <main class="px-4 -mt-4 relative z-20 space-y-5">
+
         <div id="view-dashboard" class="view-section slide-up">
             <div class="flex gap-3 mb-4 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="nav('add')" class="flex-none bg-blue-600 text-white px-4 py-2 rounded-full text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2">
+                <button onclick="nav('add')" class="flex-none bg-blue-600 text-white px-5 py-3 rounded-full text-xs font-bold shadow-lg shadow-blue-500/30 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> הוספה מהירה
                 </button>
-                 <button onclick="nav('reminders')" class="flex-none bg-white dark:bg-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700">
+                 <button onclick="nav('reminders')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700">
                     <i class="fa-solid fa-bell text-slate-400"></i> התראות
                 </button>
-                <button onclick="openDrillDown('credit')" class="flex-none bg-white dark:bg-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700">
-                    <i class="fa-solid fa-credit-card text-slate-400"></i> כרטיסים
+                <button onclick="openDrillDown('credit')" class="flex-none bg-white dark:bg-slate-800 px-5 py-3 rounded-full text-xs font-bold shadow-sm border border-slate-100 dark:border-slate-700">
+                    <i class="fa-solid fa-credit-card text-slate-400"></i> ניהול כרטיסים
                 </button>
             </div>
-            <div class="glass-panel p-4 rounded-3xl shadow-sm bg-white dark:bg-slate-800">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200">תנועות אחרונות</h3>
-                    <button onclick="nav('transactions')" class="text-xs text-blue-500">לכל התנועות</button>
+
+            <div class="glass-panel p-5 rounded-3xl shadow-sm bg-white dark:bg-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200">פעולות אחרונות</h3>
+                    <button onclick="nav('transactions')" class="text-xs text-blue-500 font-medium">לכל הפעולות</button>
                 </div>
-                <div id="recentTxList" class="space-y-3"></div>
+                <div id="recentTxList" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <div id="view-settings" class="view-section hidden slide-up">
+            <h2 class="text-2xl font-bold mb-6 px-2">הגדרות</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-xs font-bold text-slate-400 mb-3 px-2 uppercase tracking-wider">פרופיל אישי</h3>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+                    <div class="grid gap-3">
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">שם מלא</label>
+                            <input type="text" id="set-name" class="w-full bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none border border-transparent focus:border-blue-500" onchange="saveProfile()">
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex-1">
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">שם בנק/סניף</label>
+                                <input type="text" id="set-branch" class="w-full bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none border border-transparent focus:border-blue-500" onchange="saveProfile()">
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1">מספר חשבון</label>
+                                <input type="text" id="set-account" class="w-full bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-sm outline-none border border-transparent focus:border-blue-500" onchange="saveProfile()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xs font-bold text-slate-400 mb-3 px-2 uppercase tracking-wider">מערכת</h3>
+                <div onclick="toggleTheme()" class="setting-item cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-moon"></i></div>
+                        <span class="text-sm font-bold">מצב לילה (Dark Mode)</span>
+                    </div>
+                    <i class="fa-solid fa-toggle-on text-2xl text-slate-200 dark:text-blue-500"></i>
+                </div>
+                
+                <div onclick="nav('reminders')" class="setting-item cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
+                        <span class="text-sm font-bold">ניהול התראות</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-left text-xs text-slate-400"></i>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xs font-bold text-slate-400 mb-3 px-2 uppercase tracking-wider">ניהול נתונים</h3>
+                <button onclick="resetData()" class="w-full p-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+                    <i class="fa-solid fa-trash"></i> איפוס כל הנתונים
+                </button>
             </div>
         </div>
 
@@ -97,22 +142,21 @@
             <h2 class="text-xl font-bold mb-4 px-2">התראות ותזכורות</h2>
             <div class="glass-panel p-5 rounded-3xl bg-white dark:bg-slate-800 shadow-xl space-y-4 mb-6">
                 <h3 class="font-bold text-sm">הוסף תזכורת חדשה</h3>
-                <input type="text" id="remDesc" class="w-full bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm" placeholder="מה להזכיר לך? (למשל: לבדוק ויזה)">
+                <input type="text" id="remDesc" class="w-full bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm outline-none focus:ring-2 ring-blue-500" placeholder="מה להזכיר לך?">
                 <div class="flex gap-2">
-                    <input type="date" id="remDate" class="flex-1 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm">
-                    <input type="time" id="remTime" class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm">
+                    <input type="date" id="remDate" class="flex-1 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm outline-none">
+                    <input type="time" id="remTime" class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm outline-none">
                 </div>
-                <button onclick="addReminder()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold text-sm">צור תזכורת</button>
+                <button onclick="addReminder()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold text-sm shadow-lg">צור תזכורת</button>
             </div>
             <div id="remindersList" class="space-y-3"></div>
         </div>
-
-        <div id="view-transactions" class="view-section hidden slide-up">
+                <div id="view-transactions" class="view-section hidden slide-up">
             <h2 class="text-xl font-bold mb-4 px-2">יומן תנועות</h2>
-            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm mb-4 space-y-3">
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm mb-4 space-y-3 sticky top-0 z-30">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute top-3 right-3 text-slate-400 text-sm"></i>
-                    <input type="text" id="searchDesc" onkeyup="renderTransactions()" placeholder="חפש לפי שם..." class="w-full bg-slate-50 dark:bg-slate-900 pr-9 p-2.5 rounded-xl text-sm border-none outline-none">
+                    <input type="text" id="searchDesc" onkeyup="renderTransactions()" placeholder="חפש לפי שם..." class="w-full bg-slate-50 dark:bg-slate-900 pr-9 p-2.5 rounded-xl text-sm border-none outline-none focus:ring-2 ring-blue-500">
                 </div>
                 <div class="flex gap-2">
                     <input type="date" id="searchDate" onchange="renderTransactions()" class="flex-1 bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl text-sm border-none outline-none text-slate-500">
@@ -121,30 +165,31 @@
             </div>
             <div id="fullTxList" class="space-y-2 pb-20"></div>
         </div>
-                <div id="view-add" class="view-section hidden slide-up">
+
+        <div id="view-add" class="view-section hidden slide-up">
             <h2 class="text-xl font-bold mb-4 px-2">תנועה חדשה</h2>
             <div class="glass-panel p-5 rounded-3xl bg-white dark:bg-slate-800 shadow-xl space-y-4">
                 <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
-                    <button onclick="setFormType('expense')" id="btn-exp" class="flex-1 py-2.5 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition">הוצאה</button>
-                    <button onclick="setFormType('income')" id="btn-inc" class="flex-1 py-2.5 rounded-lg font-bold text-sm text-slate-400 transition">הכנסה</button>
+                    <button onclick="setFormType('expense')" id="btn-exp" class="flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition">הוצאה</button>
+                    <button onclick="setFormType('income')" id="btn-inc" class="flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition">הכנסה</button>
                 </div>
                 <div class="space-y-4">
                     <div class="relative">
-                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">סכום</label>
-                        <input type="number" id="inpAmount" class="w-full text-2xl font-bold bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition text-center" placeholder="0.00">
+                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">סכום (₪)</label>
+                        <input type="number" id="inpAmount" class="w-full text-3xl font-bold bg-transparent border border-slate-200 dark:border-slate-700 rounded-xl p-4 outline-none focus:border-blue-500 transition text-center" placeholder="0.00">
                     </div>
                     <div class="relative">
-                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">פרטים</label>
-                        <input type="text" id="inpDesc" class="w-full bg-slate-50 dark:bg-slate-900 border border-transparent focus:bg-white focus:border-blue-500 rounded-xl p-3 outline-none transition text-sm" placeholder="תיאור">
+                        <label class="text-[10px] font-bold text-slate-400 absolute -top-2 right-2 bg-white dark:bg-slate-800 px-1">תיאור</label>
+                        <input type="text" id="inpDesc" class="w-full bg-slate-50 dark:bg-slate-900 border border-transparent focus:bg-white focus:border-blue-500 rounded-xl p-3 outline-none transition text-sm" placeholder="על מה יצא הכסף?">
                     </div>
                 </div>
                 <div id="methodSelectorDiv">
-                    <label class="text-xs font-bold text-slate-400 mb-1 block" id="methodLabel">מאיפה יורד הכסף?</label>
-                    <div class="flex gap-2 overflow-x-auto no-scrollbar" id="paymentMethodsList"></div>
+                    <label class="text-xs font-bold text-slate-400 mb-2 block" id="methodLabel">מקור הכסף</label>
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="paymentMethodsList"></div>
                     <input type="hidden" id="selectedMethod" value="bank">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-slate-400 mb-1 block">קטגוריה</label>
+                    <label class="text-xs font-bold text-slate-400 mb-2 block">קטגוריה</label>
                     <div class="flex flex-wrap gap-2" id="categoryChips"></div>
                     <input type="hidden" id="selectedCat" value="כללי">
                 </div>
@@ -152,20 +197,8 @@
             </div>
         </div>
 
-        <div id="view-settings" class="view-section hidden slide-up">
-            <h2 class="text-xl font-bold mb-4 px-2">הגדרות</h2>
-            <div class="glass-panel p-5 rounded-3xl bg-white dark:bg-slate-800 shadow-sm space-y-4">
-                <h3 class="font-bold text-sm text-blue-500">פרטים אישיים</h3>
-                <div class="space-y-3">
-                    <input type="text" id="set-name" placeholder="שם מלא" class="w-full bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm" onchange="saveProfile()">
-                    <input type="text" id="set-account" placeholder="מספר חשבון" class="w-full bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm" onchange="saveProfile()">
-                    <input type="text" id="set-branch" placeholder="מספר סניף / שם בנק" class="w-full bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-sm" onchange="saveProfile()">
-                </div>
-            </div>
-        </div>
-
-        <div id="drillDownModal" class="hidden fixed inset-0 bg-slate-100 dark:bg-slate-900 z-50 p-4 overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
+        <div id="drillDownModal" class="hidden fixed inset-0 bg-slate-100 dark:bg-slate-900 z-50 p-4 overflow-y-auto pb-20">
+            <div class="flex justify-between items-center mb-6 sticky top-0 bg-slate-100 dark:bg-slate-900 py-2 z-10">
                 <h2 class="text-2xl font-bold" id="ddTitle">כותרת</h2>
                 <button onclick="closeDrillDown()" class="w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -174,30 +207,29 @@
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t dark:border-slate-800 p-2 pb-6 flex justify-around items-end z-40">
-        <button onclick="nav('dashboard')" id="nav-dashboard" class="text-blue-600 flex flex-col items-center w-16"><i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[10px]">בית</span></button>
-        <button onclick="nav('transactions')" id="nav-transactions" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-list text-lg mb-1"></i><span class="text-[10px]">יומן</span></button>
+        <button onclick="nav('dashboard')" id="nav-dashboard" class="text-blue-600 flex flex-col items-center w-16"><i class="fa-solid fa-house text-xl mb-1"></i><span class="text-[10px]">בית</span></button>
+        <button onclick="nav('transactions')" id="nav-transactions" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-list-ul text-xl mb-1"></i><span class="text-[10px]">יומן</span></button>
         <div class="relative -top-6">
             <button onclick="nav('add')" class="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-90 transition transform hover:-translate-y-1"><i class="fa-solid fa-plus text-2xl"></i></button>
         </div>
-        <button onclick="nav('reminders')" id="nav-reminders" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-bell text-lg mb-1"></i><span class="text-[10px]">התראות</span></button>
-        <button onclick="nav('settings')" id="nav-settings" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-gear text-lg mb-1"></i><span class="text-[10px]">הגדרות</span></button>
+        <button onclick="nav('reminders')" id="nav-reminders" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-bell text-xl mb-1"></i><span class="text-[10px]">התראות</span></button>
+        <button onclick="nav('settings')" id="nav-settings" class="text-slate-400 flex flex-col items-center w-16"><i class="fa-solid fa-gear text-xl mb-1"></i><span class="text-[10px]">הגדרות</span></button>
     </nav>
         <script>
         const initialData = {
             txs: [], 
             cards: [{ id: 'c1', name: 'מקס', limit: 20000, used: 0, day: 10 }], 
-            assets: [{ id: 'a1', name: 'חיסכון לדירה', amount: 50000, type: 'saving' }],
+            assets: [{ id: 'a1', name: 'חיסכון נזיל', amount: 0, type: 'saving' }],
             reminders: [],
             profile: { name: 'אורח', account: '', branch: '' },
             theme: 'light',
             catsExp: ['מזון', 'רכב', 'בית', 'בילויים', 'קניות', 'חשבונות'],
-            catsInc: ['משכורת', 'הפקדת מזומן', 'ביט/פייבוקס', 'העברה בנקאית', 'מתנה', 'רווחי הון']
+            catsInc: ['משכורת', 'הפקדת מזומן', 'ביט/פייבוקס', 'העברה בנקאית', 'מתנה']
         };
 
-        let app = JSON.parse(localStorage.getItem('moneyAppV7')) || initialData;
-        if(!app.profile) app.profile = { name: 'אורח', account: '', branch: '' };
-        if(!app.reminders) app.reminders = [];
-
+        let app = JSON.parse(localStorage.getItem('moneyAppV8')) || initialData;
+        if(!app.profile) app.profile = initialData.profile;
+        
         let formMode = 'expense';
 
         init();
@@ -205,16 +237,13 @@
         function init() {
             if(app.theme === 'dark') document.documentElement.classList.add('dark');
             setInterval(updateClock, 1000);
-            setInterval(checkReminders, 10000); 
             updateClock();
-            checkCreditCycles();
-            if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
             renderDashboard();
             loadProfile();
         }
 
         function save() {
-            localStorage.setItem('moneyAppV7', JSON.stringify(app));
+            localStorage.setItem('moneyAppV8', JSON.stringify(app));
             renderDashboard();
         }
 
@@ -222,7 +251,6 @@
             document.getElementById('set-name').value = app.profile.name;
             document.getElementById('set-account').value = app.profile.account;
             document.getElementById('set-branch').value = app.profile.branch;
-            updateHeader();
         }
 
         function saveProfile() {
@@ -230,77 +258,14 @@
             app.profile.account = document.getElementById('set-account').value;
             app.profile.branch = document.getElementById('set-branch').value;
             save();
-            updateHeader();
+            alert('הפרופיל עודכן בהצלחה!');
         }
 
-        function updateHeader() {
-            document.getElementById('headerName').innerText = `שלום ${app.profile.name}`;
-            if(app.profile.account) document.getElementById('headerDetails').innerText = `חשבון: ${app.profile.account} | סניף: ${app.profile.branch}`;
-        }
-
-        function addReminder() {
-            const desc = document.getElementById('remDesc').value;
-            const date = document.getElementById('remDate').value;
-            const time = document.getElementById('remTime').value;
-            if(desc && date && time) {
-                app.reminders.push({ id: Date.now(), desc, date, time, done: false });
-                save(); renderReminders();
-                document.getElementById('remDesc').value = '';
-                alert('התזכורת נוספה');
+        function resetData() {
+            if(confirm('פעולה זו תמחק את כל הנתונים לצמיתות! להמשיך?')) {
+                localStorage.removeItem('moneyAppV8');
+                location.reload();
             }
-        }
-
-        function checkReminders() {
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toTimeString().slice(0, 5);
-            let alertCount = 0;
-            app.reminders.forEach(r => {
-                if(!r.done) {
-                    if(r.date < dateStr || (r.date === dateStr && r.time <= timeStr)) {
-                        alertCount++;
-                        if (Notification.permission === "granted") new Notification("MoneyStack: תזכורת", { body: r.desc });
-                    }
-                }
-            });
-            const badge = document.getElementById('badgeCount');
-            const bell = document.getElementById('bellIcon');
-            if(alertCount > 0) {
-                badge.innerText = alertCount; badge.classList.remove('hidden'); bell.classList.add('bell-shake', 'text-red-500');
-            } else {
-                badge.classList.add('hidden'); bell.classList.remove('bell-shake', 'text-red-500');
-            }
-        }
-
-        function renderReminders() {
-            const list = document.getElementById('remindersList');
-            list.innerHTML = '';
-            app.reminders.forEach(r => {
-                list.innerHTML += `
-                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl flex justify-between items-center ${r.done ? 'opacity-50' : ''}">
-                        <div><div class="font-bold text-sm">${r.desc}</div><div class="text-xs text-slate-500">${r.date} בשעה ${r.time}</div></div>
-                        <div class="flex gap-2">
-                             ${!r.done ? `<button onclick="this.parentElement.innerHTML='<i class=fa-solid fa-check>';app.reminders.find(x=>x.id==${r.id}).done=true;save();checkReminders();" class="text-green-500 text-xs font-bold border border-green-200 px-2 py-1 rounded">בוצע</button>` : '<i class="fa-solid fa-check text-green-500"></i>'}
-                             <button onclick="app.reminders=app.reminders.filter(x=>x.id!==${r.id});save();renderReminders();" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function checkCreditCycles() {
-            const today = new Date();
-            const d = today.getDate();
-            const m = today.getMonth();
-            let changed = false;
-            app.cards.forEach(card => {
-                if (d === card.day && card.lastPaidMonth !== m) {
-                    if (card.used > 0) {
-                        app.txs.push({ id: Date.now(), type: 'expense', amount: card.used, desc: `חיוב כרטיס ${card.name}`, cat: 'אשראי', date: today.toISOString().split('T')[0], method: 'bank', timestamp: Date.now() });
-                        card.used = 0; card.lastPaidMonth = m; changed = true;
-                    }
-                }
-            });
-            if(changed) save();
         }
 
         function renderDashboard() {
@@ -325,15 +290,14 @@
             sortedTxs.forEach(tx => {
                 const isInc = tx.type === 'income';
                 recentEl.innerHTML += `
-                    <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700 last:border-0">
+                    <div class="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-700 last:border-0">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center ${isInc ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'}"><i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-bag-shopping'} text-xs"></i></div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${isInc ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'}"><i class="fa-solid ${isInc ? 'fa-arrow-down' : 'fa-bag-shopping'} text-sm"></i></div>
                             <div><div class="font-bold text-sm">${tx.desc}</div><div class="text-[10px] text-slate-400">${tx.date} • ${tx.cat}</div></div>
                         </div>
                         <span class="font-bold text-sm ${isInc ? 'text-green-500' : ''}">${tx.amount.toLocaleString()}</span>
                     </div>`;
             });
-            updateHeader();
         }
 
         function renderTransactions() {
@@ -349,7 +313,7 @@
             filtered.forEach(tx => {
                 const isInc = tx.type === 'income';
                 list.innerHTML += `
-                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex justify-between">
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm flex justify-between mb-2">
                         <div class="flex gap-3"><div class="w-1 bg-${isInc?'green':'red'}-500 rounded-full"></div><div><div class="font-bold text-slate-700 dark:text-slate-200">${tx.desc}</div><div class="text-xs text-slate-400">${tx.date} • ${tx.cat}</div></div></div>
                         <div class="text-right"><div class="font-bold ${isInc?'text-green-500':'text-slate-800 dark:text-slate-200'}">${tx.amount.toLocaleString()}</div><button onclick="deleteTx(${tx.id})" class="text-[10px] text-red-300">מחק</button></div>
                     </div>`;
@@ -360,12 +324,12 @@
             formMode = type;
             const btnExp = document.getElementById('btn-exp'); const btnInc = document.getElementById('btn-inc'); const saveBtn = document.getElementById('saveBtn'); const methodLabel = document.getElementById('methodLabel');
             if (type === 'expense') {
-                btnExp.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition';
-                btnInc.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm text-slate-400 transition';
+                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-red-500 transition';
+                btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
                 saveBtn.className = 'w-full bg-red-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-500/30 active:scale-95 transition mt-2'; saveBtn.innerText = 'רשום הוצאה'; methodLabel.innerText = 'מאיפה יורד הכסף?';
             } else {
-                btnExp.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm text-slate-400 transition';
-                btnInc.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm bg-white shadow text-green-500 transition';
+                btnExp.className = 'flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 transition';
+                btnInc.className = 'flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow text-green-500 transition';
                 saveBtn.className = 'w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition mt-2'; saveBtn.innerText = 'רשום הכנסה'; methodLabel.innerText = 'לאן הכסף נכנס?';
             }
             renderFormOptions();
@@ -373,30 +337,30 @@
 
         function renderFormOptions() {
             const payList = document.getElementById('paymentMethodsList');
-            payList.innerHTML = `<button onclick="selectMethod(this, 'bank')" class="pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-white whitespace-nowrap ring-2 ring-slate-800">עו"ש בנק</button>`;
+            payList.innerHTML = `<button onclick="selectMethod(this, 'bank')" class="pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-white whitespace-nowrap ring-2 ring-slate-800 shadow-sm">עו"ש בנק</button>`;
             if (formMode === 'expense') {
-                app.cards.forEach(c => payList.innerHTML += `<button onclick="selectMethod(this, '${c.id}')" class="pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-500 whitespace-nowrap">${c.name}</button>`);
+                app.cards.forEach(c => payList.innerHTML += `<button onclick="selectMethod(this, '${c.id}')" class="pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-500 whitespace-nowrap shadow-sm">${c.name}</button>`);
             } else {
-                app.assets.forEach(a => payList.innerHTML += `<button onclick="selectMethod(this, 'asset_${a.id}')" class="pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-500 whitespace-nowrap">${a.name}</button>`);
+                app.assets.forEach(a => payList.innerHTML += `<button onclick="selectMethod(this, 'asset_${a.id}')" class="pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-500 whitespace-nowrap shadow-sm">${a.name}</button>`);
             }
             const catDiv = document.getElementById('categoryChips'); catDiv.innerHTML = '';
             const cats = formMode === 'expense' ? app.catsExp : app.catsInc;
             cats.forEach((cat, i) => {
-                const activeClass = i === 0 ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-slate-50 text-slate-500 border-transparent';
+                const activeClass = i === 0 ? 'bg-blue-100 text-blue-600 border-blue-200 shadow-sm' : 'bg-slate-50 text-slate-500 border-transparent';
                 catDiv.innerHTML += `<button onclick="selectCat(this, '${cat}')" class="cat-chip px-3 py-1.5 rounded-lg text-xs border ${activeClass}">${cat}</button>`;
             });
             document.getElementById('selectedCat').value = cats[0]; document.getElementById('selectedMethod').value = 'bank';
         }
 
         function selectMethod(btn, id) {
-            document.querySelectorAll('.pay-method-chip').forEach(b => b.className = 'pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-500 whitespace-nowrap');
-            btn.className = 'pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-white whitespace-nowrap ring-2 ring-slate-800';
+            document.querySelectorAll('.pay-method-chip').forEach(b => b.className = 'pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-500 whitespace-nowrap shadow-sm');
+            btn.className = 'pay-method-chip px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-white whitespace-nowrap ring-2 ring-slate-800 shadow-md';
             document.getElementById('selectedMethod').value = id;
         }
 
         function selectCat(btn, cat) {
             document.querySelectorAll('.cat-chip').forEach(b => b.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-slate-50 text-slate-500 border-transparent');
-            btn.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-blue-100 text-blue-600 border-blue-200';
+            btn.className = 'cat-chip px-3 py-1.5 rounded-lg text-xs border bg-blue-100 text-blue-600 border-blue-200 shadow-sm';
             document.getElementById('selectedCat').value = cat;
         }
 
@@ -431,13 +395,19 @@
             const modal = document.getElementById('drillDownModal'); const content = document.getElementById('ddContent'); const title = document.getElementById('ddTitle'); modal.classList.remove('hidden'); content.innerHTML = '';
             if (type === 'credit') {
                 title.innerText = 'כרטיסים'; content.innerHTML = `<button onclick="addNewCard()" class="w-full py-3 border border-dashed border-slate-300 text-slate-400 rounded-xl mb-4">+ הוסף כרטיס</button>`;
-                app.cards.forEach(c => { const percent = Math.min(100, (c.used / c.limit) * 100); content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700"><div class="flex justify-between items-center mb-2"><h3 class="font-bold">${c.name}</h3><span class="text-xs bg-slate-100 px-2 py-1 rounded">חיוב: ${c.day}</span></div><div class="flex justify-between text-xs mb-1 text-slate-500"><span>נוצל: ${c.used.toLocaleString()}</span><span>נותר: ${(c.limit - c.used).toLocaleString()}</span></div><div class="credit-bar-bg mb-3"><div class="credit-bar-fill bg-blue-500" style="width: ${percent}%"></div></div><button onclick="editCard('${c.id}')" class="text-xs text-blue-500 border border-blue-100 px-3 py-1 rounded-lg">ערוך הגדרות</button></div>`; });
+                app.cards.forEach(c => { const percent = Math.min(100, (c.used / c.limit) * 100); content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-3"><div class="flex justify-between items-center mb-2"><h3 class="font-bold">${c.name}</h3><span class="text-xs bg-slate-100 px-2 py-1 rounded">חיוב: ${c.day}</span></div><div class="flex justify-between text-xs mb-1 text-slate-500"><span>נוצל: ${c.used.toLocaleString()}</span><span>נותר: ${(c.limit - c.used).toLocaleString()}</span></div><div class="credit-bar-bg mb-3"><div class="credit-bar-fill bg-blue-500" style="width: ${percent}%"></div></div><div class="flex gap-2"><button onclick="updateCardBalance('${c.id}')" class="flex-1 text-xs bg-blue-50 text-blue-600 font-bold py-2 rounded-lg">עדכון יתרה מהיר</button><button onclick="editCard('${c.id}')" class="text-xs text-slate-400 px-3">הגדרות</button></div></div>`; });
             } else if (type === 'assets') {
-                title.innerText = 'נכסים'; content.innerHTML = `<button onclick="addNewAsset()" class="w-full py-3 border border-dashed border-slate-300 text-slate-400 rounded-xl mb-4">+ הוסף נכס</button>`;
+                title.innerText = 'חסכונות והשקעות'; content.innerHTML = `<button onclick="addNewAsset()" class="w-full py-3 border border-dashed border-slate-300 text-slate-400 rounded-xl mb-4">+ הוסף חיסכון/השקעה</button>`;
                 app.assets.forEach(a => { content.innerHTML += `<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex justify-between items-center mb-2"><div><div class="font-bold">${a.name}</div><div class="text-xs text-slate-500">${a.type === 'saving' ? 'חיסכון' : 'השקעה'}</div></div><div class="text-right"><div class="font-bold">${a.amount.toLocaleString()} ₪</div><button onclick="editAsset('${a.id}')" class="text-[10px] text-blue-500">עדכון שווי</button></div></div>`; });
             } else if (type === 'bank') {
                 title.innerText = 'עו"ש בנק'; content.innerHTML = `<div class="p-4 text-center text-slate-500">לפירוט מלא עבור ליומן התנועות</div>`;
             }
+        }
+
+        function updateCardBalance(id) {
+            const card = app.cards.find(c => c.id === id);
+            const newVal = parseFloat(prompt(`עדכון יתרה נוכחית לכרטיס ${card.name}\n(כמה תפוס כרגע?):`, card.used));
+            if (!isNaN(newVal)) { card.used = newVal; save(); openDrillDown('credit'); }
         }
 
         function editCard(id) { const card = app.cards.find(c => c.id === id); const name = prompt('שם:', card.name); const limit = parseFloat(prompt('מסגרת:', card.limit)); const day = parseInt(prompt('יום חיוב:', card.day)); if (name && limit) { card.name = name; card.limit = limit; card.day = day; save(); openDrillDown('credit'); } }
@@ -445,6 +415,10 @@
         function addNewAsset() { const name = prompt('שם הנכס'); if(name) { app.assets.push({ id: 'a'+Date.now(), name, amount: parseFloat(prompt('סכום')), type: 'saving' }); save(); openDrillDown('assets'); } }
         function editAsset(id) { const asset = app.assets.find(a => a.id === id); const amt = parseFloat(prompt('סכום מעודכן:', asset.amount)); if(!isNaN(amt)) { asset.amount = amt; save(); openDrillDown('assets'); } }
         function closeDrillDown() { document.getElementById('drillDownModal').classList.add('hidden'); renderDashboard(); }
+        
+        function addReminder() { const desc = document.getElementById('remDesc').value; const date = document.getElementById('remDate').value; const time = document.getElementById('remTime').value; if(desc && date && time) { app.reminders.push({ id: Date.now(), desc, date, time, done: false }); save(); renderReminders(); document.getElementById('remDesc').value = ''; alert('נוסף!'); } }
+        function renderReminders() { const list = document.getElementById('remindersList'); list.innerHTML = ''; app.reminders.forEach(r => { list.innerHTML += `<div class="bg-white dark:bg-slate-800 p-3 rounded-xl flex justify-between items-center ${r.done ? 'opacity-50' : ''}"><div><div class="font-bold text-sm">${r.desc}</div><div class="text-xs text-slate-500">${r.date} בשעה ${r.time}</div></div><div class="flex gap-2">${!r.done ? `<button onclick="this.parentElement.innerHTML='<i class=fa-solid fa-check>';app.reminders.find(x=>x.id==${r.id}).done=true;save();" class="text-green-500 text-xs font-bold border border-green-200 px-2 py-1 rounded">בוצע</button>` : '<i class="fa-solid fa-check text-green-500"></i>'}<button onclick="app.reminders=app.reminders.filter(x=>x.id!==${r.id});save();renderReminders();" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`; }); }
+
         function nav(view) {
             document.querySelectorAll('.view-section').forEach(el => { el.classList.add('hidden'); el.classList.remove('slide-up'); });
             const active = document.getElementById('view-' + view); active.classList.remove('hidden'); void active.offsetWidth; active.classList.add('slide-up');
