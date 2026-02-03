@@ -2,65 +2,103 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>MoneyStack - ניהול תקציב</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyStack</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6 text-blue-800">הבנק שלי - ניתוח נתונים</h1>
+<body class="bg-gray-50 p-4">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-3xl font-bold mb-6 text-blue-800">הבנק שלי - גרסה מתוקנת</h1>
         
         <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <label class="block mb-2 font-bold text-gray-700">הדבק כאן את נתוני הבנק מה-Note:</label>
-            <textarea id="rawData" class="w-full h-40 p-4 border rounded-md mb-4 text-left" placeholder="הדבק כאן..."></textarea>
-            <button onclick="processData()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">נתח נתונים</button>
+            <label class="block mb-2 font-bold text-gray-700">הדבק כאן את השורות מהבנק:</label>
+            <textarea id="rawData" class="w-full h-32 p-3 border rounded-md mb-4 text-left font-mono" placeholder="לדוגמה:
+01/01/2026 | דוגמה | --- | 100 | 500"></textarea>
+            <button onclick="runAnalysis()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-md shadow-lg active:bg-blue-800">
+                לחץ כאן לניתוח הנתונים
+            </button>
         </div>
 
-        <div id="resultTable" class="hidden bg-white rounded-lg shadow-md overflow-hidden">
-            <table class="w-full text-right border-collapse">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="p-3 border">תאריך</th>
-                        <th class="p-3 border">תיאור</th>
-                        <th class="p-3 border text-red-600">חובה</th>
-                        <th class="p-3 border text-green-600">זכות</th>
-                        <th class="p-3 border font-bold">יתרה</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <div id="output" class="hidden">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">תוצאות:</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border bg-white rounded-lg">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="p-3 border">תאריך</th>
+                            <th class="p-3 border">תיאור</th>
+                            <th class="p-3 border text-red-600">הוצאה</th>
+                            <th class="p-3 border text-green-600">הכנסה</th>
+                            <th class="p-3 border">יתרה</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        function processData() {
-            const rawText = document.getElementById('rawData').value;
-            const lines = rawText.split('\n');
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; // ניקוי טבלה
+        function runAnalysis() {
+            // קריאת הטקסט
+            const text = document.getElementById('rawData').value;
+            if (!text.trim()) {
+                alert("התיבה ריקה! אנא הדבק נתונים.");
+                return;
+            }
+
+            const lines = text.split('\n');
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; // איפוס הטבלה
+            let count = 0;
 
             lines.forEach(line => {
-                if (line.includes('/') && !line.includes('תאריך')) {
-                    const parts = line.split('|').map(p => p.trim());
+                // ניקוי רווחים מיותרים וניסיון לזהות תאריך
+                if (line.includes('/') && (line.includes('|') || line.match(/\d/))) {
                     
-                    [span_0](start_span)// מבנה השורה לפי הדוגמה שלך[span_0](end_span)
-                    const date = parts[0];
-                    const desc = parts[1];
-                    const expense = parts[2] !== '---' ? parts[2] : '';
-                    const income = parts[3] !== '---' ? parts[3] : '';
-                    const balance = parts[4] || '';
+                    // פירוק השורה - מתמודד גם עם קווים וגם עם רווחים
+                    let parts;
+                    if (line.includes('|')) {
+                        parts = line.split('|');
+                    } else {
+                        parts = line.split(/\s\s+/); // רווח כפול ומעלה
+                    }
+                    
+                    parts = parts.map(p => p.trim());
+
+                    // אם השורה קצרה מדי, מדלגים
+                    if (parts.length < 3) return;
+
+                    // חילוץ נתונים זהיר
+                    const date = parts[0] || '-';
+                    const desc = parts[1] || '-';
+                    let expense = parts[2];
+                    let income = parts[3];
+                    let balance = parts[4];
+
+                    // סידור המספרים
+                    if (expense === '---') expense = '';
+                    if (income === '---') income = '';
 
                     const row = `
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3 border">${date}</td>
-                            <td class="p-3 border font-medium">${desc}</td>
-                            <td class="p-3 border text-red-500">${expense}</td>
-                            <td class="p-3 border text-green-600">${income}</td>
-                            <td class="p-3 border font-bold">${balance}</td>
-                        </tr>`;
-                    tableBody.innerHTML += row;
+                            <td class="p-3 border whitespace-nowrap">${date}</td>
+                            <td class="p-3 border">${desc}</td>
+                            <td class="p-3 border text-red-600 font-bold">${expense}</td>
+                            <td class="p-3 border text-green-600 font-bold">${income}</td>
+                            <td class="p-3 border">${balance || ''}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                    count++;
                 }
             });
-            document.getElementById('resultTable').classList.remove('hidden');
+
+            if (count > 0) {
+                document.getElementById('output').classList.remove('hidden');
+            } else {
+                alert("לא נמצאו תנועות תקינות. נסה להעתיק שוב מהבנק.");
+            }
         }
     </script>
 </body>
