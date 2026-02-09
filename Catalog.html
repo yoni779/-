@@ -6,254 +6,131 @@
     <title>SHOW - ארוז עם מחשבה</title>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --gold: #dfac28; /* זהב מהלוגו */
-            --green: #295e42; /* ירוק מהלוגו */
-            --bg: #fdfdfd;
-            --text: #333;
-            --whatsapp: #25D366;
-        }
-
-        body {
-            font-family: 'Rubik', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* --- עיצוב חלק עליון --- */
-        .header-container {
-            text-align: center;
-            padding: 15px;
-            background: white;
-            border-bottom: 4px solid var(--gold);
-        }
-
-        .logo-img {
-            max-width: 220px;
-            height: auto;
-        }
-
-        .slogan {
-            color: var(--green);
-            font-size: 1.1rem;
-            margin-top: 5px;
-            font-weight: bold;
-        }
-
-        /* --- סרגל מידע --- */
-        .info-bar {
-            background: var(--green);
-            color: white;
-            padding: 12px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .info-item { display: flex; align-items: center; gap: 5px; }
-        .info-item a { color: white; text-decoration: none; font-weight: bold; }
-
-        /* --- חיפוש --- */
-        .search-container {
-            max-width: 90%;
-            margin: 20px auto;
-            text-align: center;
-        }
-
-        #searchInput {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 50px;
-            font-size: 1rem;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            outline: none;
-        }
+        :root { --gold: #dfac28; --green: #295e42; --bg: #fdfdfd; --text: #333; --whatsapp: #25D366; }
+        body { font-family: 'Rubik', sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; }
         
+        .header-container { text-align: center; padding: 15px; background: white; border-bottom: 4px solid var(--gold); }
+        .logo-img { max-width: 220px; height: auto; }
+        .slogan { color: var(--green); font-size: 1.1rem; margin-top: 5px; font-weight: bold; }
+        
+        .info-bar { background: var(--green); color: white; padding: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; text-align: center; font-size: 0.9rem; }
+        .info-item a { color: white; text-decoration: none; font-weight: bold; }
+        
+        .search-container { max-width: 90%; margin: 20px auto; text-align: center; }
+        #searchInput { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 50px; font-size: 1rem; text-align: center; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         #searchInput:focus { border-color: var(--gold); }
-
-        /* --- רשת המוצרים --- */
-        .catalog-container {
-            padding: 10px 15px 80px 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        /* עיצוב הכרטיס */
-        .card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-            border: 1px solid #f0f0f0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            background-color: #f9f9f9;
-        }
-
-        .card-body {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            justify-content: space-between;
-            text-align: center;
-        }
-
-        .card-title {
-            font-weight: bold;
-            color: var(--green);
-            font-size: 1rem;
-            margin-bottom: 4px;
-            line-height: 1.2;
-        }
-
-        .card-desc {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .wa-btn {
-            background-color: var(--gold);
-            color: white;
-            border: none;
-            padding: 8px 0;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            display: block;
-            width: 100%;
-            box-shadow: 0 2px 4px rgba(223, 172, 40, 0.3);
-        }
-
-        /* --- כפתור צף --- */
-        .float-wa {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: var(--whatsapp);
-            color: white;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 100;
-            text-decoration: none;
-            border: 2px solid white;
-        }
-
-        .no-results {
-            text-align: center;
-            width: 100%;
-            grid-column: 1 / -1;
-            padding: 20px;
-            color: #888;
-            display: none;
-        }
+        
+        .catalog-container { padding: 10px 15px 80px 15px; max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; display: flex; flex-direction: column; }
+        .card-img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background-color: #f9f9f9; }
+        .card-body { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; text-align: center; }
+        .card-title { font-weight: bold; color: var(--green); font-size: 1rem; margin-bottom: 4px; line-height: 1.2; }
+        .card-desc { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+        .card-price { font-weight: bold; color: var(--gold); margin-bottom: 10px; font-size: 1rem; }
+        
+        .wa-btn { background-color: var(--gold); color: white; border: none; padding: 8px 0; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; display: block; width: 100%; box-shadow: 0 2px 4px rgba(223, 172, 40, 0.3); }
+        .float-wa { position: fixed; bottom: 20px; left: 20px; background: var(--whatsapp); color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; text-decoration: none; border: 2px solid white; }
     </style>
 </head>
 <body>
-      <div class="header-container">
+
+    <div class="header-container">
         <img src="logo.jpg" alt="SHOW" class="logo-img">
         <div class="slogan">ארוז עם מחשבה</div>
     </div>
 
     <div class="info-bar">
-        <div class="info-item">
-            <span>📍</span>
-            <span>חזון איש 3, מודיעין עילית</span>
-        </div>
-        <div class="info-item">
-            <span>📞</span>
-            <a href="tel:0554017180">055-4017180</a>
-        </div>
+        <div class="info-item"><span>📍</span><span>חזון איש 3, מודיעין עילית</span></div>
+        <div class="info-item"><span>📞</span><a href="tel:0554017180">055-4017180</a></div>
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="מה מחפשים? (יין, שוקולד...)" onkeyup="filterProducts()">
+        <input type="text" id="searchInput" placeholder="חפש מוצר (למשל: שעון, יין, שוקולד)..." onkeyup="filterProducts()">
     </div>
-
-    <div class="catalog-container">
-        <div class="grid" id="productsGrid">
-            
-            <div class="card" data-name="מארז שוקולד יוקרתי זהב">
-                <img src="1.jpg" alt="מארז" class="card-img" loading="lazy">
-                <div class="card-body">
-                    <div class="card-title">מארז זהב</div>
-                    <div class="card-desc">יין ושוקולדים בלגיים</div>
-                    <a href="javascript:void(0)" onclick="orderItem('מארז זהב')" class="wa-btn">אני רוצה כזה 🛍️</a>
-                </div>
-            </div>
-            <div class="card" data-name="מגבת רקמה סבון">
-                <img src="2.jpg" alt="מארז" class="card-img" loading="lazy">
-                <div class="card-body">
-                    <div class="card-title">מארז מגבת</div>
-                    <div class="card-desc">מגבת פנים רקומה עם סבון</div>
-                    <a href="javascript:void(0)" onclick="orderItem('מארז מגבת')" class="wa-btn">אני רוצה כזה 🛍️</a>
-                </div>
-            </div>
-            <div class="no-results" id="noResults">לא מצאנו מוצר כזה... נסה משהו אחר</div>
-        </div>
+        <div class="catalog-container">
+        <div class="grid" id="productsGrid"></div>
+        <div id="noResults" style="display:none; text-align:center; padding:20px; color:#888;">לא נמצאו מוצרים תואמים</div>
     </div>
 
     <a href="javascript:void(0)" onclick="contactGeneral()" class="float-wa">💬</a>
 
     <script>
-        // המספר המעודכן שלך
-        const PHONE = "972554017180"; 
+        const PHONE = "972554017180";
 
-        function orderItem(itemName) {
-            const msg = `היי SHOW, אשמח להזמין את *${itemName}* שראיתי בקטלוג.`;
-            const url = `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+        // רשימת המוצרים המלאה (נגלה 1 + נגלה 2)
+        const products = [
+            // --- נגלה ראשונה ושניה משולבות ---
+            { name: "נטלה מפוארת + מגבת", price: "165 ₪", img: "100.jpg", desc: "נטלה מפוארת ומגבת גדולה (מק\"ט 100)" },
+            { name: "שלישיית צלוחיות הגשה", price: "105 ₪", img: "101.jpg", desc: "כולל שוקולד ואיש מנגן (מק\"ט 101)" },
+            { name: "סט שולחן שבת פרקטי", price: "570 ₪", img: "102.jpg", desc: "מעמד ברכונים, סכו\"ם, יין ושוקולד (מק\"ט 102)" },
+            { name: "סט שולחן שבת מרשים", price: "685 ₪", img: "103.jpg", desc: "כולל קרש חלות, מעמד מפיות, מלחיות, יין ועוד (מק\"ט 103)" },
+            { name: "סט ליל הסדר מהודר", price: "275 ₪", img: "104.jpg", desc: "כיסויים מהודרים למצות ואפיקומן (מק\"ט 104)" },
+            { name: "סט ליל הסדר עור", price: "650 ₪", img: "105.jpg", desc: "סט יוקרתי דמוי עור (מק\"ט 105)" },
+            { name: "כלי מים אחרונים", price: "180 ₪", img: "106.jpg", desc: "כלי מהודר בגוון כסף לבן (מק\"ט 106)" },
+            { name: "סט קידוש יוקרתי", price: "285 ₪", img: "107.jpg", desc: "בקבוק יין קריסטל וכוסיות (מק\"ט 107)" },
+            { name: "שלישיית סלטים", price: "130 ₪", img: "108.jpg", desc: "קעריות הגשה מעוצבות (מק\"ט 108)" },
+            { name: "שעון כסף לבן", price: "65 ₪", img: "109.jpg", desc: "שעון שולחני קלאסי (מק\"ט 109)" },
+            { name: "שעון מרובע שחור", price: "325 ₪", img: "110.jpg", desc: "שעון קיר גדול ומרשים (מק\"ט 110)" },
+            { name: "סט קערות הגשה שחור", price: "115 ₪", img: "111.jpg", desc: "סט זכוכית שחור יוקרתי (מק\"ט 111)" },
+            { name: "סט הבדלה זהב", price: "345 ₪", img: "112.jpg", desc: "סט הבדלה מלא בעיצוב זהב (מק\"ט 112)" },
+            { name: "סטנד קישוטים עץ", price: "185 ₪", img: "113.jpg", desc: "סטנד עץ משולב שעון לבן ושוקולד (מק\"ט 113)" },
+            { name: "קנקן שתיה זהב", price: "145 ₪", img: "114.jpg", desc: "קנקן עם בסיס זהב מהודר (מק\"ט 114)" },
+            { name: "פינוקים לבית", price: "245 ₪", img: "115.jpg", desc: "אגרטל, מגש עלה ואיש מנגן (מק\"ט 115)" },
+            { name: "סט קערות לבן זהב", price: "225 ₪", img: "116.jpg", desc: "עיצוב נקי בעיטור זהב (מק\"ט 116)" },
+            { name: "שעון ענק שחור", price: "275 ₪", img: "117.jpg", desc: "שעון קיר מרשים בעיצוב מודרני (מק\"ט 117)" },
+            { name: "סט זהב עתיק", price: "99 ₪", img: "118.jpg", desc: "שעון ושתי מראות דקורטיביות (מק\"ט 118)" },
+            { name: "סט פרח כסף", price: "175 ₪", img: "119.jpg", desc: "עיצוב כסף יוקרתי (מק\"ט 119)" },
+            { name: "מפית חלות", price: "150 ₪", img: "120.jpg", desc: "מפית חלות מהודרת ומעוצבת (מק\"ט 120)" },
+            { name: "שעון גלגלי שיניים", price: "185 ₪", img: "121.jpg", desc: "שעון בעיצוב מיוחד (מק\"ט 121)" },
+            { name: "אגרטל ואיש מנגן", price: "215 ₪", img: "122.jpg", desc: "אגרטל זכוכית איכותי עם פסל איש מנגן (מק\"ט 122)" },
+            { name: "שלישיית כלי לסלטים", price: "74 ₪", img: "123.jpg", desc: "מגש עם 3 כלי זכוכית לסלטים (מק\"ט 123)" },
+            { name: "זוג מלחיות זכוכית", price: "75 ₪", img: "124.jpg", desc: "סט מלחיות מעוצב ויוקרתי (מק\"ט 124)" },
+            { name: "סט נטילת ידיים קטן", price: "99 ₪", img: "125.jpg", desc: "מגבות קטנות ונטלה (מק\"ט 125)" },
+            { name: "סט שבת אקריליק", price: "210 ₪", img: "126.jpg", desc: "מגש נרות, מעמד ברכונים ו-4 ברכונים (מק\"ט 126)" },
+            { name: "קופסא יוקרתית למצות", price: "240 ₪", img: "127.jpg", desc: "מארז מפואר הכולל קופסא למצות ובקבוק יין (מק\"ט 127)" },
+            { name: "שעון לבן זהב", price: "60 ₪", img: "128.jpg", desc: "שעון שולחני מעוצב בשילוב שוקולדים (מק\"ט 128)" },
+            { name: "סט נטילת ידיים גדול", price: "155 ₪", img: "129.jpg", desc: "כולל מגבת גדולה ונטלה מהודרת (מק\"ט 129)" },
+            { name: "סט סלט זכוכית ועץ", price: "70 ₪", img: "130.jpg", desc: "קערה זכוכית, מעמד עץ ובקבוק לתיבול (מק\"ט 130)" },
+            { name: "ערכת סלט משודרגת", price: "157 ₪", img: "131.jpg", desc: "קערה עבה, כפות לא שבירות ובקבוק שמן (מק\"ט 131)" },
+            { name: "שישיית פלייסמנטים", price: "60 ₪", img: "132.jpg", desc: "סט פלייסמנטים יוקרתי לשולחן (מק\"ט 132)" },
+            { name: "קרש חלות אקריליק", price: "220 ₪", img: "133.jpg", desc: "מעמד מעוצב ומיוחד לחלות (מק\"ט 133)" },
+            { name: "שלישיית קפה סוכר תה", price: "960 ₪", img: "134.jpg", desc: "שלישיית כלים יוקרתיים (מק\"ט 134)" },
+            { name: "סט כיסוי שבת", price: "330 ₪", img: "135.jpg", desc: "2 חלקים בחיתוך לייזר + שוקולד (מק\"ט 135)" },
+        ];
+
+        const grid = document.getElementById('productsGrid');
+
+        function renderProducts(list) {
+            grid.innerHTML = "";
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}" class="card-img" loading="lazy">
+                    <div class="card-body">
+                        <div class="card-title">${item.name}</div>
+                        <div class="card-desc">${item.desc}</div>
+                        <div class="card-price">${item.price}</div>
+                        <a href="https://wa.me/${PHONE}?text=היי, אשמח להזמין את *${item.name}* (מק״ט ${item.img.replace('.jpg','')})" target="_blank" class="wa-btn">אני רוצה כזה 🛍️</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        renderProducts(products);
+
+        function filterProducts() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = products.filter(p => p.name.includes(term) || p.desc.includes(term));
+            renderProducts(filtered);
+            document.getElementById('noResults').style.display = filtered.length ? "none" : "block";
         }
 
         function contactGeneral() {
-            const msg = "היי SHOW, יש לי שאלה לגבי הקטלוג...";
-            const url = `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        function filterProducts() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.getElementsByClassName('card');
-            let found = false;
-
-            for (let i = 0; i < cards.length; i++) {
-                const name = cards[i].getAttribute('data-name').toLowerCase();
-                if (name.includes(input)) {
-                    cards[i].style.display = "flex";
-                    found = true;
-                } else {
-                    cards[i].style.display = "none";
-                }
-            }
-            document.getElementById('noResults').style.display = found ? "none" : "block";
+            window.open(`https://wa.me/${PHONE}?text=היי, יש לי שאלה כללית לגבי הקטלוג...`, '_blank');
         }
     </script>
 </body>
