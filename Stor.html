@@ -714,6 +714,13 @@
   <script>
     const WHATSAPP_NUMBER = "972552596022";
 
+    /* חיבור לסוכן הנהלת החשבונות (bakikar-agent).
+       כל עוד ORDERS_URL ריק, שום דבר לא נשלח והאתר עובד בדיוק כמו קודם.
+       כשהשרת יהיה מוכן: למשל "https://<שם-השירות>.onrender.com/orders" */
+    const ORDERS_URL = "";
+    const ORDERS_KEY = ""; // הערך של ORDERS_KEY בשרת. גלוי לכולם באתר, זו הגנה קלה בלבד
+    const ORDERS_TIMEOUT_MS = 1500; // לא מעכבים את הלקוח יותר מזה לפני וואטסאפ
+
     const products = [
       /* טוסטים ובאגטים */
       {
@@ -1032,7 +1039,31 @@
       return digits.length === 9 && digits.startsWith("5");
     }
 
-    function sendCartToWhatsApp() {
+    function newOrderId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
+    }
+
+    // שולח את ההזמנה לשרת. אם השרת לא עונה או נכשל, ממשיכים לוואטסאפ כרגיל.
+    function sendOrderToAgent(order) {
+      if (!ORDERS_URL) return Promise.resolve();
+      try {
+        const request = fetch(ORDERS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Site-Key": ORDERS_KEY },
+          body: JSON.stringify(order)
+        }).catch(() => {});
+        const timeout = new Promise(resolve => setTimeout(resolve, ORDERS_TIMEOUT_MS));
+        return Promise.race([request, timeout]);
+      } catch (e) {
+        return Promise.resolve();
+      }
+    }
+
+    async function sendCartToWhatsApp() {
       const phoneInput = document.getElementById("phone");
       const notesInput = document.getElementById("notes");
 
@@ -1049,6 +1080,7 @@
       }
 
       const lines = [];
+      const orderItems = [];
       let total = 0;
 
       Object.keys(cart).forEach(id => {
@@ -1059,6 +1091,7 @@
         const lineTotal = qty * p.price;
         total += lineTotal;
         lines.push(`• ${p.name} × ${qty} – ${lineTotal} ₪`);
+        orderItems.push({ product_id: p.id, name: p.name, qty: qty, unit_price: p.price });
       });
 
       if (!lines.length) {
@@ -1078,6 +1111,11 @@
         footer.push(`הערות: ${notes}`);
       }
 
+      const orderId = newOrderId();
+      if (ORDERS_URL) {
+        footer.push(`מס' הזמנה: ${orderId.slice(0, 8)}`);
+      }
+
       const text = [header, "", ...lines, ...footer].join("\n");
       const encoded = encodeURIComponent(text);
       const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
@@ -1086,6 +1124,17 @@
         localStorage.setItem("mtok-phone", phone);
         localStorage.setItem("mtok-notes", notes);
       } catch (e) {}
+
+      await sendOrderToAgent({
+        order_id: orderId,
+        store: "matok",
+        source: "website",
+        created_at: new Date().toISOString(),
+        customer_phone: "0" + normalizePhone(phone),
+        notes: notes,
+        items: orderItems,
+        total: total
+      });
 
       window.location.href = url;
     }
